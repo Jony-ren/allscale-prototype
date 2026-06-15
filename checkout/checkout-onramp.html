@@ -399,8 +399,8 @@ body{
     <div style="background:#fafbfa;border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;gap:16px;">
       <div class="t-h6" style="color:#0c3124;">Payment method</div>
       <div style="display:flex;flex-direction:column;gap:4px;">
-        <button class="pay-opt" id="opt-allscale" onclick="selOpt('allscale')">
-          <div class="radio off" id="r-allscale"></div>
+        <button class="pay-opt sel" id="opt-allscale" onclick="selOpt('allscale')">
+          <div class="radio on" id="r-allscale"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg></div>
           <div style="flex:1;min-width:0;">
             <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="assets/allscale-logo.svg" height="22" style="display:block;"></div>
             <div class="t-sm" style="color:#0d0d0d;">Sign in to use AllScale wallet</div>
@@ -421,8 +421,8 @@ body{
           </div>
         </button>
         <!-- ⬇ On-ramp 新增：唯一新增的支付方式（其余三项不变）· 对齐 live v0.9.2 ⬇ -->
-        <button class="pay-opt sel" id="opt-local" onclick="selLocalOpt()">
-          <div class="radio on" id="r-local"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg></div>
+        <button class="pay-opt" id="opt-local" onclick="selLocalOpt()">
+          <div class="radio off" id="r-local"></div>
           <div style="flex:1;min-width:0;">
             <div class="t-body-lg" style="color:#83968f;">Card & Local Payments</div>
             <div class="onr-logo-row" aria-label="Visa, Mastercard, PayPal & more">
@@ -441,8 +441,7 @@ body{
     </div>
 
     <div class="details" style="margin-top:16px;">
-      <div class="t-h6" style="color:#0d0d0d;display:flex;align-items:center;gap:8px;">Details <span class="dev-pill dev-pill-demo">Demo 用</span></div>
-      <div style="font-size:11px;color:#B07A00;background:rgba(255,180,50,.08);border:1px dashed rgba(255,180,50,.4);border-radius:6px;padding:6px 8px;margin-top:6px;line-height:1.5;">⚠️ Demo 仅展示 3 行，真实环境保留原本所有 Details 字段，不要按 demo 删行</div>
+      <div class="t-h6" style="color:#0d0d0d;">Details</div>
       <div class="det-row"><span class="det-label">Order ID</span><span class="det-value mono" style="font-size:14px;">CHK_abc123456</span></div>
       <div class="det-row"><span class="det-label">Amount</span><span class="det-value">100.00 USDT</span></div>
       <div class="det-row"><span class="det-label">Merchant</span><span class="det-value">Acme Shop</span></div>
@@ -476,7 +475,7 @@ function setCoin(c){
 }
 
 /* ─── Payment method select ─── */
-let selectedMethod='scan';
+let selectedMethod='allscale';
 function selOpt(which) {
   selectedMethod=which;
   document.querySelectorAll('.pay-opt').forEach(o=>o.classList.remove('sel'));
@@ -639,22 +638,6 @@ function goNext() {
   <span id="onr-toast-msg">Saved</span>
 </div>
 
-<!-- IP 切换器（右下角悬浮）· 国家 / 当地货币按 prototype（onramp-prototype.html）-->
-<div class="onr-ip" id="onr-ip">
-  <button class="onr-ip-toggle" onclick="onrToggleIP()">🌐 <span id="onr-ip-label">🇩🇪 Germany</span></button>
-  <div class="onr-ip-body" id="onr-ip-body" style="display:none;">
-    <div class="onr-ip-title">Buyer Country (IP)</div>
-    <div id="onr-ip-list"></div>
-    <div class="onr-ip-note">切换 IP 时，结账币种 tab 会加入该国当地货币。</div>
-  </div>
-</div>
-
-<!-- 屏幕下方中间：Activity / Store settings 两个入口 -->
-<div class="onr-nav" id="onr-nav">
-  <button class="onr-nav-btn" onclick="onrOpen('onr-activity-ov')">🧾 Activity</button>
-  <button class="onr-nav-btn" onclick="onrOpen('onr-settings-ov')">⚙️ Store settings</button>
-</div>
-
 <!-- Activity：Recent orders（沿用 payment-link，3 条，每条 Card & Local 标识）-->
 <div class="onr-sheet-ov" id="onr-activity-ov" onclick="if(event.target===this)onrClose('onr-activity-ov')">
   <div class="onr-modal">
@@ -757,39 +740,6 @@ function goNext() {
         <button class="onr-btn-secondary" onclick="onrClpCancel()">Cancel</button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ════ 开发人员标注面板（左下角悬浮，可展开/收起）════ -->
-<div class="onr-dev" id="onr-dev">
-  <button class="onr-dev-toggle" onclick="onrToggleDev()">🛠 On-ramp 新功能</button>
-  <div class="onr-dev-body" id="onr-dev-body" style="display:none;">
-
-    <div class="onr-dev-section">
-      <div class="onr-dev-title">流程 / 状态（点击查看）</div>
-      <button class="onr-dev-link" onclick="onrFocusEntry()"><span class="onr-dev-step">1</span>Checkout · 「Card & Local Payments」入口<span class="onr-dev-tag new">New</span></button>
-      <button class="onr-dev-link" onclick="openOnrampPicker()"><span class="onr-dev-step">2</span>报价浮层（法币 + 收款链 + provider）<span class="onr-dev-tag new">New</span></button>
-      <button class="onr-dev-link" onclick="onrDevShow('onr-handoff')"><span class="onr-dev-step">3</span>新 tab 跳转 provider<span class="onr-dev-tag state">State</span></button>
-      <button class="onr-dev-link" onclick="onrDevShow('onr-waiting')"><span class="onr-dev-step">4</span>落地 · Request Submitted<span class="onr-dev-tag state">State</span></button>
-      <button class="onr-dev-link" onclick="onrDevShow('onr-success')"><span class="onr-dev-step">5</span>落地 · Transaction Completed<span class="onr-dev-tag state">State</span></button>
-    </div>
-
-    <div class="onr-dev-section">
-      <div class="onr-dev-title">开发备注 · MVP 范围 (PRD v0.9.2 · 2026-06-05)</div>
-      <div class="onr-dev-note">
-        <ul>
-          <li><strong>入口</strong>：Checkout 第 4 个支付方式「Card & Local Payments」（展示 Visa / Mastercard / PayPal + “& more”），其余三项不变。</li>
-          <li><strong>报价浮层</strong>（OnrampPaymentOption.tsx）：① <strong>Pay in</strong> 付款法币选择器（47 币种，切换→各家总价换币重算）；② <strong>Receive on</strong> 收款链 Ethereum / BSC / Base（不同链 gas→总价变，所选链 = 商家结算链、商家默认接受全部 EVM）；③ 4 家 provider（MoonPay / Transak / Banxa / Wert）按所选法币过滤，<strong>卡内 chip 切支付方式</strong>（带各方式价格、每家默认最低价），不支持本单的 provider 不渲染。</li>
-          <li>结算 token（USDT/USDC）由订单定死、不在浮层展示；金额按订单算好不可改；地区不展示（后端两层解析：先 IP，再按所选法币收敛）；不拆手续费 / 汇率 / 最低额（AC-12）。</li>
-          <li>Confirm → 建单拿 redirectUrl → <strong>新 tab</strong> 打开 provider 完成 KYC + 卡支付，原页转 Waiting；<strong>AllScale 不实现 vendor 屏、不预判失败</strong>，paid 以扫链到账为准。</li>
-          <li>Waiting = <strong>Request Submitted</strong>（可选 Leave Email，非必填）；Success = <strong>Transaction Completed</strong>；“Card &amp; Local” 标识在订单 / 活动列表，不在成功页。</li>
-          <li>费用：订单 USDT 全额 + on-ramp 手续费 + 平台 <strong>0.5% markup</strong>（缓冲按法币分层，主流 1% 起；灰度期走服务端配置）。</li>
-          <li><strong>资源</strong>：法币圆形国旗 icon 用 <a href="https://github.com/HatScripts/circle-flags" target="_blank" rel="noopener" style="color:var(--as-green);font-weight:600;word-break:break-all;">github.com/HatScripts/circle-flags</a>（CDN：jsdelivr <code>gh/HatScripts/circle-flags/flags/&lt;ISO&gt;.svg</code>，按 ISO 国家码一一对应）。</li>
-          <li><strong>金额展示</strong>：右下角 IP 切换器选国家 → co-cointabs 加该国当地货币 tab；点当地货币按汇率换算（100 USDT × rate，符号 / 汇率见 prototype <code>CURRENCY_BY_COUNTRY</code>），数字用 <strong>number-flow 滚动动画</strong>；金额过大时按可用宽度<strong>等比缩小字号</strong>（基准 58 / 28px），保证同一行且不超出卡片。</li>
-        </ul>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -1179,7 +1129,10 @@ function onrClpCancel(){ var t=document.getElementById('onr-clp-toggle'); if(t) 
     w.format={useGrouping:true};
     f.format={minimumIntegerDigits:2,useGrouping:false};
     f.numberPrefix='.'; w.numberPrefix='';
-    w.update(100); f.update(0);
+    w.update(0); f.update(0);   // 先渲染 0（首帧不动画）
+    requestAnimationFrame(function(){   // 下一帧滚动到目标值，页面加载时触发 number-flow 滚动动画
+      w.update(100); f.update(0);
+    });
   });
 </script>
 </body>
