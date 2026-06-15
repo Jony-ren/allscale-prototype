@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Design System</title>
+<link rel="stylesheet" href="tokens.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: #F6F8F7;
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 0 0 272px;
+  }
+
+  /* ════════════════════════════════════════════════
+     LAYOUT — Finto-style scaffolding (排版 only).
+     Dark grid-texture sidebar · mono section-tags w/ green dot
+     · big titles · soft white cards. All CONTENT unchanged.
+     ════════════════════════════════════════════════ */
+
+  /* ─── SIDEBAR — dark forest, subtle grid lines ─── */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 272px;
+    display: flex; flex-direction: column;
+    padding: 32px 24px;
+    background: #000;
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 40px 40px; background-position: center top;
+    border-right: 1px solid rgba(255,255,255,.08);
+    overflow-y: auto;
+    z-index: 10;
+  }
+  .sidebar-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: rgba(255,255,255,.45); text-decoration: none;
+    letter-spacing: var(--tracking-wide); margin-bottom: 34px;
+    transition: color var(--dur-fast);
+  }
+  .sidebar-back:hover { color: rgba(255,255,255,.9); }
+  .brand-logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 6px; color: #fff;
+  }
+  .brand-mark {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand-light), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    color: #0C3124; font-size: 16px; font-weight: 800; letter-spacing: -.04em;
+  }
+  .brand-name {
+    font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: #fff;
+  }
+  .sidebar-sub {
+    font-family: var(--font-mono); font-size: 10px;
+    color: rgba(255,255,255,.4); margin: 2px 0 30px 42px;
+    letter-spacing: var(--tracking-wider); text-transform: uppercase;
+  }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-nav a {
+    display: block; padding: 9px 14px; border-radius: 10px;
+    font-size: 14px; font-weight: var(--weight-regular);
+    color: rgba(255,255,255,.68); text-decoration: none;
+    transition: background var(--dur-fast), color var(--dur-fast);
+  }
+  .sidebar-nav a:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .sidebar-nav a.active { background: var(--accent); color: #0C3124; font-weight: var(--weight-semibold); }
+  .sidebar-footer {
+    margin-top: auto; padding-top: 28px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: rgba(255,255,255,.4); letter-spacing: var(--tracking-wide);
+  }
+
+  /* ─── CONTENT CONTAINER — centered, generous rhythm ─── */
+  .content {
+    max-width: 1000px; margin: 0 auto;
+    padding: 80px 64px 160px;
+    display: flex; flex-direction: column; gap: 96px;
+  }
+  .sec-divider { border: none; border-top: 1px solid var(--border); }
+
+  /* ─── SECTION HEADER — mono tag w/ green dot · big title · lede ─── */
+  section { scroll-margin-top: 32px; }
+  .sec-tag {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-2); margin-bottom: 16px;
+  }
+  .sec-tag::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+  .sec-label {
+    font-size: 40px; font-weight: var(--weight-bold);
+    letter-spacing: -0.03em; line-height: 1.08;
+    color: var(--text); margin-bottom: 14px;
+  }
+  .sec-desc {
+    font-size: 18px; color: var(--text-2);
+    max-width: 600px; line-height: 1.6; margin-bottom: 44px;
+  }
+
+  /* subsection — quiet accent label */
+  .subhead {
+    font-size: 11px; font-weight: var(--weight-medium);
+    color: var(--accent); letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    margin: 48px 0 18px;
+  }
+  .subhead:first-of-type { margin-top: 0; }
+
+  /* ─── HERO / PHILOSOPHY ─── */
+  .hero h1 {
+    font-size: 52px; font-weight: var(--weight-bold);
+    letter-spacing: -0.035em; line-height: 1.05;
+    color: var(--text); margin-bottom: 18px;
+  }
+  .hero .lede {
+    font-size: 20px; color: var(--text-2);
+    max-width: 560px; line-height: 1.55;
+  }
+  .principles {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 20px; margin-top: 48px;
+  }
+  .principle {
+    background: var(--bg-white); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); padding: 26px 26px 28px;
+    box-shadow: 0 2px 8px rgba(12,42,17,.04);
+    transition: transform .22s var(--ease-standard), box-shadow .22s var(--ease-standard);
+  }
+  .principle:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(12,42,17,.09); }
+  .principle .pnum {
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: var(--tracking-wider); margin-bottom: 12px;
+  }
+  .principle h3 {
+    font-size: 18px; font-weight: var(--weight-semibold);
+    color: var(--text); margin-bottom: 8px;
+    letter-spacing: var(--tracking-snug); line-height: 1.3;
+  }
+  .principle p { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+  .principle p em { font-style: italic; color: var(--text); }
+  .polanyi-quote {
+    margin-top: 20px; padding: 32px 36px;
+    background: #0C3124; color: #fff;
+    border-radius: var(--radius-xl);
+    font-size: 18px; line-height: 1.55; letter-spacing: -.01em;
+    position: relative; overflow: hidden;
+  }
+  .polanyi-quote::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .polanyi-quote em { font-style: italic; color: var(--brand-light); }
+
+  /* ─── COLORS — Finto color-cards (chip on top, specs below) ─── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+    gap: 20px;
+  }
+  .color-card {
+    background: var(--bg-white); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); overflow: hidden; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(12,42,17,.04);
+    transition: transform .2s var(--ease-standard), box-shadow .2s var(--ease-standard);
+  }
+  .color-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(12,42,17,.10); }
+  .color-card.copied { box-shadow: 0 0 0 2px var(--accent); }
+  .color-swatch {
+    position: relative;
+    height: 128px; display: flex; align-items: flex-end; padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .color-role { font-size: 15px; font-weight: var(--weight-semibold); letter-spacing: -.01em; }
+  .ext-tag {
+    position: absolute; top: 14px; right: 14px;
+    font-family: var(--font-mono); font-size: 8.5px; font-weight: 500;
+    letter-spacing: .12em; padding: 2px 7px; border-radius: 999px;
+    border: 1px solid currentColor; opacity: .5;
+  }
+  .color-details { padding: 16px; display: flex; flex-direction: column; gap: 9px; }
+  .color-spec { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 12px; }
+  .spec-label { color: var(--text-2); }
+  .spec-value { color: var(--text); font-weight: 500; }
+  .color-card.copied .spec-hex { color: var(--accent); }
+  .color-card.copied .spec-hex::after { content: ' ✓'; }
+
+  /* status chips */
+  .status-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: var(--radius-full);
+    font-size: var(--text-sm); font-weight: var(--weight-medium);
+  }
+  .status-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .status-orange { background: var(--orange-soft); color: var(--orange); }
+  .status-red    { background: var(--red-soft);    color: var(--red); }
+  .status-green  { background: var(--green-soft);  color: var(--green); }
+
+  /* ─── shared specimen card (typography / spacing / sizes / motion / zindex / tone) ─── */
+  .specimen {
+    background: var(--bg-white);
+    border-radius: var(--radius-xl); padding: 8px 32px;
+  }
+
+  /* ─── TYPOGRAPHY — label left / sample right ─── */
+  .type-list { display: flex; flex-direction: column; }
+  .type-row {
+    display: grid; grid-template-columns: 168px 1fr;
+    align-items: baseline; gap: 24px;
+    padding: 26px 0; border-bottom: 1px solid var(--border);
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-sample { color: var(--text); letter-spacing: var(--tracking-snug); font-weight: var(--weight-medium); line-height: 1; }
+  .type-meta { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+  .type-meta code { font-family: var(--font-mono); background: none; padding: 0; color: var(--accent-2); }
+
+  .weights { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .weight-chip {
+    display: inline-flex; align-items: baseline; gap: 8px;
+    padding: 11px 18px; border-radius: var(--radius-full);
+    border: 1px solid var(--border); background: var(--bg-white);
+    font-size: 15px; color: var(--text);
+    box-shadow: 0 2px 8px rgba(12,42,17,.04);
+  }
+  .weight-chip code { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); background: none; padding: 0; }
+
+  /* ─── SPACING ─── */
+  .space-list { display: flex; flex-direction: column; padding: 18px 0; }
+  .space-row { display: grid; grid-template-columns: 110px 1fr 60px; align-items: center; gap: 24px; padding: 10px 0; }
+  .space-row .nm { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+  .space-row .bar-wrap { position: relative; height: 12px; display: flex; align-items: center; }
+  .space-row .bar { background: var(--accent); height: 10px; border-radius: 999px; min-width: 0; }
+  .space-row .vl { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); text-align: right; }
+
+  /* ─── RADIUS ─── */
+  .radius-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+  .radius-card-demo {
+    background: var(--bg-white); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 2px 8px rgba(12,42,17,.04);
+  }
+  .radius-shape { height: 100px; background: var(--surface-2); border: 1px solid var(--border); }
+  .radius-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-size: 11px; }
+  .radius-meta .nm { color: var(--text-2); }
+  .radius-meta .vl { color: var(--text-3); }
+
+  /* ─── SHADOW ─── */
+  .shadow-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px; padding: 8px 4px; }
+  .shadow-demo { background: var(--bg-white); border-radius: var(--radius-lg); padding: 24px; height: 132px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .shadow-name { font-family: var(--font-mono); font-size: 11px; color: var(--text-2); }
+  .shadow-val { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 2px; word-break: break-all; }
+
+  /* ─── ROWS (sizes / motion / zindex / tone) ─── */
+  .row-list { display: flex; flex-direction: column; }
+  .row {
+    display: grid; grid-template-columns: minmax(160px, 200px) minmax(140px, auto) 1fr;
+    gap: 24px; align-items: baseline;
+    padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row code { font-family: var(--font-mono); font-size: 12px; color: var(--accent-2); background: none; padding: 0; }
+  .row .vl { font-family: var(--font-mono); font-size: 12px; color: var(--text); font-weight: var(--weight-medium); }
+  .row .ds { color: var(--text-2); font-size: 13px; }
+
+  /* ─── COMPONENT EXAMPLES ─── */
+  .examples { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .ex-card {
+    background: var(--bg-white);
+    border-radius: var(--radius-xl); padding: 28px 24px;
+  }
+  .ex-label { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); margin-bottom: 18px; letter-spacing: var(--tracking-wide); }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: var(--btn-h); padding: 0 22px; border: none;
+    background: var(--accent); color: var(--bg-white);
+    border-radius: var(--radius-button); font-family: var(--font-sans);
+    font-size: var(--text-md); font-weight: var(--weight-medium); cursor: pointer;
+    transition: background var(--dur-fast);
+  }
+  .btn-primary:hover { background: var(--accent-2); }
+  .btn-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-white); border: 1px solid var(--border);
+    border-radius: var(--radius-pill); padding: 10px 16px;
+    font-family: var(--font-sans); font-size: var(--text-md); font-weight: var(--weight-medium);
+    color: var(--text); cursor: pointer;
+    transition: border-color var(--dur-fast);
+  }
+  .btn-pill:hover { border-color: var(--accent); }
+  .btn-tab-active {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 20px; border: none; background: var(--surface-2);
+    border-radius: var(--radius-full); color: var(--accent);
+    font-family: var(--font-sans); font-size: var(--text-md); font-weight: var(--weight-medium); cursor: pointer;
+  }
+  .btn-tab {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 20px; border: none; background: transparent;
+    border-radius: var(--radius-full); color: var(--text-2);
+    font-family: var(--font-sans); font-size: var(--text-md); font-weight: var(--weight-medium); cursor: pointer;
+  }
+
+  /* Modal header — canonical pattern */
+  .ds-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 4px; }
+  .ds-modal-icon-btn {
+    width: var(--icon-btn); height: var(--icon-btn);
+    border-radius: var(--radius-full); background: var(--accent-light);
+    border: none; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .ds-modal-icon-btn:hover { background: var(--surface-3); }
+  .ds-modal-frame { width: var(--modal-w); max-width: 100%; background: var(--bg); border-radius: var(--radius-modal); box-shadow: var(--shadow-md); margin: 0 auto; }
+  .ds-modal-body-mock { padding: 0 24px 24px; font-size: var(--text-sm); color: var(--text-2); }
+
+  /* Dropdown menu — canonical pattern */
+  .ds-dd { min-width: var(--dropdown-min-w); background: var(--bg-white); border: 1.5px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-popover); padding: 4px; font-family: var(--font-sans); }
+  .ds-dd-item {
+    width: 100%; padding: 10px 14px; border: none; background: transparent;
+    font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-medium);
+    color: var(--text); text-align: left; border-radius: var(--radius-xs); cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-standard); display: block; letter-spacing: var(--tracking-snug);
+  }
+  .ds-dd-item:hover { background: var(--accent-light); }
+  .ds-dd-item.danger { color: var(--red); }
+  .ds-dd-item.danger:hover { background: var(--accent-light); }
+
+  /* Input */
+  .ds-input {
+    width: 100%; background: var(--bg-white); border: 1.5px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 14px;
+    font-family: var(--font-sans); font-size: var(--text-md); font-weight: var(--weight-medium);
+    color: var(--text); outline: none; transition: background var(--dur-fast), border-color var(--dur-fast);
+  }
+  .ds-input::placeholder { color: var(--text-2); }
+  .ds-input:focus { background: var(--accent-light); border-color: var(--accent); }
+
+  /* Inline tag */
+  .badge-invoice { display: inline-flex; align-items: center; padding: 2px 6px; background: var(--surface-2); color: var(--accent); border-radius: var(--radius-sm); font-size: var(--text-caption); font-weight: var(--weight-regular); line-height: 1; }
+
+  /* Calendar day cells */
+  .cell-pill { width: 48px; height: 42px; border-radius: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-sizing: border-box; }
+  .cell-pill.ring  { background: #71DC78; border: 1px solid transparent; }
+  .cell-pill.light { background: var(--surface-2); border: 1px solid transparent; }
+  .cell-pill.mid   { background: #D4F5C5; border: 1px solid transparent; }
+  .cell-pill.empty { background: transparent; border: 1px solid transparent; }
+  .cell-pill .day  { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--text); line-height: 1; }
+  .cell-pill .amt  { font-size: var(--text-micro); color: var(--text); line-height: 1; }
+  .cell-pill.empty .day { color: var(--text-2); }
+  .cells-row { display: flex; gap: 8px; }
+
+  /* Code blocks */
+  .code-toggle { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 0; transition: color var(--dur-fast); letter-spacing: var(--tracking-wide); }
+  .code-toggle:hover { color: var(--accent); }
+  .code-toggle .pm { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); font-size: 12px; line-height: 1; transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-base); }
+  .code-toggle:hover .pm { background: var(--accent-light); color: var(--accent); }
+  .code-toggle.open .pm { transform: rotate(45deg); }
+  .code { font-family: var(--font-mono); font-size: 12px; color: var(--text); background: var(--surface); border: none; border-radius: var(--radius-xs); padding: 14px 16px; line-height: 1.65; overflow-x: auto; margin-top: 14px; display: none; }
+  .code.open { display: block; }
+  .code .c-key { color: var(--accent-2); }
+
+  /* ─── MOTION — number-flow amount switch demo ─── */
+  .nf-demo { display: flex; flex-direction: column; align-items: center; padding: 18px 0 10px; }
+  .nf-amount { display: flex; align-items: baseline; justify-content: center; min-height: 64px; }
+  .token-switch-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--surface); border: none; border-radius: var(--radius-full);
+    padding: 10px 20px; cursor: pointer;
+    font-family: var(--font-sans); font-size: var(--text-md); font-weight: var(--weight-medium);
+    color: var(--text); letter-spacing: -.01em;
+    transition: background var(--dur-fast) var(--ease-standard), transform var(--dur-fast);
+  }
+  .token-switch-btn:hover { background: var(--surface-2); }
+  @keyframes token-pop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .token-switch-btn.popping { animation: token-pop .32s var(--ease-spring); }
+
+  /* ─── BREAKPOINTS — named modal responsive laws ─── */
+  .bp-grid { display: flex; flex-direction: column; gap: 16px; }
+  .bp-card { background: var(--bg-white); border-radius: var(--radius-xl); padding: 24px; }
+  .bp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .bp-code { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: var(--tracking-wide); color: #0C3124; background: var(--accent); border-radius: var(--radius-sm); padding: 4px 9px; }
+  .bp-name { font-size: 16px; font-weight: var(--weight-semibold); letter-spacing: -.01em; color: var(--text); }
+  .bp-bp { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); letter-spacing: var(--tracking-wide); margin-bottom: 18px; }
+  .bp-bp code { font-family: var(--font-mono); background: none; padding: 0; color: var(--accent-2); }
+  .bp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .bp-col { background: var(--surface); border-radius: var(--radius-lg); padding: 16px 18px; }
+  .bp-col-h { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: var(--tracking-wide); color: var(--text-2); margin-bottom: 12px; }
+  .bp-col-h b { color: var(--text); font-weight: var(--weight-semibold); }
+  .bp-col ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 7px; }
+  .bp-col li { font-size: 13px; line-height: 1.45; color: var(--text-2); }
+  .bp-col li code { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent-2); background: none; padding: 0; }
+  .bp-specs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .bp-spec { display: inline-flex; align-items: baseline; gap: 6px; font-size: 12px; color: var(--text-2); background: var(--surface-2); border-radius: var(--radius-full); padding: 5px 12px; }
+  .bp-spec b { color: var(--accent); font-weight: var(--weight-semibold); font-family: var(--font-mono); font-size: 11.5px; }
+  @media (max-width: 720px) { .bp-cols { grid-template-columns: 1fr; } }
+
+  /* ─── BADGES ─── */
+  .ds-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 9px; font-family: var(--font-sans); font-size: 14px; font-weight: var(--weight-regular); letter-spacing: -0.02em; line-height: 1; height: 23px; box-sizing: border-box; white-space: nowrap; }
+  .ds-pill img { display: block; flex-shrink: 0; }
+  .ds-pill[data-state="processing"] { background: var(--pill-processing-bg); color: var(--pill-processing-fg); }
+  .ds-pill[data-state="timeout"]    { background: var(--pill-timeout-bg);    color: var(--pill-timeout-fg); }
+  .ds-pill[data-state="failed"]     { background: var(--pill-failed-bg);     color: var(--pill-failed-fg); }
+  .ds-pill[data-state="canceled"]   { background: var(--pill-canceled-bg);   color: var(--pill-canceled-fg); }
+  .ds-pill[data-state="awaiting"]   { background: var(--pill-awaiting-bg);   color: var(--pill-awaiting-fg); }
+  .ds-pill[data-state="expired"]    { background: var(--pill-expired-bg);    color: var(--pill-expired-fg); border: 1px solid var(--border); }
+  .ds-pill[data-state="draft"]      { background: #EDEAFC; color: #7B61FF; }   /* Invoice — Draft (purple) */
+  .ds-pill[data-state="sent"]       { background: #F1F2F4; color: #6B7280; }   /* Invoice — Sent (grey) */
+  .ds-pill[data-state="viewed"]     { background: #FDF4F2; color: #DB9253; }   /* Invoice — Viewed */
+  .ds-pill[data-state="overdue"]    { background: #FCF5DB; color: #EC9418; }   /* Invoice — Overdue (amber, = timeout) */
+
+  .ds-refund { display: inline-flex; align-items: center; background: var(--text); color: #fff; font-family: var(--font-sans); font-size: 12px; padding: 2px 6px; border-radius: 10px; line-height: 1; white-space: nowrap; }
+
+  .ds-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: var(--weight-medium); line-height: 1.5; }
+  .ds-chip[data-tone="success"]  { background: var(--green-soft);  color: var(--accent); }
+  .ds-chip[data-tone="warning"]  { background: var(--orange-soft); color: var(--orange); }
+  .ds-chip[data-tone="error"]    { background: var(--red-soft);    color: var(--red); }
+  .ds-chip[data-tone="info"]     { background: var(--info-soft);   color: var(--info); }
+  .ds-chip[data-tone="neutral"]  { background: var(--neutral-soft);color: var(--neutral-text); }
+
+  .ds-tag-sm { background: var(--surface-2); color: var(--accent); font-size: var(--text-caption); line-height: 1; padding: 2px 6px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; }
+  .ds-tag-lg { font-size: var(--text-caption); font-weight: var(--weight-medium); padding: 4px 12px; border-radius: var(--radius-full); display: inline-flex; align-items: center; }
+  .ds-tag-lg[data-tone="success"]  { background: var(--surface-2); color: var(--accent); }
+  .ds-tag-lg[data-tone="warning"]  { background: var(--orange-soft); color: var(--orange); }
+  .ds-tag-lg[data-tone="error"]    { background: var(--red-soft);    color: var(--red); }
+  .ds-tag-lg[data-tone="neutral"]  { background: var(--neutral-soft);color: var(--neutral-text); }
+
+  .ds-status-icon { display: inline-flex; align-items: center; gap: 6px; background: #F1F1F1; border: 0.8px solid #E5E5E5; color: #777; font-size: 11px; line-height: 1; padding: 3px 8px; border-radius: 9px; }
+  .ds-spinner { width: 11px; height: 11px; border: 1.5px solid #BBB; border-top-color: #777; border-radius: 50%; animation: ds-spin 1s linear infinite; }
+  @keyframes ds-spin { to { transform: rotate(360deg); } }
+
+  .ds-method { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 10.5px; font-weight: var(--weight-bold); letter-spacing: 0.04em; line-height: 1.4; }
+
+  @media (max-width: 900px) {
+    body { padding: 0; }
+    .sidebar { position: static; width: auto; border-right: 0; background-image: none; padding: 24px; }
+    .content { padding: 40px 24px 96px; gap: 72px; }
+    .principles { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 40px; }
+    .sec-label { font-size: 32px; }
+  }
+
+  /* ════════════════════════════════════════════════
+     BUTTONS — Figma board B001–B011 (node 18669-70953),
+     HOVER aligned to the AllScale design system (darken, not opacity-fade).
+     State model:
+       · Hover    → DARKEN colour   green → --accent-2 (#087E4C) · neutral → --surface-3 (#E5EEEA) · dark card → #0D0D0D
+       · Pressing → 60% opacity     · Disabled → 50% opacity     (per Figma)
+       · Tabs & list rows switch SURFACE   transparent ↔ Card bg #FAFBFA (hover → #E5EEEA) ↔ Button Cyan #F2F8F5
+     ════════════════════════════════════════════════ */
+  .as-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans); font-weight: 500; letter-spacing: -0.02em;
+    border: none; cursor: pointer; white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-standard), opacity var(--dur-fast) var(--ease-standard);
+  }
+  .as-btn svg, .as-btn img { display: block; flex-shrink: 0; }
+  .as-btn:active { opacity: .6; }
+  /* forced-state helpers for the spec sheet */
+  .is-hover   { pointer-events: none; }   /* hover = darken, per-variant below */
+  .is-press   { opacity: .6 !important; pointer-events: none; }
+  .is-disable { opacity: .5 !important; pointer-events: none; }
+
+  /* HOVER — darken the colour to match the design system (not an opacity fade) */
+  .as-btn--primary:hover,         .as-btn--primary.is-hover         { background: var(--accent-2); }
+  .as-btn--secondary:hover,       .as-btn--secondary.is-hover       { background: var(--surface-3); }
+  .as-btn--secondary-green:hover, .as-btn--secondary-green.is-hover { background: var(--surface-3); }
+  .as-btn--danger:hover,          .as-btn--danger.is-hover          { background: var(--surface-3); }
+  .as-btn--chip:hover,            .as-btn--chip.is-hover            { background: var(--surface-3); }
+  .as-btn--icon-sq:hover,         .as-btn--icon-sq.is-hover         { background: var(--surface-3); }
+  .as-btn--icon:hover,            .as-btn--icon.is-hover            { background: var(--surface-3); }
+  .as-btn--white:hover,           .as-btn--white.is-hover           { background: var(--surface-3); }
+  .as-btn--cardark:hover,         .as-btn--cardark.is-hover         { background: #0D0D0D; }
+  .as-ttab--deselect:hover,       .as-ttab--deselect.is-hover       { background: var(--surface-3); }
+
+  /* B001 · Primary — AllScale Green */
+  .as-btn--primary        { background: var(--accent); color: var(--bg); font-size: var(--text-lg); gap: 14px; padding: 14px 20px; border-radius: var(--radius-pill); }
+  /* B002 · Secondary — Card background */
+  .as-btn--secondary      { background: var(--surface); color: var(--text); font-size: var(--text-lg); gap: 15px; padding: 14px 19px; border-radius: var(--radius-pill); }
+  /* B004 · Secondary, green label */
+  .as-btn--secondary-green{ background: var(--surface); color: var(--accent); font-size: var(--text-lg); gap: 15px; padding: 14px 20px; border-radius: var(--radius-pill); }
+  /* B008 · Danger (no icon) */
+  .as-btn--danger         { background: var(--surface); color: #FF383C; font-size: var(--text-lg); gap: 15px; padding: 14px 19px; border-radius: var(--radius-pill); }
+  /* B005 · Chip + icon — Button Cyan */
+  .as-btn--chip           { background: var(--surface-2); color: var(--text); font-size: var(--text-md); gap: 9px; padding: 12px 14px; border-radius: var(--radius-button); }
+  .as-btn--chip.is-active { color: var(--accent); }
+  /* B007 · Icon button — rounded square (Button Cyan) */
+  .as-btn--icon-sq        { background: var(--surface-2); color: var(--text); width: 32px; height: 32px; padding: 0; border-radius: var(--radius-sm); }
+  /* B010 · Icon button — pill (Button Cyan) */
+  .as-btn--icon           { background: var(--surface-2); color: var(--text); width: 32px; height: 32px; padding: 10px 6px; border-radius: 38px; }
+  /* B001-Dark · White on dark */
+  .as-btn--white          { background: #fff; color: #1A1A1A; font-size: var(--text-lg); gap: 15px; height: 48px; padding: 0 20px; border-radius: var(--radius-pill); }
+  /* B002-Dark · Card-background-Dark */
+  .as-btn--cardark        { background: #1A1A1A; color: #fff; font-size: var(--text-lg); gap: 15px; padding: 12px 19px; border-radius: var(--radius-pill); }
+
+  /* B003 · Tab / segment (surface model) */
+  .as-tab { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-sans); font-weight: 500; font-size: var(--text-md); letter-spacing: -0.02em; padding: 10px 20px; border-radius: 32px; border: 1px solid transparent; cursor: pointer; transition: background var(--dur-fast) var(--ease-standard); }
+  .as-tab--selected { background: var(--accent); color: #fff; }
+  .as-tab--deselect { background: transparent; color: var(--text-2); border-color: var(--border); }
+  .as-tab--deselect:hover   { background: var(--surface-3); }
+  .as-tab--deselect.is-hover-bg { background: var(--surface-3); }
+  .as-tab--deselect.is-press-bg { background: var(--surface-2); }
+
+  /* B006 · Text tab (selected = underlined green) */
+  .as-ttab { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-sans); font-weight: 500; font-size: var(--text-md); letter-spacing: -0.02em; padding: 10px 20px; border-radius: 32px; border: none; cursor: pointer; transition: opacity var(--dur-fast); }
+  .as-ttab--selected { background: var(--surface-2); color: var(--accent); text-decoration: underline; }
+  .as-ttab--deselect { background: var(--surface); color: var(--text-2); }
+
+  /* B009 · Selectable list row (surface model; disabled = opacity) */
+  .as-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 350px; max-width: 100%; height: 52px; padding: 14px 20px; border-radius: var(--radius-xl); background: transparent; cursor: pointer; transition: background var(--dur-fast) var(--ease-standard); }
+  .as-row:hover { background: var(--surface-3); }
+  .as-row.is-hover-bg { background: var(--surface-3); }
+  .as-row.is-selected { background: var(--surface-2); }
+  .as-row .lbl { font-family: var(--font-sans); font-weight: 500; font-size: var(--text-lg); letter-spacing: -0.02em; color: var(--text); }
+  .as-tick { width: 24px; height: 24px; border-radius: 20px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+
+  /* B011 · Avatar dropdown */
+  .as-avatar-btn { display: inline-flex; align-items: center; gap: 12px; padding: 6px 12px 6px 6px; border-radius: var(--radius-xl); border: 1px solid var(--border); background: transparent; cursor: pointer; transition: background var(--dur-fast) var(--ease-standard); }
+  .as-avatar-btn:hover, .as-avatar-btn.is-hover-bg { background: var(--surface-3); }
+  .as-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--brand-light), var(--accent)); display: flex; align-items: center; justify-content: center; color: #0C3124; font-weight: 500; font-size: 15px; letter-spacing: -.02em; flex-shrink: 0; }
+  .as-avatar-btn .nm { font-family: var(--font-sans); font-weight: 400; font-size: var(--text-sm); color: var(--text); }
+  .as-avatar-btn .chev { color: var(--text-2); }
+
+  /* ─── Buttons spec-sheet layout (mirrors the Figma board) ─── */
+  .btn-spec { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 4px 28px 8px; box-shadow: 0 2px 8px rgba(12,42,17,.04); margin-bottom: 20px; }
+  .btn-spec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 18px 0 6px; }
+  .btn-spec-head .bcode { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--accent-2); }
+  .btn-spec-head .bname { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+  .btn-spec-head .bspec { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); margin-left: auto; letter-spacing: .02em; }
+  .btn-row { display: grid; grid-template-columns: 150px 1fr 188px; align-items: center; gap: 20px; padding: 15px 0; border-bottom: 1px solid var(--border); }
+  .btn-row:last-child { border-bottom: 0; }
+  .btn-state { font-family: var(--font-mono); font-size: 11px; color: var(--text-2); letter-spacing: .03em; }
+  .btn-demo { display: flex; align-items: center; min-height: 50px; }
+  .btn-demo--dark { background: #0D0D0D; border-radius: 14px; padding: 14px 16px; }
+  .btn-note { display: flex; align-items: center; gap: 8px; justify-content: flex-end; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); text-align: right; }
+  .btn-note .dot { width: 11px; height: 11px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.05); }
+  .btn-note .op { color: var(--accent-2); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-back" href="../index.html">‹ All prototypes</a>
+  <div class="brand-logo">
+    <span class="brand-mark">A</span>
+    <span class="brand-name">AllScale</span>
+  </div>
+  <div class="sidebar-sub">Design System · Foundation</div>
+  <nav class="sidebar-nav" id="sidebar-nav">
+    <a href="#colors">Colors</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing</a>
+    <a href="#radius">Radius</a>
+    <a href="#shadow">Shadow</a>
+    <a href="#sizes">Sizes</a>
+    <a href="#motion">Motion</a>
+    <a href="#breakpoints">Breakpoints</a>
+    <a href="#components">Components</a>
+    <a href="#buttons">Buttons</a>
+    <a href="#badges">Badges</a>
+    <a href="#usage">Usage</a>
+    <a href="#philosophy">Philosophy</a>
+  </nav>
+  <div class="sidebar-footer">Tokens · tokens.css</div>
+</aside>
+
+<main class="content">
+
+  <!-- ─────────── COLORS ─────────── -->
+  <section id="colors">
+    <div class="sec-tag">01 · Palette</div>
+    <div class="sec-label">Colors</div>
+    <div class="sec-desc">Click any swatch to copy its hex. Names follow the AllScale Figma library; <code style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);background:var(--surface-2);padding:1px 6px;border-radius:5px;">EXT</code> marks tokens we extend beyond it.</div>
+
+    <div class="subhead">Surface</div>
+    <div class="color-grid">
+      <div class="color-card" data-copy="#FDFFFE"><div class="color-swatch" style="background:var(--bg);color:#0C3124"><span class="color-role">bg</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#FDFFFE</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--bg</span></div></div></div>
+      <div class="color-card" data-copy="#FFFFFF"><div class="color-swatch" style="background:var(--bg-white);color:#0C3124"><span class="color-role">White</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#FFFFFF</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--bg-white</span></div></div></div>
+      <div class="color-card" data-copy="#FAFBFA"><div class="color-swatch" style="background:var(--surface);color:#0C3124"><span class="color-role">Card background</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#FAFBFA</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--surface</span></div></div></div>
+      <div class="color-card" data-copy="#F2F8F5"><div class="color-swatch" style="background:var(--surface-2);color:#0C3124"><span class="color-role">Button Cyan</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#F2F8F5</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--surface-2</span></div></div></div>
+      <div class="color-card" data-copy="#E5EEEA"><div class="color-swatch" style="background:var(--surface-3);color:#0C3124"><span class="color-role">Border Cyan</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#E5EEEA</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--surface-3</span></div></div></div>
+    </div>
+
+    <div class="subhead">Border</div>
+    <div class="color-grid">
+      <div class="color-card" data-copy="#E5EEEA"><div class="color-swatch" style="background:var(--border);color:#0C3124"><span class="color-role">Border Cyan</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#E5EEEA</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--border</span></div></div></div>
+      <div class="color-card" data-copy="#E4E4E4"><div class="color-swatch" style="background:var(--border-gray);color:#0C3124"><span class="color-role">border-gray</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#E4E4E4</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--border-gray</span></div></div></div>
+      <div class="color-card" data-copy="#C5DDD4"><div class="color-swatch" style="background:var(--border-strong);color:#0C3124"><span class="color-role">border-strong</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#C5DDD4</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--border-strong</span></div></div></div>
+    </div>
+
+    <div class="subhead">Text</div>
+    <div class="color-grid">
+      <div class="color-card" data-copy="#0C3124"><div class="color-swatch" style="background:var(--text);color:#fff"><span class="color-role">AllScale Dark</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#0C3124</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--text</span></div></div></div>
+      <div class="color-card" data-copy="#83968F"><div class="color-swatch" style="background:var(--text-2);color:#fff"><span class="color-role">Text Cyan</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#83968F</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--text-2</span></div></div></div>
+      <div class="color-card" data-copy="#B0C4BB"><div class="color-swatch" style="background:var(--text-3);color:#0C3124"><span class="color-role">text-3</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#B0C4BB</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--text-3</span></div></div></div>
+    </div>
+
+    <div class="subhead">Brand</div>
+    <div class="color-grid">
+      <div class="color-card" data-copy="#009859"><div class="color-swatch" style="background:var(--accent);color:#fff"><span class="color-role">AllScale Green</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#009859</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--accent</span></div></div></div>
+      <div class="color-card" data-copy="#0CAA67"><div class="color-swatch" style="background:var(--accent-hover);color:#fff"><span class="color-role">accent-hover</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#0CAA67</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--accent-hover</span></div></div></div>
+      <div class="color-card" data-copy="#087E4C"><div class="color-swatch" style="background:var(--accent-2);color:#fff"><span class="color-role">accent-2</span><span class="ext-tag">EXT</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#087E4C</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--accent-2</span></div></div></div>
+      <div class="color-card" data-copy="#F2F8F5"><div class="color-swatch" style="background:var(--accent-light);color:#0C3124"><span class="color-role">Button Cyan</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#F2F8F5</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--accent-light</span></div></div></div>
+      <div class="color-card" data-copy="#12D16B"><div class="color-swatch" style="background:var(--brand-light);color:#0C3124"><span class="color-role">Brand Light Green</span></div><div class="color-details"><div class="color-spec"><span class="spec-label">HEX</span><span class="spec-value spec-hex">#12D16B</span></div><div class="color-spec"><span class="spec-label">TOKEN</span><span class="spec-value">--brand-light</span></div></div></div>
+    </div>
+
+    <div class="subhead">Status</div>
+    <div class="status-row">
+      <span class="status-chip status-orange">Warning</span>
+      <span class="status-chip status-red">Error</span>
+      <span class="status-chip status-green">Success</span>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── TYPOGRAPHY ─────────── -->
+  <section id="typography">
+    <div class="sec-tag">02 · Type</div>
+    <div class="sec-label">Typography</div>
+
+    <div class="specimen">
+      <div class="type-list">
+        <div class="type-row"><span class="type-meta"><code>Heading/H1</code><span>38 / Medium / −4%</span></span><span class="type-sample" style="font-size:var(--text-h1); letter-spacing:var(--tracking-tight);">$2,844.90</span></div>
+        <div class="type-row"><span class="type-meta"><code>Heading/H2</code><span>32 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-h2);">Invoice</span></div>
+        <div class="type-row"><span class="type-meta"><code>Heading/H3</code><span>28 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-h3);">Page title</span></div>
+        <div class="type-row"><span class="type-meta"><code>Heading/H4</code><span>24 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-h4);">Invoice overview</span></div>
+        <div class="type-row"><span class="type-meta"><code>Heading/H5</code><span>22 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-h5);">Invoice activity</span></div>
+        <div class="type-row"><span class="type-meta"><code>Heading/H6</code><span>20 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-h6);">Apr 2026</span></div>
+        <div class="type-row"><span class="type-meta"><code>Body/Body Large</code><span>18 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-lg);">Create invoice</span></div>
+        <div class="type-row"><span class="type-meta"><code>Body/Body</code><span>16 / Medium / −2%</span></span><span class="type-sample" style="font-size:var(--text-md);">Body — Sent / Received / Transaction</span></div>
+        <div class="type-row"><span class="type-meta"><code>Body/Body Small</code><span>14 / Regular / 0</span></span><span class="type-sample" style="font-size:var(--text-sm); font-weight:var(--weight-regular); letter-spacing:var(--tracking-normal);">Tab label — small body</span></div>
+        <div class="type-row"><span class="type-meta"><code>Caption/Caption</code><span>12 / Regular / 0</span></span><span class="type-sample" style="font-size:var(--text-caption); font-weight:var(--weight-regular); letter-spacing:var(--tracking-normal); color:var(--text-2);">SUN MON TUE WED — caption</span></div>
+        <div class="type-row"><span class="type-meta"><code>Caption/Micro</code><span>10 / Regular / 0</span></span><span class="type-sample" style="font-size:var(--text-micro); font-weight:var(--weight-regular); letter-spacing:var(--tracking-normal); color:var(--text-2);">$50K</span></div>
+      </div>
+    </div>
+
+    <div class="subhead">Weights</div>
+    <div class="weights">
+      <span class="weight-chip" style="font-weight:var(--weight-regular)">Regular <code>400</code></span>
+      <span class="weight-chip" style="font-weight:var(--weight-medium)">Medium <code>500</code></span>
+      <span class="weight-chip" style="font-weight:var(--weight-semibold)">Semibold <code>600</code></span>
+      <span class="weight-chip" style="font-weight:var(--weight-bold)">Bold <code>700</code></span>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── SPACING ─────────── -->
+  <section id="spacing">
+    <div class="sec-tag">03 · Rhythm</div>
+    <div class="sec-label">Spacing</div>
+    <div class="sec-desc">The gap between things, made visible.</div>
+    <div class="specimen"><div class="space-list" id="space-list"></div></div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── RADIUS ─────────── -->
+  <section id="radius">
+    <div class="sec-tag">04 · Corners</div>
+    <div class="sec-label">Radius</div>
+    <div class="radius-grid" id="radius-grid"></div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── SHADOW ─────────── -->
+  <section id="shadow">
+    <div class="sec-tag">05 · Elevation</div>
+    <div class="sec-label">Shadow</div>
+    <div class="shadow-grid">
+      <div class="shadow-demo" style="box-shadow: var(--shadow-sm);"><div class="shadow-name">--shadow-sm</div><div class="shadow-val">0 2px 8px rgba(0,0,0,0.06)</div></div>
+      <div class="shadow-demo" style="box-shadow: var(--shadow-md);"><div class="shadow-name">--shadow-md</div><div class="shadow-val">0 4px 24px rgba(0,0,0,0.08)</div></div>
+      <div class="shadow-demo" style="box-shadow: var(--shadow-lg);"><div class="shadow-name">--shadow-lg</div><div class="shadow-val">0 8px 40px rgba(0,0,0,0.10)</div></div>
+      <div class="shadow-demo" style="box-shadow: var(--shadow-xl);"><div class="shadow-name">--shadow-xl</div><div class="shadow-val">0 10px 40px rgba(0,0,0,0.30)</div></div>
+      <div class="shadow-demo" style="box-shadow: var(--shadow-fab);"><div class="shadow-name">--shadow-fab</div><div class="shadow-val">0 6px 20px rgba(12,49,36,0.28)</div></div>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── SIZES ─────────── -->
+  <section id="sizes">
+    <div class="sec-tag">06 · Dimensions</div>
+    <div class="sec-label">Sizes</div>
+    <div class="specimen"><div class="row-list">
+      <div class="row"><code>--btn-h</code><span class="vl">50px</span><span class="ds">Primary button</span></div>
+      <div class="row"><code>--btn-compact-h</code><span class="vl">39px</span><span class="ds">Compact button</span></div>
+      <div class="row"><code>--pill-h</code><span class="vl">44px</span><span class="ds">Tab pill / large pill</span></div>
+      <div class="row"><code>--topbar-h</code><span class="vl">64px</span><span class="ds">Top bar</span></div>
+      <div class="row"><code>--sbar-w</code><span class="vl">105px</span><span class="ds">Sidebar — collapsed</span></div>
+      <div class="row"><code>--sbar-w-exp</code><span class="vl">256px</span><span class="ds">Sidebar — expanded</span></div>
+      <div class="row"><code>--avatar-md</code><span class="vl">44px</span><span class="ds">Row avatar</span></div>
+    </div></div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── MOTION ─────────── -->
+  <section id="motion">
+    <div class="sec-tag">07 · Easing</div>
+    <div class="sec-label">Motion</div>
+    <div class="sec-desc">Easing carries meaning. Spring for arrivals, ease-out for panels, standard for everything else.</div>
+    <div class="specimen"><div class="row-list">
+      <div class="row"><code>--ease-spring</code><span class="vl">cubic-bezier(0.34, 1.56, 0.64, 1)</span><span class="ds">Number-flow, bouncy enter</span></div>
+      <div class="row"><code>--ease-out</code><span class="vl">cubic-bezier(0.23, 1, 0.32, 1)</span><span class="ds">Slide-in panels</span></div>
+      <div class="row"><code>--ease-standard</code><span class="vl">cubic-bezier(0.4, 0, 0.2, 1)</span><span class="ds">Default</span></div>
+      <div class="row"><code>--dur-fast</code><span class="vl">150ms</span><span class="ds">Hover, button color</span></div>
+      <div class="row"><code>--dur-base</code><span class="vl">220ms</span><span class="ds">Modal open</span></div>
+      <div class="row"><code>--dur-slow</code><span class="vl">350ms</span><span class="ds">Fade</span></div>
+      <div class="row"><code>--dur-spin</code><span class="vl">600ms</span><span class="ds">number-flow digit roll</span></div>
+    </div></div>
+
+    <div class="subhead">Amount switch — number-flow digit roll · click the pill</div>
+    <div class="ex-card" style="padding: 28px;">
+      <div class="nf-demo">
+        <div class="nf-amount">
+          <number-flow id="amt-whole" style="font-size:58px;font-weight:700;letter-spacing:var(--tracking-tight);color:var(--text);"></number-flow>
+          <number-flow id="amt-frac" style="font-size:28px;font-weight:400;letter-spacing:var(--tracking-snug);color:var(--text-2);"></number-flow>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:12px;">
+          <button class="token-switch-btn" id="token-switch">
+            <span>Switch</span>
+            <img src="../pay/asset/switch.svg" width="12" height="12" style="flex-shrink:0;" alt="">
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:center;">
+        <button class="code-toggle" data-target="code-numberflow"><span class="pm">+</span> Code</button>
+        <button class="code-toggle" id="nf-copy"><span class="pm">⧉</span>&nbsp;<span id="nf-copy-label">Copy code</span></button>
+      </div>
+      <pre class="code" id="code-numberflow"></pre>
+      <textarea id="nf-snippet" hidden>
+&lt;!-- 1) Amount row — number-flow custom elements --&gt;
+<div style="display:flex;align-items:baseline;justify-content:center;">
+  <number-flow id="amt-whole"
+    style="font-size:58px;font-weight:700;letter-spacing:-.04em;color:#0C3124;"></number-flow>
+  <number-flow id="amt-frac"
+    style="font-size:28px;font-weight:400;letter-spacing:-.02em;color:#83968F;"></number-flow>
+</div>
+
+&lt;!-- 2) Switch pill --&gt;
+<div style="display:flex;justify-content:center;margin-top:12px;">
+  <button class="token-switch-btn" id="token-switch" onclick="toggleAmount()">
+    <span>Switch</span>
+    <img src="../pay/asset/switch.svg" width="12" height="12" style="flex-shrink:0;">
+  </button>
+</div>
+
+<style>
+  .token-switch-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #FAFBFA; border: none; border-radius: 999px;
+    padding: 10px 20px; cursor: pointer;
+    font-family: 'Archivo', sans-serif;
+    font-size: 16px; font-weight: 500; color: #0C3124;
+    letter-spacing: -.01em;
+    transition: background .15s, transform .15s;
+  }
+  .token-switch-btn:hover { background: #F2F8F5; }
+
+  /* button pop on click */
+  @keyframes token-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .token-switch-btn.popping {
+    animation: token-pop .32s cubic-bezier(.34, 1.56, .64, 1); /* --ease-spring */
+  }
+</style>
+
+<script>
+  // two amount states: { whole: integer, frac: decimal digits as integer }
+  var AMOUNTS = [
+    { whole: 1939,  frac: 50 },
+    { whole: 28464, frac: 7 }
+  ];
+  var current = 0;
+
+  function toggleAmount() {
+    current = 1 - current;
+
+    // button pop
+    var btn = document.getElementById('token-switch');
+    btn.classList.remove('popping');
+    void btn.offsetWidth; // force reflow to restart animation
+    btn.classList.add('popping');
+    btn.addEventListener('animationend', function () { btn.classList.remove('popping'); }, { once: true });
+
+    // animate digits via number-flow
+    var vals = AMOUNTS[current];
+    var flowWhole = document.getElementById('amt-whole');
+    var flowFrac  = document.getElementById('amt-frac');
+    if (flowWhole?.update) flowWhole.update(vals.whole);
+    if (flowFrac?.update)  flowFrac.update(vals.frac);
+  }
+</script>
+
+<script type="module">
+  import 'https://esm.sh/number-flow';
+
+  var spinTiming    = { duration: 600, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }; /* --dur-spin / --ease-spring */
+  var opacityTiming = { duration: 350, easing: 'ease' };                              /* --dur-slow */
+
+  var flowWhole = document.getElementById('amt-whole');
+  var flowFrac  = document.getElementById('amt-frac');
+
+  flowWhole.spinTiming    = spinTiming;
+  flowFrac.spinTiming     = spinTiming;
+  flowWhole.opacityTiming = opacityTiming;
+  flowFrac.opacityTiming  = opacityTiming;
+  flowWhole.format = { useGrouping: true };
+  flowFrac.format  = { minimumIntegerDigits: 2, useGrouping: false };
+  flowFrac.numberPrefix = '.';
+
+  flowWhole.update(1939);
+  flowFrac.update(50);
+</script></textarea>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── BREAKPOINTS ─────────── -->
+  <section id="breakpoints">
+    <div class="sec-tag">08 · Responsive</div>
+    <div class="sec-label">Breakpoints</div>
+    <div class="sec-desc">Named modal responsive laws (<code>W0xxA</code>). Each modal declares <strong>one</strong> breakpoint at <code>633px</code> — desktop ≥634px, compact ≤633px — and drops the canonical back/close header for a centered title. No 768px sheet fallback. Reference: <code>checkout/checkout-onramp.html</code>.</div>
+
+    <div class="bp-grid">
+
+      <div class="bp-card">
+        <div class="bp-head"><span class="bp-code">W002A</span><span class="bp-name">Primary modal → fullscreen, keep Back</span></div>
+        <div class="bp-bp">Card &amp; Local Payments · single breakpoint <code>633px</code></div>
+        <div class="bp-cols">
+          <div class="bp-col">
+            <div class="bp-col-h"><b>≥ 634px</b> · Desktop</div>
+            <ul>
+              <li>Top-centered modal · <code>420px</code> wide · radius <code>24px</code></li>
+              <li>Banner: title only — <strong>no back, no close</strong></li>
+              <li>Confirm / Cancel footer at the modal bottom (<code>position:sticky</code>)</li>
+            </ul>
+          </div>
+          <div class="bp-col">
+            <div class="bp-col-h"><b>≤ 633px</b> · Fullscreen</div>
+            <ul>
+              <li>Fills viewport · <code>100% × 100%</code> · radius <code>0</code></li>
+              <li><strong>Back button shown</strong> (only nav kept); close stays hidden</li>
+              <li>Title stays centered via invisible close-spacer</li>
+              <li><strong>CTA pinned to the screen bottom</strong> (<code>flex:1</code> body + footer <code>margin-top:auto</code>)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bp-specs">
+          <span class="bp-spec">breakpoint <b>633px</b></span>
+          <span class="bp-spec">desktop width <b>420px</b></span>
+          <span class="bp-spec">compact <b>fullscreen</b></span>
+          <span class="bp-spec">CTA <b>screen bottom</b></span>
+          <span class="bp-spec">floating FABs <b>hidden ≤633</b></span>
+        </div>
+      </div>
+
+      <div class="bp-card">
+        <div class="bp-head"><span class="bp-code">W003A</span><span class="bp-name">Secondary modal → bottom floating sheet</span></div>
+        <div class="bp-bp">Pay with XXX · Pay in · Payment provider · single breakpoint <code>633px</code></div>
+        <div class="bp-cols">
+          <div class="bp-col">
+            <div class="bp-col-h"><b>≥ 634px</b> · Desktop</div>
+            <ul>
+              <li>Top-centered modal · <code>420px</code> wide · radius <code>24px</code></li>
+              <li>Banner: title only — <strong>no back, no close</strong></li>
+            </ul>
+          </div>
+          <div class="bp-col">
+            <div class="bp-col-h"><b>≤ 633px</b> · Bottom sheet</div>
+            <ul>
+              <li>Bottom-anchored floating sheet · <code>max-width 420px</code></li>
+              <li>Side margin <strong>≥ 8px</strong> · <strong>16px</strong> from bottom (always)</li>
+              <li>Height <strong>never exceeds 520px</strong> (<code>max-height:min(520px,92vh)</code>) — list scrolls inside</li>
+              <li>All four corners equal (<code>24px</code>) — it floats, so bottom = top</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bp-specs">
+          <span class="bp-spec">breakpoint <b>633px</b></span>
+          <span class="bp-spec">max-width <b>420px</b></span>
+          <span class="bp-spec">max-height <b>520px</b></span>
+          <span class="bp-spec">side margin <b>≥8px</b></span>
+          <span class="bp-spec">bottom gap <b>16px</b></span>
+          <span class="bp-spec">corners <b>24px all</b></span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── COMPONENTS ─────────── -->
+  <section id="components">
+    <div class="sec-tag">09 · UI</div>
+    <div class="sec-label">Components</div>
+    <div class="sec-desc">Built from the tokens above. Hover to feel the interaction.</div>
+
+    <div class="examples">
+      <div class="ex-card">
+        <div class="ex-label">Primary CTA</div>
+        <button class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5.25v13.5M5.25 12h13.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Create invoice
+        </button>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Filter dropdown</div>
+        <button class="btn-pill">Monthly
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Tab pill</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn-tab-active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M14.83 13.41V9.17M14.83 9.17H10.59M14.83 9.17L9.17 14.83" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Sent
+          </button>
+          <button class="btn-tab">Received</button>
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Search input</div>
+        <input class="ds-input" placeholder="Name, email or address">
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Inline tag</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span style="font-size:var(--text-md); font-weight:var(--weight-medium);">Nina</span>
+          <span class="badge-invoice">Invoice</span>
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Soft status</div>
+        <div class="status-row">
+          <span class="status-chip status-orange">Pending</span>
+          <span class="status-chip status-red">Failed</span>
+          <span class="status-chip status-green">Completed</span>
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Calendar day · ring · light · mid · empty</div>
+        <div class="cells-row">
+          <div class="cell-pill ring"><span class="day">1</span><span class="amt">$50K</span></div>
+          <div class="cell-pill mid"><span class="day">3</span><span class="amt">$1K</span></div>
+          <div class="cell-pill light"><span class="day">2</span><span class="amt">$134</span></div>
+          <div class="cell-pill empty"><span class="day">25</span><span class="amt">$0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subhead">Modal header — back ⟵ left · close ⟶ right · both 44×44</div>
+    <div class="ex-card" style="padding: 24px;">
+      <div class="ds-modal-frame">
+        <div class="ds-modal-header">
+          <button class="ds-modal-icon-btn" aria-label="Back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="ds-modal-icon-btn" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="ds-modal-body-mock">Modal body — width <code style="font-family:var(--font-mono);color:var(--accent-2);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:11px;">var(--modal-w)</code> = 420px · header padding <code style="font-family:var(--font-mono);color:var(--accent-2);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:11px;">16 18 4 18</code></div>
+      </div>
+      <button class="code-toggle" data-target="code-modal-header"><span class="pm">+</span> Code</button>
+      <pre class="code" id="code-modal-header">&lt;div class="ds-modal-frame"&gt;
+  &lt;div class="ds-modal-header"&gt;
+    &lt;button class="ds-modal-icon-btn" aria-label="Back"&gt;&lt;svg&gt;…&lt;/svg&gt;&lt;/button&gt;
+    &lt;button class="ds-modal-icon-btn" aria-label="Close"&gt;&lt;svg&gt;…&lt;/svg&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  …
+&lt;/div&gt;
+
+<span class="c-key">/* Spec */</span>
+.ds-modal-header  { display: flex; justify-content: space-between; padding: 16px 18px 4px; }
+.ds-modal-icon-btn{ width: <span class="c-key">var(--icon-btn)</span>; height: <span class="c-key">var(--icon-btn)</span>;
+                    background: <span class="c-key">var(--accent-light)</span>; border-radius: <span class="c-key">var(--radius-full)</span>; }
+.ds-modal-frame   { width: <span class="c-key">var(--modal-w)</span>; border-radius: <span class="c-key">var(--radius-modal)</span>; }</pre>
+      <div style="font-size:11px;color:var(--text-3);margin-top:10px;letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:var(--weight-medium);">Rules</div>
+      <ul style="font-size:13px;color:var(--text-2);line-height:1.6;margin:6px 0 0 18px;padding:0;">
+        <li>Back button always left-anchored, close button always right-anchored</li>
+        <li>Both icon buttons are <strong>44×44</strong> (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--icon-btn)</code>) circular, accent-light bg</li>
+        <li>SVG inside is 18×18, stroke-width 2.2, color <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--text)</code></li>
+        <li>If a step has no Back, render an invisible spacer with <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">visibility:hidden</code> to keep close on the right</li>
+        <li>Modal frame width is fixed at <strong>420px</strong> (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--modal-w)</code>) across every step of a sub-flow — no width-jitter between screens</li>
+      </ul>
+    </div>
+
+    <div class="subhead">Dropdown menu — context menus, ⋯ actions, filter popovers</div>
+    <div class="ex-card" style="padding: 28px;">
+      <div style="display:flex; justify-content:center; padding: 6px 0 14px;">
+        <div class="ds-dd">
+          <div class="ds-dd-item">Rename</div>
+          <div class="ds-dd-item">Duplicate</div>
+          <div class="ds-dd-item danger">Delete</div>
+        </div>
+      </div>
+      <button class="code-toggle" data-target="code-dropdown"><span class="pm">+</span> Code</button>
+      <pre class="code" id="code-dropdown">&lt;div class="ds-dd"&gt;
+  &lt;div class="ds-dd-item"&gt;Rename&lt;/div&gt;
+  &lt;div class="ds-dd-item"&gt;Duplicate&lt;/div&gt;
+  &lt;div class="ds-dd-item danger"&gt;Delete&lt;/div&gt;
+&lt;/div&gt;
+
+<span class="c-key">/* Spec */</span>
+.ds-dd       { min-width: <span class="c-key">var(--dropdown-min-w)</span>; background: <span class="c-key">var(--bg-white)</span>;
+               border: 1.5px solid <span class="c-key">var(--border)</span>;
+               border-radius: <span class="c-key">var(--radius-md)</span>;
+               box-shadow: <span class="c-key">var(--shadow-popover)</span>;
+               padding: 4px; }
+.ds-dd-item  { padding: 10px 14px;
+               font-size: <span class="c-key">var(--text-sm)</span>; font-weight: <span class="c-key">var(--weight-medium)</span>;
+               border-radius: <span class="c-key">var(--radius-xs)</span>; }
+.ds-dd-item:hover { background: <span class="c-key">var(--accent-light)</span>; }
+.ds-dd-item.danger { color: <span class="c-key">var(--red)</span>; }</pre>
+      <div style="font-size:11px;color:var(--text-3);margin-top:10px;letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:var(--weight-medium);">Rules</div>
+      <ul style="font-size:13px;color:var(--text-2);line-height:1.6;margin:6px 0 0 18px;padding:0;">
+        <li>Container: <strong>140px</strong> min-width (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--dropdown-min-w)</code>), <strong>1.5px</strong> border, <strong>12px</strong> radius, <strong>4px</strong> inner padding, <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--shadow-popover)</code> elevation</li>
+        <li>Items: <strong>10×14</strong> padding, <strong>14px</strong> medium text, <strong>8px</strong> radius (so hover bg stays inside the menu's rounded edge)</li>
+        <li>Hover: <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--accent-light)</code> background for every item, including destructive — colour difference comes from text only</li>
+        <li>Destructive items: red text (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--red)</code>), no extra red background — keep hover language consistent</li>
+        <li>Position: <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">absolute</code> from the trigger button, <strong>6px</strong> vertical gap, anchored to the trigger's side (usually right)</li>
+        <li>Do NOT set <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">overflow: hidden</code> on the menu — items already round their own corners</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── BUTTONS ─────────── -->
+  <section id="buttons">
+    <div class="sec-tag">Figma · B001–B011</div>
+    <div class="sec-label">Buttons</div>
+    <div class="sec-desc">Structure transcribed 1:1 from Figma, with <strong>hover aligned to the design system</strong>: hover <strong>darkens the colour</strong> (green → accent-2, neutral surfaces → surface-3, dark card → #0D0D0D) rather than fading opacity. Pressing (60%) and disabled (50%) keep the Figma opacity. Tabs and list rows switch surface. Hover or click any example to feel it. <span style="color:var(--text-3)">(icon glyphs are representative)</span></div>
+
+    <!-- B001 · Primary -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B001</span><span class="bname">Primary · AllScale Green</span><span class="bspec">18px · pad 14×20 · radius 30 · gap 14</span></div>
+      <div class="btn-row"><span class="btn-state">Default / Enable</span><span class="btn-demo"><button class="as-btn as-btn--primary"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Confirm</button></span><span class="btn-note"><span class="dot" style="background:var(--accent)"></span>AllScale Green · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--primary is-hover"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Confirm</button></span><span class="btn-note"><span class="dot" style="background:var(--accent-2)"></span>→ accent-2</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--primary is-press"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Confirm</button></span><span class="btn-note"><span class="dot" style="background:var(--accent)"></span>AllScale Green · <span class="op">60%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--primary is-disable"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Confirm</button></span><span class="btn-note"><span class="dot" style="background:var(--accent)"></span>AllScale Green · <span class="op">50%</span></span></div>
+    </div>
+
+    <!-- B002 · Secondary -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B002</span><span class="bname">Secondary · Card background</span><span class="bspec">18px · pad 14×19 · radius 30 · gap 15</span></div>
+      <div class="btn-row"><span class="btn-state">Default / Enable</span><span class="btn-demo"><button class="as-btn as-btn--secondary"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Button</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--secondary is-hover"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Button</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--secondary is-press"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Button</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">60%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--secondary is-disable"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Button</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">50%</span></span></div>
+    </div>
+
+    <!-- B003 · Tab / segment -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B003</span><span class="bname">Tab · segment</span><span class="bspec">16px · pad 10×20 · radius 32 · surface model</span></div>
+      <div class="btn-row"><span class="btn-state">Default / Selected</span><span class="btn-demo"><button class="as-tab as-tab--selected">Transaction</button></span><span class="btn-note"><span class="dot" style="background:var(--accent)"></span>AllScale Green</span></div>
+      <div class="btn-row"><span class="btn-state">Deselect</span><span class="btn-demo"><button class="as-tab as-tab--deselect">Transaction</button></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>Transparent · Border Cyan</span></div>
+      <div class="btn-row"><span class="btn-state">Hover (deselect)</span><span class="btn-demo"><button class="as-tab as-tab--deselect is-hover-bg">Transaction</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing (deselect)</span><span class="btn-demo"><button class="as-tab as-tab--deselect is-press-bg">Pressing</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan</span></div>
+    </div>
+
+    <!-- B004 · Secondary green-text -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B004</span><span class="bname">Secondary · green label</span><span class="bspec">18px · pad 14×20 · radius 30 · gap 15</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-btn as-btn--secondary-green"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Create new store</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--secondary-green is-disable"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Create new store</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hovering</span><span class="btn-demo"><button class="as-btn as-btn--secondary-green is-hover"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Create new store</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--secondary-green is-press"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Create new store</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B005 · Chip + icon -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B005</span><span class="bname">Chip · icon + label</span><span class="bspec">16px · pad 12×14 · radius 40 · gap 9 · icon 24</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-btn as-btn--chip"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--chip is-disable"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--chip is-hover"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--chip is-press"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B005-A · Chip active (green label) -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B005-A</span><span class="bname">Chip · active (green label)</span><span class="bspec">same as B005 · label AllScale Green</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-btn as-btn--chip is-active"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--chip is-active is-disable"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--chip is-active is-hover"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--chip is-active is-press"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Invoice</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B006 · Text tab -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B006</span><span class="bname">Text tab</span><span class="bspec">16px · pad 10×20 · radius 32</span></div>
+      <div class="btn-row"><span class="btn-state">Selected (no hover/press)</span><span class="btn-demo"><button class="as-ttab as-ttab--selected">Payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · green underline</span></div>
+      <div class="btn-row"><span class="btn-state">Deselect</span><span class="btn-demo"><button class="as-ttab as-ttab--deselect">Payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover (deselect)</span><span class="btn-demo"><button class="as-ttab as-ttab--deselect is-hover">Payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing (deselect)</span><span class="btn-demo"><button class="as-ttab as-ttab--deselect is-press">Payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B007 · Icon button (rounded square) -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B007</span><span class="bname">Icon button · rounded square</span><span class="bspec">32×32 · Button Cyan · opacity model</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-btn as-btn--icon-sq"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--icon-sq is-disable"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--icon-sq is-hover"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--icon-sq is-press"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B008 · Danger -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B008</span><span class="bname">Danger · destructive</span><span class="bspec">18px · pad 14×19 · radius 30 · label #FF383C</span></div>
+      <div class="btn-row"><span class="btn-state">Default / Enable</span><span class="btn-demo"><button class="as-btn as-btn--danger">Cancel payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><button class="as-btn as-btn--danger is-disable">Cancel payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--danger is-hover">Cancel payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--danger is-press">Cancel payroll</button></span><span class="btn-note"><span class="dot" style="background:var(--surface)"></span>Card background · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B009 · Selectable list row -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B009</span><span class="bname">List row · selectable</span><span class="bspec">18px · h52 · pad 14×20 · radius 24 · surface model</span></div>
+      <div class="btn-row"><span class="btn-state">Default / Enable</span><span class="btn-demo"><div class="as-row"><span class="lbl">Canada</span><span class="as-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>Transparent · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo"><div class="as-row is-disable"><span class="lbl">Canada</span><span class="as-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>Transparent · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><div class="as-row is-hover-bg"><span class="lbl">Canada</span><span class="as-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing / Selected</span><span class="btn-demo"><div class="as-row is-selected"><span class="lbl">Canada</span><span class="as-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan</span></div>
+    </div>
+
+    <!-- B010 · Icon button (pill) -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B010</span><span class="bname">Icon button · pill</span><span class="bspec">32×32 · radius 38 · pad 10×6 · icon 20</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-btn as-btn--icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.6667 6.6667V5C6.6667 3.159 8.159 1.6667 10 1.6667L15 1.6667C16.841 1.6667 18.3334 3.159 18.3334 5V10C18.3334 11.841 16.841 13.3334 15 13.3334H13.3334M6.6667 6.6667H5C3.159 6.6667 1.6667 8.159 1.6667 10V15C1.6667 16.841 3.159 18.3334 5 18.3334H10C11.841 18.3334 13.3334 16.841 13.3334 15V13.3334M6.6667 6.6667H10C11.841 6.6667 13.3334 8.159 13.3334 10V13.3334" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-btn as-btn--icon is-hover"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.6667 6.6667V5C6.6667 3.159 8.159 1.6667 10 1.6667L15 1.6667C16.841 1.6667 18.3334 3.159 18.3334 5V10C18.3334 11.841 16.841 13.3334 15 13.3334H13.3334M6.6667 6.6667H5C3.159 6.6667 1.6667 8.159 1.6667 10V15C1.6667 16.841 3.159 18.3334 5 18.3334H10C11.841 18.3334 13.3334 16.841 13.3334 15V13.3334M6.6667 6.6667H10C11.841 6.6667 13.3334 8.159 13.3334 10V13.3334" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo"><button class="as-btn as-btn--icon is-press"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.6667 6.6667V5C6.6667 3.159 8.159 1.6667 10 1.6667L15 1.6667C16.841 1.6667 18.3334 3.159 18.3334 5V10C18.3334 11.841 16.841 13.3334 15 13.3334H13.3334M6.6667 6.6667H5C3.159 6.6667 1.6667 8.159 1.6667 10V15C1.6667 16.841 3.159 18.3334 5 18.3334H10C11.841 18.3334 13.3334 16.841 13.3334 15V13.3334M6.6667 6.6667H10C11.841 6.6667 13.3334 8.159 13.3334 10V13.3334" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-2)"></span>Button Cyan · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B011 · Avatar dropdown -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B011</span><span class="bname">Avatar dropdown</span><span class="bspec">avatar 32 · label 14 · radius 24 · pad 6 / 12 / 6</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo"><button class="as-avatar-btn"><span class="as-avatar">A</span><span class="nm">Heading</span><svg class="chev" width="7" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>Transparent · Border Cyan</span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo"><button class="as-avatar-btn is-hover-bg"><span class="as-avatar">A</span><span class="nm">Heading</span><svg class="chev" width="7" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+    </div>
+
+    <div class="subhead">Dark variants</div>
+
+    <!-- B001-Dark · White on dark -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B001-Dark</span><span class="bname">Primary · White on dark</span><span class="bspec">18px · h48 · pad 0×20 · radius 30 · label #1A1A1A</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--white"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pay • 39.50 USDT</button></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>White · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--white is-disable"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pay • 39.50 USDT</button></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>White · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--white is-hover"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pay • 39.50 USDT</button></span><span class="btn-note"><span class="dot" style="background:var(--surface-3)"></span>→ surface-3</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--white is-press"><svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pay • 39.50 USDT</button></span><span class="btn-note"><span class="dot" style="background:#fff;border-color:var(--border)"></span>White · <span class="op">60%</span></span></div>
+    </div>
+
+    <!-- B002-Dark · Card-dark -->
+    <div class="btn-spec">
+      <div class="btn-spec-head"><span class="bcode">B002-Dark</span><span class="bname">Secondary · Card background-Dark</span><span class="bspec">18px · pad 12×19 · radius 30 · gap 15 · icon 24</span></div>
+      <div class="btn-row"><span class="btn-state">Default</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--cardark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Download invoice</button></span><span class="btn-note"><span class="dot" style="background:#1A1A1A"></span>Card bg-Dark · <span class="op">100%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Disabled</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--cardark is-disable"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Download invoice</button></span><span class="btn-note"><span class="dot" style="background:#1A1A1A"></span>Card bg-Dark · <span class="op">50%</span></span></div>
+      <div class="btn-row"><span class="btn-state">Hover</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--cardark is-hover"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Download invoice</button></span><span class="btn-note"><span class="dot" style="background:#0D0D0D"></span>→ Background-Dark</span></div>
+      <div class="btn-row"><span class="btn-state">Pressing</span><span class="btn-demo btn-demo--dark"><button class="as-btn as-btn--cardark is-press"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Download invoice</button></span><span class="btn-note"><span class="dot" style="background:#1A1A1A"></span>Card bg-Dark · <span class="op">60%</span></span></div>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── BADGES ─────────── -->
+  <section id="badges">
+    <div class="sec-tag">10 · Status</div>
+    <div class="sec-label">Badges</div>
+    <div class="sec-desc">State communicated through color + icon, not text alone.</div>
+
+    <div class="ex-label" style="margin-bottom:18px;">Composable <code style="font-family:var(--font-mono);color:var(--accent-2);">ds-pill</code> — icon + label, coloured by <code style="font-family:var(--font-mono);color:var(--accent-2);">data-state</code>. Grouped by product surface.</div>
+
+    <div class="subhead">Checkout</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="ds-pill" data-state="processing"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><circle cx="15.5" cy="11.5" r="6" stroke="#028BFD" stroke-dasharray="3 3"/></svg>Processing</span>
+        <span class="ds-pill" data-state="failed"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><path d="M9.04651 11.5C9.04651 15.0642 11.9358 17.9535 15.5 17.9535C19.0642 17.9535 21.9535 15.0642 21.9535 11.5C21.9535 7.93584 19.0642 5.04651 15.5 5.04651C11.9358 5.04651 9.04651 7.93583 9.04651 11.5ZM16.0233 8.7093L16.0233 11.8488C16.0233 12.1378 15.789 12.3721 15.5 12.3721C15.211 12.3721 14.9767 12.1378 14.9767 11.8488L14.9767 8.7093C14.9767 8.42031 15.211 8.18604 15.5 8.18604C15.789 8.18604 16.0233 8.42031 16.0233 8.7093ZM16.0233 13.593L16.0233 13.9767C16.0233 14.2657 15.789 14.5 15.5 14.5C15.211 14.5 14.9767 14.2657 14.9767 13.9767L14.9767 13.593C14.9767 13.304 15.211 13.0698 15.5 13.0698C15.789 13.0698 16.0233 13.304 16.0233 13.593ZM8 11.5C8 7.35786 11.3579 4 15.5 4C19.6421 4 23 7.35786 23 11.5C23 15.6421 19.6421 19 15.5 19C11.3579 19 8 15.6421 8 11.5Z" fill="#FF383C"/></svg>Failed</span>
+        <span class="ds-pill" data-state="canceled"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><path d="M9.04651 11.5C9.04651 15.0642 11.9358 17.9535 15.5 17.9535C19.0642 17.9535 21.9535 15.0642 21.9535 11.5C21.9535 7.93584 19.0642 5.04651 15.5 5.04651C11.9358 5.04651 9.04651 7.93583 9.04651 11.5ZM16.0233 8.7093L16.0233 11.8488C16.0233 12.1378 15.789 12.3721 15.5 12.3721C15.211 12.3721 14.9767 12.1378 14.9767 11.8488L14.9767 8.7093C14.9767 8.42031 15.211 8.18604 15.5 8.18604C15.789 8.18604 16.0233 8.42031 16.0233 8.7093ZM16.0233 13.593L16.0233 13.9767C16.0233 14.2657 15.789 14.5 15.5 14.5C15.211 14.5 14.9767 14.2657 14.9767 13.9767L14.9767 13.593C14.9767 13.304 15.211 13.0698 15.5 13.0698C15.789 13.0698 16.0233 13.304 16.0233 13.593ZM8 11.5C8 7.35786 11.3579 4 15.5 4C19.6421 4 23 7.35786 23 11.5C23 15.6421 19.6421 19 15.5 19C11.3579 19 8 15.6421 8 11.5Z" fill="#FF383C"/></svg>Canceled</span>
+        <span class="ds-pill" data-state="timeout"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><path d="M9.04651 11.5C9.04651 15.0642 11.9358 17.9535 15.5 17.9535C19.0642 17.9535 21.9535 15.0642 21.9535 11.5C21.9535 7.93584 19.0642 5.04651 15.5 5.04651C11.9358 5.04651 9.04651 7.93583 9.04651 11.5ZM16.0233 8.7093L16.0233 11.8488C16.0233 12.1378 15.789 12.3721 15.5 12.3721C15.211 12.3721 14.9767 12.1378 14.9767 11.8488L14.9767 8.7093C14.9767 8.42031 15.211 8.18604 15.5 8.18604C15.789 8.18604 16.0233 8.42031 16.0233 8.7093ZM16.0233 13.593L16.0233 13.9767C16.0233 14.2657 15.789 14.5 15.5 14.5C15.211 14.5 14.9767 14.2657 14.9767 13.9767L14.9767 13.593C14.9767 13.304 15.211 13.0698 15.5 13.0698C15.789 13.0698 16.0233 13.304 16.0233 13.593ZM8 11.5C8 7.35786 11.3579 4 15.5 4C19.6421 4 23 7.35786 23 11.5C23 15.6421 19.6421 19 15.5 19C11.3579 19 8 15.6421 8 11.5Z" fill="#EC9418"/></svg>Timeout</span>
+      </div>
+    </div>
+
+    <div class="subhead">Invoice Status</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="ds-pill" data-state="draft"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Draft</span>
+        <span class="ds-pill" data-state="sent"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Sent</span>
+        <span class="ds-pill" data-state="viewed"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DB9253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>Viewed</span>
+        <span class="ds-pill" data-state="processing"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><circle cx="15.5" cy="11.5" r="6" stroke="#028BFD" stroke-dasharray="3 3"/></svg>Processing</span>
+        <span class="ds-pill" data-state="failed"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><path d="M9.04651 11.5C9.04651 15.0642 11.9358 17.9535 15.5 17.9535C19.0642 17.9535 21.9535 15.0642 21.9535 11.5C21.9535 7.93584 19.0642 5.04651 15.5 5.04651C11.9358 5.04651 9.04651 7.93583 9.04651 11.5ZM16.0233 8.7093L16.0233 11.8488C16.0233 12.1378 15.789 12.3721 15.5 12.3721C15.211 12.3721 14.9767 12.1378 14.9767 11.8488L14.9767 8.7093C14.9767 8.42031 15.211 8.18604 15.5 8.18604C15.789 8.18604 16.0233 8.42031 16.0233 8.7093ZM16.0233 13.593L16.0233 13.9767C16.0233 14.2657 15.789 14.5 15.5 14.5C15.211 14.5 14.9767 14.2657 14.9767 13.9767L14.9767 13.593C14.9767 13.304 15.211 13.0698 15.5 13.0698C15.789 13.0698 16.0233 13.304 16.0233 13.593ZM8 11.5C8 7.35786 11.3579 4 15.5 4C19.6421 4 23 7.35786 23 11.5C23 15.6421 19.6421 19 15.5 19C11.3579 19 8 15.6421 8 11.5Z" fill="#FF383C"/></svg>Failed</span>
+        <span class="ds-pill" data-state="overdue"><svg width="15" height="15" viewBox="8 4 15 15" fill="none"><path d="M9.04651 11.5C9.04651 15.0642 11.9358 17.9535 15.5 17.9535C19.0642 17.9535 21.9535 15.0642 21.9535 11.5C21.9535 7.93584 19.0642 5.04651 15.5 5.04651C11.9358 5.04651 9.04651 7.93583 9.04651 11.5ZM16.0233 8.7093L16.0233 11.8488C16.0233 12.1378 15.789 12.3721 15.5 12.3721C15.211 12.3721 14.9767 12.1378 14.9767 11.8488L14.9767 8.7093C14.9767 8.42031 15.211 8.18604 15.5 8.18604C15.789 8.18604 16.0233 8.42031 16.0233 8.7093ZM16.0233 13.593L16.0233 13.9767C16.0233 14.2657 15.789 14.5 15.5 14.5C15.211 14.5 14.9767 14.2657 14.9767 13.9767L14.9767 13.593C14.9767 13.304 15.211 13.0698 15.5 13.0698C15.789 13.0698 16.0233 13.304 16.0233 13.593ZM8 11.5C8 7.35786 11.3579 4 15.5 4C19.6421 4 23 7.35786 23 11.5C23 15.6421 19.6421 19 15.5 19C11.3579 19 8 15.6421 8 11.5Z" fill="#EC9418"/></svg>Overdue</span>
+      </div>
+    </div>
+
+    <div class="subhead">Payment link</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="ds-pill" data-state="awaiting"><img src="../checkout/assets/awaiting.svg" width="15" height="15">Awaiting</span>
+      </div>
+    </div>
+
+    <div class="subhead">Refund tag</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div class="ex-label">Inline dark badge appended after an order ID</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span style="font-size:16px; font-weight:500;">ORD-2024-006</span>
+        <span class="ds-refund">Refund</span>
+      </div>
+    </div>
+
+    <div class="subhead">B · Soft chip</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div class="ex-label">Environment / active / settled — no dot, slightly larger</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="ds-chip" data-tone="success">Active</span>
+        <span class="ds-chip" data-tone="success">Production</span>
+        <span class="ds-chip" data-tone="warning">Sandbox</span>
+        <span class="ds-chip" data-tone="error">Expired</span>
+      </div>
+    </div>
+
+    <div class="subhead">C · Inline tag</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div class="ex-label">Compact label next to a name</div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <span style="font-size:var(--text-md); font-weight:var(--weight-medium);">Nina</span>
+        <span class="ds-tag-sm">Invoice</span>
+        <span style="margin-left:12px;font-size:var(--text-md); font-weight:var(--weight-medium);">Checkout — Invoice Overview</span>
+        <span class="ds-tag-lg" data-tone="success">New</span>
+        <span class="ds-tag-lg" data-tone="success">Latest</span>
+      </div>
+    </div>
+
+    <div class="subhead">D · Status with icon</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div class="ex-label">Rotating processing icon + label</div>
+      <span class="ds-status-icon"><span class="ds-spinner"></span>Pending</span>
+    </div>
+
+    <div class="subhead">E · Monospace tag</div>
+    <div class="ex-card" style="margin-bottom: 20px;">
+      <div class="ex-label">HTTP method · status code · dev annotation</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="ds-method" style="background:#DBEAFE;color:#1E40AF;">GET</span>
+        <span class="ds-method" style="background:var(--green-soft);color:var(--accent);">POST</span>
+        <span class="ds-method" style="background:var(--orange-soft);color:#D97706;">PUT</span>
+        <span class="ds-method" style="background:var(--red-soft);color:var(--red);">DELETE</span>
+        <span style="width:1px; height:18px; background:var(--border); margin:0 4px;"></span>
+        <span class="ds-method" style="background:var(--green-soft);color:var(--accent);">200</span>
+        <span class="ds-method" style="background:var(--orange-soft);color:#D97706;">404</span>
+        <span class="ds-method" style="background:var(--red-soft);color:var(--red);">500</span>
+      </div>
+    </div>
+
+    <div class="subhead">F · Tone reference</div>
+    <div class="specimen"><div class="row-list">
+      <div class="row"><code>success</code><span class="vl" style="color:var(--accent)">●</span><span class="ds">Claimed, Completed, Done, Settled, Verified, Active, Production, 2xx</span></div>
+      <div class="row"><code>warning</code><span class="vl" style="color:var(--orange)">●</span><span class="ds">Awaiting, Pending (alt), Sandbox, 4xx</span></div>
+      <div class="row"><code>info</code><span class="vl" style="color:var(--info)">●</span><span class="ds">Processing, In progress, Submitted</span></div>
+      <div class="row"><code>error</code><span class="vl" style="color:var(--red)">●</span><span class="ds">Failed, Rejected, Expired (alt), 5xx</span></div>
+      <div class="row"><code>neutral</code><span class="vl" style="color:var(--neutral)">●</span><span class="ds">Expired, Cancelled, Inactive, Draft, Closed</span></div>
+    </div></div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── USAGE ─────────── -->
+  <section id="usage">
+    <div class="sec-tag">11 · Integration</div>
+    <div class="sec-label">Usage</div>
+    <div class="sec-desc">Link once. Reference variables instead of hard-coded values.</div>
+    <button class="code-toggle open" data-target="code-usage"><span class="pm">+</span> Show example</button>
+    <pre class="code open" id="code-usage">&lt;link rel="stylesheet" href="../design-system/tokens.css"&gt;
+
+.card {
+  background: <span class="c-key">var(--surface)</span>;
+  border-radius: <span class="c-key">var(--radius-lg)</span>;
+  padding: <span class="c-key">var(--space-5)</span>;
+  box-shadow: <span class="c-key">var(--shadow-md)</span>;
+}
+.card-title {
+  font-size: <span class="c-key">var(--text-h5)</span>;
+  font-weight: <span class="c-key">var(--weight-medium)</span>;
+  letter-spacing: <span class="c-key">var(--tracking-snug)</span>;
+  color: <span class="c-key">var(--text)</span>;
+}</pre>
+    <div class="sec-desc" style="margin-top:20px;">When a token changes, update only <code style="font-family:var(--font-mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--accent-2);">tokens.css</code> — every linked page picks up the new value.</div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── PHILOSOPHY ─────────── -->
+  <section id="philosophy" class="hero">
+    <div class="sec-tag">00 · Philosophy</div>
+    <h1>A quiet system for AllScale.</h1>
+    <p class="lede">Tokens, components, and motion — designed so the interface fades, and the user's task surfaces.</p>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="pnum">01 · TACIT FIRST</div>
+        <h3>Felt before thought.</h3>
+        <p>Every interaction should be understood through embodied intuition — within seconds, without instructions.</p>
+      </div>
+      <div class="principle">
+        <div class="pnum">02 · SUBSIDIARY → FOCAL</div>
+        <h3>Look <em>through</em>, not <em>at</em>.</h3>
+        <p>A great interface disappears. The user's focus belongs on their goal — never on the chrome.</p>
+      </div>
+      <div class="principle">
+        <div class="pnum">03 · INEFFABILITY</div>
+        <h3>Show, don't describe.</h3>
+        <p>Replace tooltips and helper text with visual metaphor, motion, rhythm, and spatial relationship.</p>
+      </div>
+      <div class="principle">
+        <div class="pnum">04 · PERSONAL COMMITMENT</div>
+        <h3>Trust, care, made for me.</h3>
+        <p>Every element should reinforce that this app exists to help — quietly, on the user's behalf.</p>
+      </div>
+    </div>
+
+    <div class="polanyi-quote">
+      “We know more than we can tell.” — Michael Polanyi.
+      After every screen, you should be able to imagine the user thinking: <em>this interface understands me.</em>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── Spacing: bar = the spacing ─────────────────────────────
+  const spaces = [
+    ['--space-0', 0], ['--space-0-5', 2], ['--space-1', 4], ['--space-1-5', 6],
+    ['--space-2', 8], ['--space-2-5', 10], ['--space-3', 12], ['--space-3-5', 14],
+    ['--space-4', 16], ['--space-5', 20], ['--space-6', 24], ['--space-7', 28],
+    ['--space-8', 32], ['--space-10', 40], ['--space-12', 48], ['--space-14', 56],
+    ['--space-16', 64]
+  ];
+  const maxSpace = Math.max(...spaces.map(s => s[1]));
+  const sl = document.getElementById('space-list');
+  spaces.forEach(([name, val]) => {
+    const widthPct = val === 0 ? 0 : (val / maxSpace) * 100;
+    const row = document.createElement('div');
+    row.className = 'space-row';
+    row.innerHTML =
+      '<span class="nm">' + name + '</span>' +
+      '<span class="bar-wrap"><span class="bar" style="width:' + widthPct + '%;' + (val === 0 ? 'visibility:hidden;' : '') + '"></span></span>' +
+      '<span class="vl">' + val + 'px</span>';
+    sl.appendChild(row);
+  });
+
+  // ── Radius shapes ──────────────────────────────────────────
+  const radii = [
+    ['--radius-xs', '8px'], ['--radius-sm', '10px'], ['--radius-md', '12px'],
+    ['--radius-lg', '18px'], ['--radius-xl', '24px'], ['--radius-2xl', '28px'],
+    ['--radius-pill', '30px'], ['--radius-button', '40px'], ['--radius-full', '999px']
+  ];
+  const rg = document.getElementById('radius-grid');
+  radii.forEach(([name, val]) => {
+    const card = document.createElement('div');
+    card.className = 'radius-card-demo';
+    card.innerHTML =
+      '<div class="radius-shape" style="border-radius:' + val + ';"></div>' +
+      '<div class="radius-meta"><span class="nm">' + name + '</span><span class="vl">' + val + '</span></div>';
+    rg.appendChild(card);
+  });
+
+  // ── Click-to-copy (tacit: click → copied, no tooltip needed) ─
+  document.querySelectorAll('.color-card[data-copy]').forEach(el => {
+    el.addEventListener('click', async () => {
+      const hex = el.getAttribute('data-copy');
+      try { await navigator.clipboard.writeText(hex); } catch (e) {}
+      el.classList.add('copied');
+      setTimeout(() => el.classList.remove('copied'), 1200);
+    });
+  });
+
+  // ── Code reveal toggle (subsidiary — code is chrome, hidden by default) ─
+  document.querySelectorAll('.code-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-target');
+      const target = document.getElementById(id);
+      if (!target) return;
+      btn.classList.toggle('open');
+      target.classList.toggle('open');
+    });
+  });
+
+  // ── Number-flow demo: code panel + one-click copy ──────────
+  (function () {
+    var snippet = document.getElementById('nf-snippet');
+    var code = snippet ? snippet.value.trim() : '';
+    var pre = document.getElementById('code-numberflow');
+    if (pre) pre.textContent = code;
+    var btn = document.getElementById('nf-copy');
+    if (btn && code) btn.addEventListener('click', async function () {
+      try { await navigator.clipboard.writeText(code); } catch (e) {}
+      var label = document.getElementById('nf-copy-label');
+      label.textContent = 'Copied ✓';
+      setTimeout(function () { label.textContent = 'Copy code'; }, 1200);
+    });
+  })();
+
+  // ── Scrollspy ──────────────────────────────────────────────
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('#sidebar-nav a'));
+    var map = {};
+    links.forEach(function (a) {
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) map[id] = { link: a, el: el };
+    });
+    function update() {
+      var y = window.scrollY + 120;
+      var current = null;
+      Object.keys(map).forEach(function (id) {
+        if (map[id].el.offsetTop <= y) current = id;
+      });
+      links.forEach(function (a) { a.classList.remove('active'); });
+      if (current && map[current]) map[current].link.classList.add('active');
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+</script>
+
+<script type="module">
+  import 'https://esm.sh/number-flow';
+
+  const spinTiming    = { duration: 600, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }; // --dur-spin / --ease-spring
+  const opacityTiming = { duration: 350, easing: 'ease' };                              // --dur-slow
+
+  const flowWhole = document.getElementById('amt-whole');
+  const flowFrac  = document.getElementById('amt-frac');
+
+  flowWhole.spinTiming    = spinTiming;
+  flowFrac.spinTiming     = spinTiming;
+  flowWhole.opacityTiming = opacityTiming;
+  flowFrac.opacityTiming  = opacityTiming;
+  flowWhole.format = { useGrouping: true };
+  flowFrac.format  = { minimumIntegerDigits: 2, useGrouping: false };
+  flowFrac.numberPrefix = '.';
+
+  flowWhole.update(1939);
+  flowFrac.update(50);
+
+  // two amount states, far apart so the digit roll is clearly visible
+  const AMOUNTS = [
+    { whole: 1939,  frac: 50 },
+    { whole: 28464, frac: 7 }
+  ];
+  let current = 0;
+
+  document.getElementById('token-switch').addEventListener('click', () => {
+    current = 1 - current;
+
+    const btn = document.getElementById('token-switch');
+    btn.classList.remove('popping');
+    void btn.offsetWidth; // force reflow to restart animation
+    btn.classList.add('popping');
+    btn.addEventListener('animationend', () => btn.classList.remove('popping'), { once: true });
+
+    const vals = AMOUNTS[current];
+    flowWhole.update(vals.whole);
+    flowFrac.update(vals.frac);
+  });
+</script>
+
+</body>
+</html>
