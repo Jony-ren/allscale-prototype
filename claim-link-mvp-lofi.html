@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim Link MVP — Lo-fi Wireframe</title>
+<style>
+:root{
+  --ink:#1f2024; --muted:#8a8d93; --line:#c9ccd1; --line2:#e3e5e8;
+  --paper:#ffffff; --bg:#f3f4f6; --fill:#eef0f2; --pri:#2b2d31; --reco:#f4f6e9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;padding:0 0 60px}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+
+/* lo-fi ribbon + tabs */
+.bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px}
+.bar .name{font-weight:700;letter-spacing:-.01em}
+.bar .badge{font-size:11px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:2px 8px}
+.tabs{margin-left:auto;display:flex;gap:6px}
+.tabs button{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 13px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.wrap{max-width:920px;margin:22px auto;padding:0 16px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:center}
+.persona{display:none;width:100%} .persona.on{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:flex-start}
+
+/* device frame (lo-fi) */
+.device{width:340px;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+.dev-top{height:34px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);gap:6px}
+.scr{display:none;padding:20px} .scr.on{display:block}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+h2{font-size:18px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.lead{color:var(--muted);font-size:13px;margin-bottom:16px}
+
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.fld label .opt{opacity:.7}
+.box{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:11px 12px;font:inherit;font-size:14px;color:var(--ink);outline:none}
+.box:focus{border-color:var(--ink)}
+.box.bad{border-color:#b23b3b;background:#fbf0f0}
+textarea.box{resize:none;height:54px}
+.row{display:flex;gap:8px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button.on{border-color:var(--ink);background:var(--fill);color:var(--ink)}
+.hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+.err{font-size:11.5px;color:#b23b3b;margin-top:5px;display:none} .err.show{display:block}
+
+.btn{display:block;width:100%;border:1px solid var(--ink);background:var(--pri);color:#fff;border-radius:8px;padding:12px;font:inherit;font-weight:600;cursor:pointer;text-align:center}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.link{border:none;background:none;color:var(--muted);text-decoration:underline;padding:8px}
+.btn+.btn{margin-top:8px}
+
+.ph{border:1.5px dashed var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center}
+.qr{width:120px;height:120px;margin:0 auto 14px}
+.avatar{width:48px;height:48px;border-radius:50%;margin:0 auto 8px}
+.kvbox{border:1px solid var(--line);border-radius:8px;padding:0 12px;margin-bottom:14px}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.kv:last-child{border-bottom:none} .kv .k{color:var(--muted)}
+.pill{display:inline-block;font-size:11px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.pill.wait{background:#fff} .pill.ok{background:var(--fill);color:var(--ink)}
+
+/* claim landing */
+.amt{font-size:30px;font-weight:700;text-align:center;letter-spacing:-.02em}
+.amt span{font-size:16px;color:var(--muted);font-weight:600}
+.from{text-align:center;color:var(--muted);font-size:12px;margin-top:4px}
+.msg{border:1px solid var(--line2);border-radius:8px;background:var(--fill);padding:8px 12px;font-size:12.5px;text-align:center;margin:12px 0;font-style:italic}
+.opt-card{border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:10px;cursor:pointer;display:flex;gap:11px;align-items:center}
+.opt-card.reco{border-color:var(--ink);background:var(--reco)}
+.opt-card .rd{width:18px;height:18px;border:2px solid var(--line);border-radius:50%;flex:0 0 18px;margin-top:1px}
+.opt-card.reco .rd{border-color:var(--ink);background:radial-gradient(var(--ink) 40%,transparent 45%)}
+.opt-card .h{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.opt-card .s{font-size:12px;color:var(--muted);margin-top:2px}
+.tag{font-size:10px;font-weight:700;border:1px solid var(--ink);border-radius:999px;padding:1px 7px}
+
+.otp{display:flex;gap:8px;justify-content:center;margin:6px 0 10px}
+.otp .box{width:42px;height:50px;text-align:center;font-size:20px;font-weight:700;padding:0}
+.chk{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line2);border-radius:8px;padding:11px;margin-bottom:13px;cursor:pointer;font-size:12.5px}
+.chk input{margin-top:2px}
+.done{text-align:center;padding:14px 0}
+.done .mark{width:56px;height:56px;border:2px solid var(--ink);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.done.muted .mark{border-color:var(--line)} .done.muted .mark,.done.muted h2{color:var(--muted)}
+
+/* annotation + notes */
+.note{border-left:3px solid var(--line);background:#fff;border:1px solid var(--line2);border-radius:8px;padding:11px 13px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:14px}
+.note b{color:var(--ink)}
+.aside{width:280px;font-size:12.5px;color:var(--muted);line-height:1.7}
+.aside .h{font-weight:700;color:var(--ink);margin-bottom:6px;font-size:13px}
+.aside ul{list-style:none} .aside li{padding:3px 0;border-bottom:1px dashed var(--line2)}
+
+/* merchant (lo-fi panel) */
+.panel{width:540px;max-width:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:20px}
+.panel h2{margin-bottom:2px}
+.demo-ribbon{display:inline-block;font-size:11px;font-weight:700;border:1px dashed var(--ink);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px}
+.stat .k{font-size:11px;color:var(--muted)} .stat .v{font-size:18px;font-weight:700;margin-top:2px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.tbl th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;padding:7px 6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 6px;border-bottom:1px solid var(--line2)}
+.code{border:1px solid var(--line);border-radius:8px;background:var(--fill);padding:11px;font-size:11.5px;line-height:1.7;overflow-x:auto;margin-top:8px}
+.sec{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px}
+.lim{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.lim:last-child{border-bottom:none}
+.statebtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.statebtns button{font:inherit;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;color:var(--muted);cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span class="name">Claim Link MVP</span>
+  <span class="badge">Lo-fi wireframe</span>
+  <div class="tabs">
+    <button class="on" data-p="sender" onclick="P('sender')">Sender 发钱</button>
+    <button data-p="receiver" onclick="P('receiver')">Receiver 领取</button>
+    <button data-p="merchant" onclick="P('merchant')">Merchant API</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ░░ SENDER ░░ -->
+  <div class="persona on" id="p-sender">
+    <div class="device">
+      <div class="dev-top">Wallet · Send</div>
+
+      <!-- create -->
+      <div class="scr on" id="s1">
+        <div class="eyebrow">Send via Claim Link</div>
+        <h2>Send a Claim Link</h2>
+        <div class="lead">Amount + token. Email optional — they claim with the link.</div>
+        <div class="fld">
+          <label>Amount</label>
+          <div class="row">
+            <input class="box" id="amt" value="100" inputmode="decimal" oninput="amtChk()" style="font-weight:700;flex:1">
+            <div class="seg" style="flex:0 0 140px">
+              <button class="on" id="tkA" onclick="tok('USDC')">USDC</button>
+              <button id="tkB" onclick="tok('USDT')">USDT</button>
+            </div>
+          </div>
+          <div class="err" id="amtErr">Per-link limit is $500</div>
+        </div>
+        <div class="fld">
+          <label>Recipient email <span class="opt">(optional)</span></label>
+          <input class="box" id="email" placeholder="leave blank to share link yourself">
+        </div>
+        <div class="fld">
+          <label>Message <span class="opt">(optional)</span></label>
+          <textarea class="box" id="msg" maxlength="200">Coffee's on me</textarea>
+        </div>
+        <div class="kvbox">
+          <div class="kv"><span class="k">Transfer</span><span id="fA">100.00 USDC</span></div>
+          <div class="kv"><span class="k">Service fee (gas reserve · receiver gasless)</span><span id="fB">~1.20</span></div>
+          <div class="kv"><span class="k">Total</span><span id="fC">101.20 USDC</span></div>
+        </div>
+        <button class="btn" onclick="sCreate()">Continue · Sign / 2FA</button>
+      </div>
+
+      <!-- detail -->
+      <div class="scr" id="s2">
+        <div class="eyebrow">Claim link created</div>
+        <h2 id="s2h">Claim link created</h2>
+        <div class="lead" id="s2sub">Claim email sent. You can also copy the link.</div>
+        <div class="ph qr">QR</div>
+        <div class="kvbox">
+          <div class="kv"><span class="k mono">allscale.io/claim/8fK2…aQ</span><span class="pill" onclick="toast('Link copied')" style="cursor:pointer">Copy</span></div>
+          <div class="kv"><span class="k">Status</span><span class="pill wait" id="s2pill">Awaiting claim</span></div>
+          <div class="kv"><span class="k">Expires</span><span id="s2exp">in 71h 58m</span></div>
+        </div>
+        <div id="s2act">
+          <button class="btn ghost" id="s2resend" onclick="toast('Email resent (max 1 / 5min)')">Resend email</button>
+          <button class="btn ghost" id="s2cxl" onclick="sCancel()">Cancel &amp; get funds back</button>
+        </div>
+        <div class="note" id="s2claiming" style="display:none"><b>Claiming…</b> Receiver submitted — on-chain tx in progress. Cancel is locked until it settles (§5.4).</div>
+        <div class="note" id="s2cancel" style="display:none"><b>Cancelled.</b> Funds returned to your wallet. Opener sees "Sender cancelled this payment."</div>
+        <button class="btn link" onclick="S('s3')">View in Activity →</button>
+        <button class="btn link" onclick="S('s1')">↺ Send another</button>
+      </div>
+
+      <!-- activity -->
+      <div class="scr" id="s3">
+        <div class="eyebrow">Wallet · Activity</div>
+        <h2>Activity</h2>
+        <div class="lead">Claim links appear as entries with status pills; 5+ entries of the same status fold into one row.</div>
+        <div class="kvbox">
+          <div class="kv"><span>Claim link · 100 USDC</span><span class="pill wait">Awaiting claim</span></div>
+          <div class="kv"><span>▸ 5 claimed claim links</span><span class="pill ok">Claimed</span></div>
+          <div class="kv"><span>Claim link · 40 USDC</span><span class="pill">Expired</span></div>
+          <div class="kv"><span>Claim link · 25 USDT</span><span class="pill">Cancelled</span></div>
+        </div>
+        <div class="note">MVP has no standalone "Pending claims" page and no bulk cancel (§5.1.2).</div>
+        <button class="btn link" onclick="S('s2')">← Back to link detail</button>
+      </div>
+    </div>
+
+    <div class="aside">
+      <div class="h">MVP · Function 1 (App single send)</div>
+      <ul>
+        <li>Entry: Wallet [Withdraw] → "Send via Claim Link" (§5.1.1)</li>
+        <li>Email optional → pure-URL share (§4.3)</li>
+        <li>Fee carries ~2× gas reserve → <b>receiver gasless</b> (§5.2.1)</li>
+        <li>Only link + basic QR — no share-card image (§4.4)</li>
+        <li>States: pending → link_sent → claiming → claimed/expired/cancelled (§5.4)</li>
+        <li>$500 / 72h are placeholders pending business + compliance (V1)</li>
+        <li><b>Claiming locks Cancel</b> — try the state buttons (§5.4)</li>
+        <li>Positive cancel wording "Cancel &amp; get funds back" (学4); link re-send fission deferred to Phase 2 (0610)</li>
+      </ul>
+      <div class="statebtns">
+        <button onclick="sSt('wait')">awaiting</button>
+        <button onclick="sSt('claiming')">claiming</button>
+        <button onclick="sSt('claimed')">claimed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ RECEIVER ░░ -->
+  <div class="persona" id="p-receiver">
+    <div class="device">
+      <div class="dev-top">🔒 allscale.io/claim</div>
+
+      <!-- landing -->
+      <div class="scr on" id="r1">
+        <div class="ph" style="font-size:10px;padding:5px;margin-bottom:14px">🔒 Official AllScale claim page · links start with allscale.io/claim</div>
+        <div class="ph avatar">Y</div>
+        <div class="amt">$100.00</div>
+        <div class="from">100 USDC · from <b style="color:var(--ink)">Yao</b> · expires in 71h 58m</div>
+        <div class="msg">"Coffee's on me"</div>
+        <button class="btn" id="claimCta" onclick="claimOpen()">Claim</button>
+        <div id="claimOpts" style="display:none">
+          <div class="opt-card reco" onclick="R('r-otp')">
+            <div class="rd"></div>
+            <div><div class="h">Withdraw to AllScale Wallet <span class="tag">Recommended</span></div><div class="s">No wallet? Verify email to open one — instant.</div></div>
+          </div>
+          <div class="opt-card" onclick="R('r-addr')">
+            <div class="rd"></div>
+            <div><div class="h">Withdraw to My Wallet</div><div class="s">Have a wallet? Enter a 0x address — no signup.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- path A: address (direct claim, no OTP — confirmed) -->
+      <div class="scr" id="r-addr">
+        <div class="eyebrow">Withdraw to my wallet</div>
+        <h2>Enter your wallet</h2>
+        <div class="lead">Enter a 0x address and claim directly — no signup, no OTP.</div>
+        <div class="fld">
+          <label>Your 0x wallet address (EVM)</label>
+          <input class="box" id="addr" value="0x9aB3f2c4D5e6789012345678AbCdEf0123456789" oninput="adChk()">
+          <div class="err" id="adErr">This payment is on EVM chains. Enter a 0x-prefix address.</div>
+        </div>
+        <label class="chk"><input type="checkbox" id="cf" onchange="adChk()"><span>I confirm the address is correct. On-chain transfers can't be reversed.</span></label>
+        <button class="btn" id="adBtn" disabled onclick="R('r-go')">Withdraw</button>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+
+      <!-- path B: OTP open wallet -->
+      <div class="scr" id="r-otp">
+        <div class="eyebrow">Open AllScale Wallet</div>
+        <h2>Verify email to open wallet</h2>
+        <div class="lead em">Email locked to the address that received the link (anti-theft).</div>
+        <div class="lead url" style="display:none">Enter any email — we open an AllScale Wallet after verification.</div>
+        <div class="fld"><label>Email</label><input class="box" id="oemail" value="friend@example.com" disabled>
+          <div class="hint em">Locked to the email that received the link — can't be changed.</div>
+        </div>
+        <div class="hint">Code sent to email above</div>
+        <div class="otp"><input class="box" maxlength="1" value="4"><input class="box" maxlength="1" value="1"><input class="box" maxlength="1" value="9"><input class="box" maxlength="1" value="2"></div>
+        <button class="btn" onclick="R('r-go')">Verify &amp; open wallet</button>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+
+      <!-- claiming -->
+      <div class="scr" id="r-go">
+        <div class="done"><div class="mark">…</div><h2>Submitting on-chain</h2><div class="lead">Gas prepaid by sender — free for you.</div></div>
+      </div>
+      <!-- done -->
+      <div class="scr" id="r-done">
+        <div class="done"><div class="mark">✓</div><h2>Received</h2><div class="lead"><b>$100.00</b> (100 USDC) arrived in your wallet.</div><button class="btn link" onclick="toast('open block explorer')">View on-chain →</button></div>
+        <button class="btn ghost" onclick="toast('Open AllScale Wallet onboarding')">No account yet? Open an AllScale Wallet</button>
+      </div>
+      <!-- expired -->
+      <div class="scr" id="r-exp">
+        <div class="done muted"><div class="mark">⌛</div><h2>Link expired</h2><div class="lead">Not claimed within 72h — refunded to sender.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+      <!-- cancelled -->
+      <div class="scr" id="r-cxl">
+        <div class="done muted"><div class="mark">✕</div><h2>Link cancelled</h2><div class="lead">The sender cancelled this payment. Funds returned to the sender.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+      <!-- down -->
+      <div class="scr" id="r-down">
+        <div class="done muted"><div class="mark">!</div><h2>Temporarily unavailable</h2><div class="lead">Try again later. <b style="color:var(--ink)">Funds are safe</b> — just temporarily inaccessible during maintenance.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+    </div>
+
+    <div class="aside">
+      <div class="h">MVP · Unified claim</div>
+      <div class="seg" style="margin-bottom:10px">
+        <button class="on" id="mE" onclick="mode('em')">Email mode (OTP)</button>
+        <button id="mU" onclick="mode('url')">Pure-URL</button>
+      </div>
+      <ul>
+        <li>Public page, no login (§5.2.1)</li>
+        <li><b>USD-first display</b>; token amount secondary (0610, TipLink 学3)</li>
+        <li><b>Expandable [Claim] CTA</b> — options appear on tap, recommended first (学1)</li>
+        <li>Shown amount = received amount, no hidden deductions (§9.2, 戒1)</li>
+        <li>UI pushes <b>Open AllScale Wallet</b> to onboard (Q2); path A success page upsells account (学2)</li>
+        <li>Path A: direct claim, <b>no OTP</b> (confirmed) — leak risk borne by link secrecy + limits (§5.2.2)</li>
+        <li>Path B always requires email OTP; email mode locks the address (§5.2.1)</li>
+        <li>0x check + irreversible confirm (§9.2)</li>
+        <li>Down: funds safe, temporarily unclaimable (§6.8)</li>
+      </ul>
+      <div class="statebtns">
+        <button onclick="R('r-done')">claimed</button>
+        <button onclick="R('r-exp')">expired</button>
+        <button onclick="R('r-cxl')">cancelled</button>
+        <button onclick="R('r-down')">backend down</button>
+        <button onclick="R('r1')">↺ reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ MERCHANT ░░ -->
+  <div class="persona" id="p-merchant">
+    <div class="panel">
+      <h2>Batch payout <span class="demo-ribbon">DEMO · 仅示意</span></h2>
+      <div class="lead">Function 2 ships as an <b>API + webhook</b>, not a dashboard page. This only illustrates the batch / shared-pool / webhook concept.</div>
+      <div class="stats">
+        <div class="stat"><div class="k">Links</div><div class="v">300</div></div>
+        <div class="stat"><div class="k">On-chain deposits</div><div class="v">1 <span style="font-size:11px;color:var(--muted)">(v1: 300)</span></div></div>
+        <div class="stat"><div class="k">Pool</div><div class="v">12,000</div></div>
+        <div class="stat"><div class="k">Gas saved</div><div class="v">×299</div></div>
+      </div>
+
+      <div class="sec">Batch result (excerpt)</div>
+      <table class="tbl">
+        <thead><tr><th>reference_id</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">task_8821</td><td>40 USDC</td><td><span class="pill ok">claimed</span></td></tr>
+          <tr><td class="mono">task_8822</td><td>40 USDC</td><td><span class="pill wait">awaiting</span></td></tr>
+          <tr><td class="mono">refund_5510</td><td>88 USDC</td><td><span class="pill">expired→refunded</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="sec">Webhook · terminal-state only · HMAC signed</div>
+      <div class="code mono">POST /hooks  x-as-signature: hmac…<br>{ "reference_id":"task_8821", "status":"claimed", "amount":"40" }<br>// MVP: no intermediate states, no dead-letter queue</div>
+
+      <div class="sec">Limits · change via dashboard + Passkey</div>
+      <div class="lim"><span>Per-link limit</span><span><b>$500</b> · cap $10,000</span></div>
+      <div class="lim"><span>Daily total</span><span><b>$50,000</b> · cap $100,000</span></div>
+      <div class="lim"><span>Rate</span><span><b>60/min · 100/batch</b></span></div>
+
+      <div class="note"><b>Merchant refund = a payout.</b> Same batch endpoint — no refund dashboard, no on-chain "mode 3". <b>Non-custodial:</b> AllScale never holds the full key; unclaimed funds only return to the locked sender address (Legal sign-off pending, §8).</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function P(p){document.querySelectorAll('.persona').forEach(e=>e.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p))}
+let TT;function toast(m){clearTimeout(TT);let t=document.getElementById('_t');if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2024;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:50';document.body.appendChild(t)}t.textContent=m;t.style.opacity='1';TT=setTimeout(()=>t.style.opacity='0',1400)}
+
+/* sender */
+let TOK='USDC',LIM=500;
+function tok(t){TOK=t;document.getElementById('tkA').classList.toggle('on',t==='USDC');document.getElementById('tkB').classList.toggle('on',t==='USDT');calc()}
+function calc(){let v=parseFloat(document.getElementById('amt').value)||0;let f=Math.max(v*0.005,0.2)+(v>0?1:0);document.getElementById('fA').textContent=v.toFixed(2)+' '+TOK;document.getElementById('fB').textContent='~'+f.toFixed(2);document.getElementById('fC').textContent=(v+f).toFixed(2)+' '+TOK}
+function amtChk(){let v=parseFloat(document.getElementById('amt').value)||0;let bad=v>LIM;document.getElementById('amt').classList.toggle('bad',bad);document.getElementById('amtErr').classList.toggle('show',bad);calc()}
+function S(id){document.querySelectorAll('#p-sender .scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+function sCreate(){let v=parseFloat(document.getElementById('amt').value)||0;if(v<=0||v>LIM){amtChk();return}
+  let hasEmail=document.getElementById('email').value.trim()!=='';
+  document.getElementById('s2sub').textContent=hasEmail?'Claim email sent. You can also copy the link.':'No email — copy the link / QR to share yourself.';
+  document.getElementById('s2resend').style.display=hasEmail?'block':'none';
+  document.getElementById('s2act').style.display='';document.getElementById('s2cancel').style.display='none';
+  document.getElementById('s2pill').textContent='Awaiting claim';document.getElementById('s2pill').className='pill wait';
+  S('s2')}
+function sCancel(){document.getElementById('s2act').style.display='none';document.getElementById('s2cancel').style.display='';document.getElementById('s2pill').textContent='Cancelled';document.getElementById('s2pill').className='pill'}
+function sSt(st){S('s2');let pill=document.getElementById('s2pill'),act=document.getElementById('s2act'),clm=document.getElementById('s2claiming'),cxl=document.getElementById('s2cxl'),rs=document.getElementById('s2resend');
+  document.getElementById('s2cancel').style.display='none';act.style.display='';clm.style.display='none';cxl.disabled=false;rs.disabled=false;
+  if(st==='wait'){pill.textContent='Awaiting claim';pill.className='pill wait'}
+  if(st==='claiming'){pill.textContent='Claiming';pill.className='pill wait';cxl.disabled=true;rs.disabled=true;clm.style.display=''}
+  if(st==='claimed'){pill.textContent='Claimed';pill.className='pill ok';act.style.display='none'}}
+
+/* receiver */
+function R(id){document.querySelectorAll('#p-receiver .scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');if(id==='r-go')setTimeout(()=>{if(document.getElementById('r-go').classList.contains('on'))R('r-done')},1300);if(id==='r1'){document.getElementById('claimOpts').style.display='none';document.getElementById('claimCta').style.display='block'}}
+function claimOpen(){document.getElementById('claimOpts').style.display='block';document.getElementById('claimCta').style.display='none'}
+function adChk(){let v=document.getElementById('addr').value.trim();let ok=/^0x[0-9a-fA-F]{40}$/.test(v);let bad=v!==''&&!ok;document.getElementById('addr').classList.toggle('bad',bad);document.getElementById('adErr').classList.toggle('show',bad);document.getElementById('adBtn').disabled=!(ok&&document.getElementById('cf').checked)}
+function mode(m){document.getElementById('mE').classList.toggle('on',m==='em');document.getElementById('mU').classList.toggle('on',m==='url');
+  document.querySelectorAll('#p-receiver .em').forEach(e=>e.style.display=(m==='em')?'':'none');
+  document.querySelectorAll('#p-receiver .url').forEach(e=>e.style.display=(m==='url')?'':'none');
+  let oe=document.getElementById('oemail');if(m==='url'){oe.value='';oe.placeholder='you@example.com';oe.disabled=false}else{oe.value='friend@example.com';oe.disabled=true}}
+
+calc();adChk();
+</script>
+</body>
+</html>

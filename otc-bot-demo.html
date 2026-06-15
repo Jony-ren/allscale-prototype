@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Store — OTC Bot Rate Engine Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDFFFE;--white:#FFFFFF;--surface:#FAFBFA;--surface-2:#F2F8F5;--surface-3:#E5EEEA;
+  --border:#E5EEEA;--border-strong:#C5DDD4;
+  --text:#0C3124;--text-2:#83968F;--text-3:#B0C4BB;
+  --green:#009859;--green-hover:#0CAA67;--green-soft:rgba(0,152,89,.10);--success-text:#047857;
+  --orange:#F59E0B;--orange-soft:rgba(245,158,11,.12);--warning-text:#B45309;
+  --red:#E53E3E;--red-soft:rgba(229,62,62,.08);
+  --info:#3B82F6;--info-soft:rgba(59,130,246,.10);--info-text:#1D4ED8;
+  --pill-processing-bg:#E5F3FE;--pill-processing-fg:#028BFD;
+  --pill-awaiting-bg:#EBF6F0;--pill-awaiting-fg:#048E44;
+  --pill-timeout-bg:#FCF5DB;--pill-timeout-fg:#EC9418;
+  --mono:'DM Mono',ui-monospace,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F2;font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+button{font-family:'Archivo',sans-serif;letter-spacing:-0.02em}
+
+/* ───── mode visibility ───── */
+body.mode-mvp .only-full{display:none!important}
+body.mode-full .only-mvp{display:none!important}
+
+/* ───── topbar ───── */
+.topbar{position:sticky;top:0;z-index:200;background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(12,49,36,.04);flex-wrap:wrap}
+.topbar-logo{width:28px;height:28px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;flex:1;min-width:240px}
+.topbar-title small{display:block;font-size:12px;font-weight:400;color:var(--text-2);letter-spacing:0}
+.mode-btns{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px}
+.mode-btn{padding:8px 18px;border:none;border-radius:50px;background:transparent;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.mode-btn.active{background:var(--green);color:#fff;font-weight:600}
+.confirm-btn{padding:8px 16px;border:1.5px solid var(--orange);border-radius:50px;background:var(--orange-soft);color:var(--warning-text);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.confirm-btn:hover{background:var(--orange);color:#fff}
+
+/* ───── scenario strip ───── */
+.scenario{max-width:1280px;margin:14px auto 0;padding:0 20px}
+.scenario-inner{background:var(--white);border:1px dashed var(--border-strong);border-radius:14px;padding:10px 16px;font-size:12.5px;color:var(--text-2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.scenario-inner b{color:var(--text);font-weight:600}
+.scenario-inner .arrow{color:var(--text-3)}
+
+/* ───── layout ───── */
+.main{max-width:1280px;margin:16px auto;padding:0 20px 60px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+
+/* ───── telegram phone ───── */
+.phone{width:375px;flex-shrink:0;background:var(--white);border:1px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.10);display:flex;flex-direction:column;height:720px}
+.tg-header{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px}
+.tg-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.tg-name{font-weight:600;font-size:14.5px}
+.tg-status{font-size:11.5px;color:#2AABEE}
+.persona-bar{padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center}
+.persona-bar .lbl{font-size:10.5px;color:var(--text-2);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.persona-tab{flex:1;padding:7px 8px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .15s;text-align:center}
+.persona-tab.active{background:var(--text);border-color:var(--text);color:#fff;font-weight:600}
+.chat{flex:1;overflow-y:auto;padding:14px 12px;background:#EFF3F1;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:84%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.55;white-space:pre-wrap;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:#D7F5E5;align-self:flex-end;border-bottom-right-radius:4px}
+.msg .rate-num{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--text)}
+.msg .meta{display:block;font-size:10.5px;color:var(--text-3);margin-top:4px}
+.msg .qline{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:1.5px 0}
+.msg .qline span:first-child{color:var(--text-2)}
+.msg .qline span:last-child{font-family:var(--mono)}
+.msg .qline.total{border-top:1px dashed var(--border-strong);margin-top:4px;padding-top:5px;font-weight:600}
+.msg .qline.total span{color:var(--text);font-size:13.5px}
+.msg .bonus{color:var(--success-text)!important}
+.msg-btn{display:block;width:100%;margin-top:8px;padding:9px;border:none;border-radius:10px;background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.msg-btn:hover{background:var(--green-hover)}
+.msg-btn:disabled{background:var(--surface-3);color:var(--text-3);cursor:default}
+.notify-card{border-left:3px solid var(--green)!important;background:#F4FBF7!important}
+.chips{padding:10px 12px;background:#fff;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:7px 12px;border:1.5px solid var(--border);border-radius:50px;background:var(--surface);font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--green);background:var(--surface-2)}
+
+/* ───── admin console ───── */
+.admin{flex:1;min-width:560px;background:var(--white);border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.admin-head{padding:16px 22px 0;border-bottom:1px solid var(--border)}
+.admin-brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;margin-bottom:4px}
+.admin-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.admin-brand small{font-weight:400;color:var(--text-2);font-size:12px}
+.tabs{display:flex;gap:2px;margin-top:10px}
+.tab{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;position:relative}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+.tab .count{display:inline-block;min-width:17px;padding:0 5px;border-radius:9px;background:var(--info-soft);color:var(--info-text);font-size:10.5px;font-weight:600;margin-left:4px}
+.admin-body{padding:20px 22px;min-height:560px}
+.pane{display:none;animation:pop .2s ease}
+.pane.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:14px;position:relative}
+.card-title{font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.live-rate-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.live-rate{font-family:var(--mono);font-size:34px;font-weight:500;letter-spacing:-0.02em;transition:color .3s}
+.live-rate.flash{color:var(--green)}
+.live-sub{font-size:12px;color:var(--text-2)}
+.live-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;background:var(--green-soft);color:var(--success-text);font-size:11.5px;font-weight:600}
+.live-badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.field-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.field-row:last-child{border-bottom:none}
+.field-label{font-size:13px;font-weight:500}
+.field-label small{display:block;font-weight:400;font-size:11.5px;color:var(--text-2)}
+.field-input{display:flex;align-items:center;gap:6px}
+.field-input input,.field-input select{width:110px;padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:13.5px;color:var(--text);background:#fff;text-align:right;outline:none}
+.field-input input:focus{border-color:var(--green)}
+.field-input .unit{font-size:12px;color:var(--text-2)}
+.preview-rate{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--success-text)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:11px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td .mono{font-family:var(--mono);font-size:12.5px}
+td .sub{display:block;font-size:11px;color:var(--text-2)}
+.pill{display:inline-block;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill.paid{background:var(--pill-processing-bg);color:var(--pill-processing-fg)}
+.pill.disbursed{background:var(--pill-awaiting-bg);color:var(--pill-awaiting-fg)}
+.pill.vip{background:var(--surface-2);color:var(--success-text);border:1px solid var(--border-strong)}
+.pill.default-tag{background:var(--surface-3);color:var(--text-2)}
+.pill.phase2{background:var(--surface-3);color:var(--text-2)}
+.btn{padding:8px 14px;border:none;border-radius:50px;background:var(--green);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--green-hover)}
+.btn.ghost{background:#fff;border:1.5px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--green)}
+.btn:disabled{background:var(--surface-3);color:var(--text-3);cursor:default}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* numbered confirm marker */
+.marker{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:2px;padding:0 4px}
+.marker:hover{transform:scale(1.15)}
+
+/* drawer */
+.drawer-overlay{position:fixed;inset:0;background:rgba(12,49,36,.25);z-index:400;opacity:0;pointer-events:none;transition:opacity .22s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;background:#fff;z-index:401;box-shadow:0 10px 40px rgba(0,0,0,.3);transition:right .25s cubic-bezier(.23,1,.32,1);display:flex;flex-direction:column}
+.drawer.open{right:0}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-head h3{font-size:16px;font-weight:600}
+.drawer-head .close{width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-2);font-size:15px;cursor:pointer;color:var(--text-2)}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
+.confirm-item{border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:11px}
+.confirm-item h4{font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
+.confirm-item p{font-size:12.5px;color:var(--text-2);line-height:1.6}
+.confirm-item .q{display:block;margin-top:6px;padding:7px 10px;background:var(--orange-soft);border-radius:8px;color:var(--warning-text);font-size:12px;font-weight:500}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:500;z-index:1000;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media (max-width:1020px){.admin{min-width:100%}.phone{width:100%;max-width:420px;margin:0 auto}}
+</style>
+</head>
+<body class="mode-mvp">
+
+<div class="topbar">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">OTC Exchange Bot — Rate Engine &amp; Payout Notify
+    <small class="only-mvp">一期 MVP 范围：实时汇率报价（服务费默认千 8 可调）+ 「已下发」通知 · 专属费率/大额费率折扣为二期 · 数据为模拟 · 汇率源 Bison 查询汇率接口（已确认）</small>
+    <small class="only-full">完整版（终态）：实时汇率 + 按客户费率 + 大额费率折扣 + 「已下发」通知 · 数据为模拟 · 汇率源 Bison 查询汇率接口（已确认）</small>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn active" id="mode-mvp" onclick="setMode('mvp')">一期 MVP</button>
+    <button class="mode-btn" id="mode-full" onclick="setMode('full')">完整版（终态）</button>
+  </div>
+  <button class="confirm-btn" id="confirm-btn" onclick="toggleDrawer(true)">📋 待业务确认点</button>
+</div>
+
+<div class="scenario">
+  <div class="scenario-inner only-mvp">
+    <b>MVP 演示路径：</b><span>左侧点「汇率多少？」看实时报价</span><span class="arrow">→</span><span>点「换 8,000 USDT」下单锁价</span><span class="arrow">→</span><span>支付并提交收款账户</span><span class="arrow">→</span><span>右侧 Orders 标记 Disbursed</span><span class="arrow">→</span><span>回左侧看到「款项已下发」通知</span>
+  </div>
+  <div class="scenario-inner only-full">
+    <b>完整版演示路径：</b><span>左侧切换「专属费率客户」身份问价看专属费率</span><span class="arrow">→</span><span>点「换 25,000 USDT」看大额费率折扣</span><span class="arrow">→</span><span>支付下单</span><span class="arrow">→</span><span>右侧多出 Customer Rates / Volume Tiers 两个配置页</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ════════ TELEGRAM (customer view) ════════ -->
+  <div class="phone">
+    <div class="tg-header">
+      <div class="tg-avatar">EX</div>
+      <div>
+        <div class="tg-name">XX Exchange Bot</div>
+        <div class="tg-status">bot · online</div>
+      </div>
+    </div>
+    <div class="persona-bar only-full">
+      <span class="lbl">客户身份</span>
+      <button class="persona-tab active" id="ptab-normal" onclick="setPersona('normal')">普通客户<br><span style="font-size:10px;opacity:.7">@customer_001</span></button>
+      <button class="persona-tab" id="ptab-vip" onclick="setPersona('vip')">专属费率客户<br><span style="font-size:10px;opacity:.7">@leo_vip_client</span></button>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="chips">
+      <button class="chip" onclick="askRate()">汇率多少？</button>
+      <button class="chip" onclick="quote(1000)">换 1,000 USDT</button>
+      <button class="chip" onclick="quote(8000)">换 8,000 USDT</button>
+      <button class="chip only-full" onclick="quote(25000)">换 25,000 USDT</button>
+    </div>
+  </div>
+
+  <!-- ════════ MERCHANT ADMIN (allscale.store) ════════ -->
+  <div class="admin">
+    <div class="admin-head">
+      <div class="admin-brand"><span class="dot"></span>allscale.store <small>· XX Exchange Bot · Merchant Console</small></div>
+      <div class="tabs">
+        <button class="tab active" id="tab-rate" onclick="setTab('rate')">Live Rate</button>
+        <button class="tab only-full" id="tab-custom" onclick="setTab('custom')">Customer Rates</button>
+        <button class="tab only-full" id="tab-tiers" onclick="setTab('tiers')">Volume Tiers</button>
+        <button class="tab" id="tab-orders" onclick="setTab('orders')">Orders <span class="count" id="order-count">1</span></button>
+      </div>
+    </div>
+    <div class="admin-body">
+
+      <!-- ── Live Rate ── -->
+      <div class="pane active" id="pane-rate">
+        <div class="card">
+          <div class="card-title">Market rate · Bison BS007002 <span class="marker" data-key="rate-source" onclick="openConfirm('rate-source')"></span></div>
+          <div class="live-rate-row">
+            <span class="live-rate" id="bison-rate">7.2480</span>
+            <span class="live-sub">USD → CNH quote · USDT treated as USD (1:1)</span>
+            <span class="live-badge"><span class="pulse"></span>Auto-poll · <span id="sync-ago">2s ago</span></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">My pricing</div>
+          <div class="field-row">
+            <div class="field-label">Service fee (default)<small>Quoted externally as 0.8% · applied to every order</small></div>
+            <div class="field-input"><input type="number" step="0.05" id="inp-fee" value="0.80" onchange="onFeeChange()"><span class="unit">%</span></div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Customer payout per 1 USDT<small>Market rate × (1 − fee) · refreshes with market</small></div>
+            <span class="preview-rate" id="preview-rate">7.1900</span>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Quote validity <span class="marker" data-key="lock" onclick="openConfirm('lock')"></span><small>Rate locked at order time, expires after</small></div>
+            <div class="field-input"><select><option>10 min</option><option>5 min</option><option>15 min</option></select></div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">If rate source unavailable <span class="marker" data-key="fallback" onclick="openConfirm('fallback')"></span><small>Fallback behavior</small></div>
+            <div class="field-input"><select><option>Pause quoting + alert me</option><option>Use last rate (≤10 min)</option></select></div>
+          </div>
+        </div>
+        <div class="card only-mvp">
+          <div class="card-title">Planned for Phase 2 <span class="marker" data-key="phasing" onclick="openConfirm('phasing')"></span></div>
+          <table>
+            <thead><tr><th>Feature</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Per-customer fee override (by Telegram ID)<span class="sub">业务 6/6 提出的第 2 条诉求 · 一期内专属客户由运营线下单独报价</span></td><td><span class="pill phase2">Phase 2</span></td></tr>
+              <tr><td>Volume-based fee discount (tiered)<span class="sub">业务 6/6 提出的第 3 条诉求 · 一期内大额单人工议价过渡</span></td><td><span class="pill phase2">Phase 2</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;font-size:12px;color:var(--text-2)">👉 这两项做成什么样，切到顶部「完整版（终态）」即可预览。</div>
+        </div>
+        <div class="card" style="background:var(--surface-2)">
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.7">💡 替代现状：汇率不再写死在 AI 问答文本里。客户任何时刻问价、下单，都按「Bison 实时价 × (1 − 服务费率)」自动计算，无需每天手动改 FAQ。利润全部走明示费率（对外口径千 8）。</div>
+        </div>
+      </div>
+
+      <!-- ── Customer Rates (full only) ── -->
+      <div class="pane" id="pane-custom">
+        <div class="card">
+          <div class="card-title">Per-customer fee overrides · by Telegram ID <span class="marker" data-key="vip" onclick="openConfirm('vip')"></span></div>
+          <table>
+            <thead><tr><th>Telegram ID</th><th>Fee override</th><th>Payout per 1 U</th><th>Status</th></tr></thead>
+            <tbody id="override-rows"></tbody>
+          </table>
+          <div style="margin-top:12px"><button class="btn ghost" onclick="toast('演示环境 — 实际版本可在此添加 / 编辑客户专属费率')">+ Add customer override</button></div>
+        </div>
+        <div class="card" style="background:var(--surface-2)">
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.7">规则：客户的 Telegram ID 在此表中 → 走专属费率；不在表中 → 走默认费率千 8。左侧切换「专属费率客户」身份即可看到报价差异。<b>本页为二期范围。</b></div>
+        </div>
+      </div>
+
+      <!-- ── Volume Tiers (full only) ── -->
+      <div class="pane" id="pane-tiers">
+        <div class="card">
+          <div class="card-title">Volume-based fee discount · per order <span class="marker" data-key="tier" onclick="openConfirm('tier')"></span></div>
+          <table>
+            <thead><tr><th>Order amount</th><th>Fee discount</th><th>Effective fee (on 0.80%)</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">&lt; 5,000 USDT</td><td class="mono">—</td><td class="mono">0.80%</td></tr>
+              <tr><td class="mono">≥ 5,000 USDT</td><td class="mono" style="color:var(--success-text)">−12.5%</td><td class="mono">0.70%</td></tr>
+              <tr><td class="mono">≥ 20,000 USDT</td><td class="mono" style="color:var(--success-text)">−25%</td><td class="mono">0.60%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="background:var(--surface-2)">
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.7">演示设定：大额折扣按比例作用在客户的费率上（专属客户下大单两个优惠<b>叠加</b>）。是否叠加 / 取更优，见确认点（大额费率折扣）。左侧点「换 25,000 USDT」可看到最高档折扣。<b>本页为二期范围。</b></div>
+        </div>
+      </div>
+
+      <!-- ── Orders ── -->
+      <div class="pane" id="pane-orders">
+        <div class="card">
+          <div class="card-title">Orders · payout pipeline <span class="marker" data-key="disburse" onclick="openConfirm('disburse')"></span></div>
+          <table>
+            <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+            <tbody id="order-rows"></tbody>
+          </table>
+        </div>
+        <div class="card" style="background:var(--surface-2)">
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.7">新增状态 <b>Disbursed（已下发）</b>：你完成法币打款后点击 <b>Mark disbursed</b>，bot 立即向客户推送「款项已由运营团队下发」通知。法币打款本身仍在 AllScale 体系外手动完成，平台只负责状态与通知。<b>本功能属一期 MVP。</b></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════ confirm drawer ════════ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="toggleDrawer(false)"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>📋 待业务确认点</h3>
+    <button class="close" onclick="toggleDrawer(false)">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-items"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ───── state ───── */
+let mode = 'mvp';            // 'mvp' | 'full'
+let bisonMid = 7.2480;
+let defaultFee = 0.008;      // 千8 — externally quoted service fee
+const overrides = [
+  { tgid:'@leo_vip_client', name:'VIP Client A', fee:0.006, active:true },
+  { tgid:'@whale_trader_88', name:'VIP Client B', fee:0.005, active:true },
+];
+const tiers = [ { min:20000, mult:0.75 }, { min:5000, mult:0.875 } ];
+let persona = 'normal';
+const personas = {
+  normal: { tgid:'@customer_001' },
+  vip:    { tgid:'@leo_vip_client' },
+};
+/* chat history per view: MVP has one chat; full has one per persona */
+const chatLog = { mvp:[], normal:[], vip:[] };
+let orders = [
+  { id:'A2847', tg:'@customer_001', chatKey:null, amount:500, rate:7.2150, cny:3578.64, status:'disbursed', time:'Jun 9, 14:02', payout:'支付宝 138****1234 张三' },
+  { id:'A2848', tg:'@customer_007', chatKey:null, amount:6000, rate:7.2210, cny:43022.76, status:'paid', time:'Jun 10, 09:41', payout:'招商银行 6225****8841 李四' },
+];
+let orderSeq = 2849;
+let pendingQuote = null;
+let lastSync = Date.now();
+
+/* ───── confirm items (mode-aware) ───── */
+const CONFIRM_ITEMS = [
+  { key:'rate-source', modes:['mvp','full'], title:'汇率来源与定价结构',
+    body:'Bison 查询汇率接口（BS007002）已确认：按币种对实时查询，返回方向性汇率与报价时间。接口示例币种对为 <b>USD ↔ CNH</b>（离岸人民币），未见 USDT 直接报价。演示定价 = 实时汇率 × (1 − 服务费率)，费率对外口径<b>千 8</b>，利润全部走明示费率、汇率不再额外加点差。',
+    q:'待确认：① USDT 视同 USD（1:1）、按 CNH 价定 CNY 打款——可否接受？（或找 Bison 确认能否直接报 USDT/CNY）② 利润全走费率、汇率不加点差——是否符合预期？③ 结算币种只做人民币，还是美元也要？' },
+  { key:'lock', modes:['mvp','full'], title:'报价锁定时点',
+    body:'演示假定：客户下单那一刻锁定汇率，10 分钟内完成支付按锁定价执行，超时需重新下单。',
+    q:'待确认：锁价在「下单时」还是「支付确认时」？有效期多长可接受？' },
+  { key:'vip', modes:['full'], title:'专属费率（二期）',
+    body:'演示假定：按 Telegram ID 单独定<b>服务费率</b>（默认对外口径千 8，专属客户可低于该值，演示为千 6 / 千 5）；名单外客户一律走默认费率。',
+    q:'待确认：① 专属费率的下限（最低能给到多少）？② 名单由谁维护？' },
+  { key:'tier', modes:['full'], title:'大额费率折扣（二期）',
+    body:'演示假定：两档（≥5,000 / ≥20,000 USDT），按单笔金额给<b>费率折扣</b>（演示为千 8 → 千 7 / 千 6），与专属费率<b>叠加</b>生效。',
+    q:'待确认：① 档位金额和折扣幅度？② 与专属费率是叠加还是取更优？' },
+  { key:'disburse', modes:['mvp','full'], title:'「已下发」状态与通知',
+    body:'演示假定：后台新增 Disbursed 状态，商家点击后 bot 自动推送 Telegram 通知。打款动作本身仍在平台外手动完成。一期只做 Telegram 通知，不做邮件。',
+    q:'待确认：① 通知文案口径？② 邮件通知是否必须（需要的话下单流程要加留邮箱一步）？' },
+  { key:'fallback', modes:['mvp','full'], title:'汇率源异常兜底',
+    body:'演示假定：Bison 接口不可用时暂停自动报价并告警商家，bot 回复客户「请稍后再试或联系人工」。',
+    q:'待确认：可否接受暂停报价？还是允许沿用最近一次价格（限定时长）？' },
+  { key:'phasing', modes:['mvp'], title:'一期范围（分期）',
+    body:'按 Telegram ID 的专属费率、大额费率折扣是业务 6/6 提出的第 2、3 条诉求，但<b>一期不做、排二期</b>。一期内专属客户和大额单由运营线下议价过渡。终态形态见「完整版」模式。',
+    q:'待确认：可否接受这个分期？二期里这两项的优先级哪个更高？' },
+];
+function visibleItems(){ return CONFIRM_ITEMS.filter(i => i.modes.includes(mode)); }
+function renderConfirm(){
+  const items = visibleItems();
+  document.getElementById('confirm-btn').textContent = `📋 待业务确认点（${items.length}）`;
+  document.getElementById('drawer-items').innerHTML = items.map((it, idx) => `
+    <div class="confirm-item" id="confirm-${it.key}">
+      <h4><span class="marker">${idx+1}</span>${it.title}</h4>
+      <p>${it.body}</p>
+      <span class="q">${it.q}</span>
+    </div>`).join('') +
+    '<div style="font-size:11.5px;color:var(--text-3);padding:4px 2px 20px;line-height:1.6">注：以上口径确认后进入开发排期。集成时需与 Bison 核对：USDT 直接报价、查询频率限制、汇率方向语义。</div>';
+  /* renumber in-page markers to match current mode */
+  document.querySelectorAll('.marker[data-key]').forEach(m => {
+    const idx = items.findIndex(i => i.key === m.dataset.key);
+    m.textContent = idx >= 0 ? (idx+1) : '';
+  });
+}
+
+/* ───── helpers ───── */
+const r4 = n => n.toFixed(4);
+const fmt = n => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const pct = f => (f*100).toFixed(2).replace(/0$/,'') + '%';
+function chatKey(){ return mode === 'mvp' ? 'mvp' : persona; }
+function feeBase(){
+  if (mode === 'full'){
+    const o = overrides.find(o => o.active && o.tgid === personas[persona].tgid);
+    if (o) return o.fee;
+  }
+  return defaultFee;
+}
+function tierMult(amt){
+  if (mode !== 'full') return 1;
+  for (const t of tiers) if (amt >= t.min) return t.mult;
+  return 1;
+}
+function now(){ return new Date().toTimeString().slice(0,8); }
+
+/* ───── ticker ───── */
+setInterval(() => {
+  bisonMid = Math.max(7.18, Math.min(7.31, bisonMid + (Math.random()-0.5)*0.004));
+  lastSync = Date.now();
+  const el = document.getElementById('bison-rate');
+  el.textContent = r4(bisonMid);
+  el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 400);
+  document.getElementById('preview-rate').textContent = r4(bisonMid * (1 - defaultFee));
+  renderOverrides();
+}, 4000);
+setInterval(() => {
+  document.getElementById('sync-ago').textContent = Math.round((Date.now()-lastSync)/1000) + 's ago';
+}, 1000);
+
+/* ───── mode switch ───── */
+function setMode(m){
+  mode = m;
+  document.body.className = 'mode-' + m;
+  document.getElementById('mode-mvp').classList.toggle('active', m==='mvp');
+  document.getElementById('mode-full').classList.toggle('active', m==='full');
+  if (m === 'mvp' && (activeTab === 'custom' || activeTab === 'tiers')) setTab('rate');
+  if (!chatLog[chatKey()].length) greet();
+  renderChat();
+  renderConfirm();
+}
+
+/* ───── telegram chat ───── */
+function pushMsg(key, who, html, cls=''){
+  chatLog[key].push({who, html, cls});
+  if (key === chatKey()) renderChat();
+}
+function renderChat(){
+  const c = document.getElementById('chat');
+  c.innerHTML = chatLog[chatKey()].map(m => `<div class="msg ${m.who} ${m.cls}">${m.html}</div>`).join('');
+  c.scrollTop = c.scrollHeight;
+}
+function setPersona(p){
+  persona = p;
+  document.getElementById('ptab-normal').classList.toggle('active', p==='normal');
+  document.getElementById('ptab-vip').classList.toggle('active', p==='vip');
+  if (!chatLog[chatKey()].length) greet();
+  renderChat();
+}
+function greet(){
+  const isVip = mode === 'full' && feeBase() !== defaultFee;
+  const lines = ['👋 欢迎来到 XX Exchange！USDT → CNY 专业承兑', '· 实时汇率，下单即锁价（10 分钟有效）', `· 服务费率 ${pct(isVip ? feeBase() : defaultFee)}`];
+  if (mode === 'full') lines.push('· 单笔 ≥ 5,000 USDT 享费率折扣');
+  if (isVip) lines.push('· 已识别您的专属费率 ✨');
+  lines.push('\n点击下方按钮询价或下单 👇');
+  chatLog[chatKey()].push({who:'bot', html: lines.join('\n')});
+}
+function askRate(){
+  pushMsg(chatKey(), 'user', '汇率多少？');
+  const fee = feeBase();
+  const isVip = mode === 'full' && fee !== defaultFee;
+  const key = chatKey();
+  setTimeout(() => {
+    pushMsg(key, 'bot',
+      `📊 当前汇率（实时）\n<span class="rate-num">1 USDT = ${r4(bisonMid)} CNY</span>\n${isVip ? '您的专属费率' : '服务费率'} ${pct(fee)}，1 USDT 实际到账约 ¥${r4(bisonMid*(1-fee))}` +
+      (mode === 'full' ? '\n单笔 ≥ 5,000 USDT 费率千 7 · ≥ 20,000 费率千 6' : '') +
+      `<span class="meta">更新于 ${now()} · 汇率自动同步 · 下单即锁价</span>`);
+  }, 350);
+}
+function quote(amt){
+  pushMsg(chatKey(), 'user', `换 ${amt.toLocaleString()} USDT`);
+  const rate = bisonMid;
+  const base = feeBase();
+  const mult = tierMult(amt);
+  const fee = base * mult;
+  const feeCny = amt * rate * fee;
+  const cny = amt * rate - feeCny;
+  const isVip = mode === 'full' && base !== defaultFee;
+  const qid = 'q' + Date.now();
+  const key = chatKey();
+  pendingQuote = { amt, rate, cny, key };
+  setTimeout(() => {
+    pushMsg(key, 'bot',
+      `🧾 报价单 · ${amt.toLocaleString()} USDT
+<div class="qline"><span>实时汇率</span><span>${r4(rate)}</span></div>
+<div class="qline"><span>${isVip ? '专属费率' : '服务费率'}${mult < 1 ? `（大额 −${Math.round((1-mult)*100)}%）` : ''}</span><span${mult < 1 || isVip ? ' class="bonus"' : ''}>${pct(fee)}</span></div>
+<div class="qline"><span>服务费</span><span>−¥ ${fmt(feeCny)}</span></div>
+<div class="qline total"><span>预计到账</span><span>¥ ${fmt(cny)}</span></div>
+<span class="meta">汇率已锁定 · 10 分钟内有效</span>
+<button class="msg-btn" id="${qid}" onclick="payNow('${qid}')">💸 立即支付 ${amt.toLocaleString()} USDT</button>`);
+  }, 350);
+}
+function payNow(btnId){
+  const b = document.getElementById(btnId);
+  if (!pendingQuote || !b || b.disabled) return;
+  b.disabled = true; b.textContent = '✓ 已支付';
+  const q = pendingQuote; pendingQuote = null;
+  setTimeout(() => {
+    pushMsg(q.key, 'bot', `🎉 Payment received！已确认收到 ${q.amt.toLocaleString()} USDT（链上可查）\n\n请回复您的收款方式和账号\n例：支付宝 138xxxx1234 张三`);
+    setTimeout(() => {
+      pushMsg(q.key, 'user', '招商银行 6225 8801 **** 3344 王五');
+      setTimeout(() => {
+        const tg = q.key === 'vip' ? '@leo_vip_client' : '@customer_001';
+        const o = { id:'A'+(orderSeq++), tg, chatKey:q.key, amount:q.amt, rate:q.rate, cny:q.cny,
+                    payout:'招商银行 6225****3344 王五', status:'paid', time:'Just now' };
+        orders.unshift(o);
+        renderOrders();
+        pushMsg(q.key, 'bot', `收到！订单 #${o.id} 已进入打款队列\n预计 30 分钟内完成人民币打款 ¥ ${fmt(q.cny)}\n款项下发后会再次通知您 🔔`);
+        toast(`新订单 #${o.id} 已进入 Orders（右侧标记下发）`);
+      }, 600);
+    }, 900);
+  }, 500);
+}
+
+/* ───── admin ───── */
+let activeTab = 'rate';
+function setTab(t){
+  activeTab = t;
+  ['rate','custom','tiers','orders'].forEach(k => {
+    document.getElementById('tab-'+k).classList.toggle('active', k===t);
+    document.getElementById('pane-'+k).classList.toggle('active', k===t);
+  });
+}
+function onFeeChange(){
+  defaultFee = (parseFloat(document.getElementById('inp-fee').value) || 0.8) / 100;
+  document.getElementById('preview-rate').textContent = r4(bisonMid * (1 - defaultFee));
+  renderOverrides();
+  toast('Default fee updated — 左侧再次询价即按新费率报价');
+}
+function renderOverrides(){
+  document.getElementById('override-rows').innerHTML = overrides.map(o => `
+    <tr>
+      <td><span class="mono">${o.tgid}</span><span class="sub">${o.name}</span></td>
+      <td class="mono" style="color:var(--success-text)">${pct(o.fee)}</td>
+      <td class="mono">¥ ${r4(bisonMid * (1 - o.fee))}</td>
+      <td><span class="pill vip">Active</span></td>
+    </tr>`).join('') + `
+    <tr>
+      <td><span class="mono">Everyone else</span><span class="sub">No override configured</span></td>
+      <td class="mono">${pct(defaultFee)}</td>
+      <td class="mono">¥ ${r4(bisonMid * (1 - defaultFee))}</td>
+      <td><span class="pill default-tag">Default</span></td>
+    </tr>`;
+}
+function renderOrders(){
+  document.getElementById('order-count').textContent = orders.filter(o => o.status==='paid').length;
+  document.getElementById('order-rows').innerHTML = orders.map(o => `
+    <tr>
+      <td><span class="mono">#${o.id}</span><span class="sub">${o.time}</span></td>
+      <td><span class="mono">${o.tg}</span><span class="sub">${o.payout}</span></td>
+      <td><span class="mono">${o.amount.toLocaleString()} U</span><span class="sub">@ ${r4(o.rate)} → ¥${fmt(o.cny)}</span></td>
+      <td><span class="pill ${o.status}">${o.status === 'paid' ? 'Paid · to disburse' : 'Disbursed ✓'}</span></td>
+      <td class="row-actions">${o.status === 'paid'
+        ? `<button class="btn" onclick="disburse('${o.id}')">Mark disbursed</button>`
+        : `<button class="btn ghost" disabled>Notified</button>`}</td>
+    </tr>`).join('');
+}
+function disburse(id){
+  const o = orders.find(x => x.id === id);
+  if (!o || o.status !== 'paid') return;
+  o.status = 'disbursed';
+  renderOrders();
+  if (o.chatKey){
+    pushMsg(o.chatKey, 'bot',
+      `✅ 您的款项已由运营团队下发\n订单 #${o.id} · ¥ ${fmt(o.cny)}\n预计 30 分钟内到账，请注意查收`, 'notify-card');
+    toast(`已通过 Telegram 通知 ${o.tg} — 看左侧对话`);
+  } else {
+    toast(`已通过 Telegram 通知 ${o.tg}（演示：该客户不在左侧对话内）`);
+  }
+}
+
+/* ───── drawer / toast ───── */
+function toggleDrawer(open){
+  document.getElementById('drawer').classList.toggle('open', open);
+  document.getElementById('drawer-overlay').classList.toggle('open', open);
+}
+function openConfirm(key){
+  toggleDrawer(true);
+  setTimeout(() => {
+    const el = document.getElementById('confirm-'+key);
+    if (!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.style.borderColor = 'var(--orange)';
+    setTimeout(()=>el.style.borderColor='', 1800);
+  }, 260);
+}
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ───── init ───── */
+greet();
+renderChat();
+renderOverrides();
+renderOrders();
+renderConfirm();
+</script>
+</body>
+</html>

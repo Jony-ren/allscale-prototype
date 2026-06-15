@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Claim Link — MVP (Hi-fi)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDFFFE; --bg-white:#FFFFFF; --surface:#FAFBFA; --surface2:#F2F8F5; --surface3:#E5EEEA;
+  --border:#E5EEEA; --border-gray:#E4E4E4; --border2:#C5DDD4;
+  --text:#0C3124; --text2:#83968F; --text3:#B0C4BB;
+  --accent:#009859; --accent-hover:#0CAA67; --accent2:#087E4C; --accent-light:#F2F8F5;
+  --orange:#D97706; --orange-soft:rgba(245,158,11,0.12);
+  --red:#E53E3E; --red-soft:rgba(229,62,62,0.08);
+  --green:#009859; --green-soft:rgba(0,152,89,0.10);
+  --shadow:0 8px 40px rgba(0,0,0,0.10); --shadow-md:0 4px 24px rgba(0,0,0,0.08);
+  --radius-card:18px; --radius-btn:999px; --radius-row:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Archivo',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;padding:0 0 80px}
+.mono{font-family:'DM Mono',monospace}
+
+/* top bar + tabs */
+.bar{position:sticky;top:0;z-index:10;background:var(--bg-white);border-bottom:1px solid var(--border-gray);padding:0 24px;height:64px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.brand .mark{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.bar .badge{font-size:11px;color:var(--text2);border:1px solid var(--border);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.tabs{margin-left:auto;display:flex;gap:6px;background:var(--surface2);border-radius:999px;padding:4px}
+.tabs button{font:inherit;font-size:13px;font-weight:500;border:none;background:transparent;color:var(--text2);border-radius:999px;padding:8px 16px;cursor:pointer;transition:all .15s}
+.tabs button.on{background:var(--text);color:#fff}
+
+.wrap{max-width:980px;margin:28px auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center}
+.persona{display:none;width:100%}
+.persona.on{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start}
+
+/* phone frame */
+.device{width:375px;background:var(--bg-white);border:1px solid var(--border-gray);border-radius:34px;overflow:hidden;box-shadow:var(--shadow)}
+.dev-top{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--surface3);background:var(--surface)}
+.dev-top .t{font-weight:600;color:var(--text);font-size:12.5px}
+.dev-top .url{display:flex;align-items:center;gap:5px;background:var(--surface2);border-radius:999px;padding:4px 12px;font-size:11.5px;color:var(--text2)}
+.scr{display:none;padding:24px 22px 26px}
+.scr.on{display:block}
+.eyebrow{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);font-weight:600;margin-bottom:6px}
+h2{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.lead{color:var(--text2);font-size:13px;margin-bottom:16px}
+
+/* fields */
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.fld label .opt{opacity:.75;font-weight:400}
+.box{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:0 14px;height:48px;color:var(--text);font-size:15px;font-family:'Archivo',sans-serif;outline:none;transition:border-color .15s,background .15s}
+.box:focus{border-color:var(--accent);background:var(--bg-white)}
+.box.bad{border-color:var(--red);background:var(--red-soft)}
+.box[disabled]{color:var(--text2);background:var(--surface2);cursor:not-allowed}
+textarea.box{resize:none;height:64px;padding:12px 14px;line-height:1.4}
+.row{display:flex;gap:8px}
+.seg{display:flex;gap:0;background:var(--surface2);border-radius:999px;padding:3px}
+.seg button{flex:1;border:none;background:transparent;border-radius:999px;padding:9px 14px;font:inherit;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s}
+.seg button.on{background:var(--bg-white);color:var(--text);box-shadow:var(--shadow-md)}
+.hint{font-size:11.5px;color:var(--text2);margin-top:6px}
+.err{font-size:11.5px;color:var(--red);margin-top:6px;display:none}
+.err.show{display:block}
+
+/* buttons */
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:6px;height:48px;border-radius:var(--radius-btn);font-size:15px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:#F2F8F5;font-family:'Archivo',sans-serif;transition:all .15s}
+.btn:hover{background:var(--accent-hover)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn[disabled]:hover{background:var(--accent)}
+.btn.ghost{background:var(--surface2);color:var(--text)}
+.btn.ghost:hover{background:var(--surface3)}
+.btn.link{background:none;color:var(--text2);font-weight:500;text-decoration:underline;height:38px}
+.btn.link:hover{background:none;color:var(--text)}
+.btn+.btn{margin-top:9px}
+
+/* qr + avatar + kv */
+.qr{width:128px;height:128px;margin:0 auto 16px;background:var(--bg-white);border:1.5px solid var(--border);border-radius:14px;padding:10px}
+.qr svg{width:100%;height:100%;display:block}
+.avatar{width:52px;height:52px;border-radius:50%;margin:0 auto 10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700}
+.kvbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:2px 14px;margin-bottom:14px}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--surface3);font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--text2)}
+.kv b{font-weight:600}
+.copy{font-size:11.5px;font-weight:600;color:var(--accent2);background:var(--green-soft);border-radius:999px;padding:4px 12px;cursor:pointer;white-space:nowrap}
+.pill{display:inline-flex;font-size:11px;font-weight:500;border-radius:6px;padding:3px 9px;font-family:'DM Mono',monospace;background:var(--surface3);color:var(--text2)}
+.pill.wait{background:var(--orange-soft);color:var(--orange)}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+
+/* claim landing */
+.trust{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text2);background:var(--surface2);border-radius:999px;padding:6px 14px;margin:0 auto 18px;width:fit-content}
+.amt{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;text-align:center;letter-spacing:-.02em;line-height:1.1}
+.from{text-align:center;color:var(--text2);font-size:12.5px;margin-top:6px}
+.from b{color:var(--text)}
+.msg{border:1px solid var(--border);border-radius:var(--radius-row);background:var(--surface2);padding:10px 14px;font-size:13px;text-align:center;margin:16px 0;font-style:italic;color:var(--text)}
+.opt-card{background:var(--bg-white);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;cursor:pointer;display:flex;gap:12px;align-items:center;transition:all .15s}
+.opt-card:hover{box-shadow:var(--shadow-md)}
+.opt-card.reco{border-color:var(--accent);background:var(--accent-light)}
+.opt-card .rd{width:18px;height:18px;border:2px solid var(--border2);border-radius:50%;flex:0 0 18px}
+.opt-card.reco .rd{border-color:var(--accent);background:radial-gradient(var(--accent) 42%,transparent 47%)}
+.opt-card .h{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.opt-card .s{font-size:12px;color:var(--text2);margin-top:2px}
+.tag{font-size:10px;font-weight:700;color:var(--accent2);background:var(--green-soft);border-radius:999px;padding:2px 8px}
+
+.otp{display:flex;gap:8px;justify-content:center;margin:8px 0 12px}
+.otp .box{width:46px;height:54px;text-align:center;font-size:21px;font-weight:700;padding:0}
+.chk{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-row);padding:12px;margin-bottom:14px;cursor:pointer;font-size:12.5px;color:var(--text)}
+.chk input{margin-top:2px;accent-color:var(--accent)}
+.done{text-align:center;padding:18px 0 10px}
+.done .mark{width:62px;height:62px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:27px;background:var(--green-soft);color:var(--accent2)}
+.done.muted .mark{background:var(--surface2);color:var(--text2)}
+.done.muted h2{color:var(--text2)}
+
+/* annotation aside */
+.note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-row);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.6;margin-top:14px}
+.note b{color:var(--text)}
+.aside{width:300px;font-size:12.5px;color:var(--text2);line-height:1.7;background:var(--bg-white);border:1px solid var(--border-gray);border-radius:var(--radius-card);padding:18px;box-shadow:var(--shadow-md)}
+.aside .h{font-weight:700;color:var(--text);margin-bottom:8px;font-size:13px}
+.aside ul{list-style:none}
+.aside li{padding:4px 0;border-bottom:1px dashed var(--surface3)}
+.aside li:last-child{border-bottom:none}
+.statebtns{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.statebtns button{font:inherit;font-size:11.5px;font-weight:500;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 13px;color:var(--text2);cursor:pointer;transition:all .15s}
+.statebtns button:hover{border-color:var(--accent);color:var(--accent2)}
+
+/* wallet home + confirm sheet */
+.balance{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;letter-spacing:-.02em;text-align:center;margin:6px 0 2px}
+.balsub{text-align:center;color:var(--text2);font-size:12.5px;margin-bottom:18px}
+.tok{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent2);flex:0 0 34px}
+.assetrow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--surface3)}
+.assetrow:last-child{border-bottom:none}
+.assetrow .n{font-weight:600;font-size:14px}
+.assetrow .sub{font-size:11.5px;color:var(--text2)}
+.assetrow .v{margin-left:auto;font-weight:600}
+.row2{display:flex;gap:9px;margin-top:16px}
+.row2 .btn{margin-top:0}
+.newtag{font-size:10px;font-weight:700;color:var(--accent2);border:1px solid var(--accent);border-radius:999px;padding:2px 8px;margin-left:auto}
+.kv .feek{text-decoration:underline dashed;text-underline-offset:3px;cursor:help}
+.kv.total{border-top:1px dashed var(--border2);border-bottom:none}
+.kv.total b{color:var(--accent2);font-size:14px}
+.confhead{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin:14px 0 4px}
+
+/* merchant */
+.panel{width:580px;max-width:100%;background:var(--bg-white);border:1px solid var(--border-gray);border-radius:var(--radius-card);padding:24px;box-shadow:var(--shadow-md)}
+.panel h2{margin-bottom:2px}
+.demo-ribbon{display:inline-flex;font-size:10.5px;font-weight:700;color:var(--orange);background:var(--orange-soft);border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin:16px 0}
+.stat{background:var(--surface2);border-radius:var(--radius-row);padding:12px}
+.stat .k{font-size:11px;color:var(--text2)}
+.stat .v{font-size:20px;font-weight:700;margin-top:2px;letter-spacing:-.01em}
+.stat .v span{font-size:11px;color:var(--text2);font-weight:400}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.tbl th{text-align:left;color:var(--text2);font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 6px;border-bottom:1px solid var(--surface3)}
+.code{border:1px solid var(--border);border-radius:var(--radius-row);background:var(--surface);padding:13px;font-size:11.5px;line-height:1.7;overflow-x:auto;margin-top:8px;font-family:'DM Mono',monospace;color:var(--text)}
+.sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin:20px 0 8px}
+.lim{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--surface3);font-size:13px}
+.lim:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span class="brand"><span class="mark">A</span>AllScale · Claim Link MVP</span>
+  <span class="badge">Hi-fi demo · 功能范围同 lofi</span>
+  <div class="tabs">
+    <button class="on" data-p="sender" onclick="P('sender')">Sender 发钱</button>
+    <button data-p="receiver" onclick="P('receiver')">Receiver 领取</button>
+    <button data-p="merchant" onclick="P('merchant')">Merchant API</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ░░ SENDER ░░ -->
+  <div class="persona on" id="p-sender">
+    <div class="device">
+      <div class="dev-top"><span class="t">Wallet · Send</span><span>9:41</span></div>
+
+      <!-- wallet home (entry) -->
+      <div class="scr on" id="s0">
+        <div class="eyebrow">Wallet</div>
+        <div class="balance">$1,250.80</div>
+        <div class="balsub">Total balance · Polygon</div>
+        <div class="kvbox" style="padding:4px 14px">
+          <div class="assetrow"><div class="tok">USDC</div><div><div class="n">USD Coin</div><div class="sub">Polygon</div></div><div class="v">820.30</div></div>
+          <div class="assetrow"><div class="tok">USDT</div><div><div class="n">Tether USD</div><div class="sub">Polygon</div></div><div class="v">430.50</div></div>
+        </div>
+        <div class="row2">
+          <button class="btn ghost" onclick="toast('Deposit flow (out of scope)')">Deposit</button>
+          <button class="btn" onclick="S('s0b')">Withdraw</button>
+        </div>
+      </div>
+
+      <!-- withdraw mode picker (entry step 2) -->
+      <div class="scr" id="s0b">
+        <div class="eyebrow">Withdraw</div>
+        <h2>Withdraw to</h2>
+        <div class="lead">Choose how to send your funds.</div>
+        <div class="opt-card reco" onclick="S('s1')">
+          <div class="tok" style="background:var(--green-soft)">🔗</div>
+          <div><div class="h">Claim Link</div><div class="s">Send to anyone with email or link</div></div>
+          <span class="newtag">New</span>
+        </div>
+        <div class="opt-card" onclick="toast('Existing withdraw flow (out of scope)')">
+          <div class="tok">0x</div>
+          <div><div class="h">Wallet address</div><div class="s">Withdraw to a 0x wallet address</div></div>
+        </div>
+        <button class="btn link" onclick="S('s0')">← Back</button>
+      </div>
+
+      <!-- create -->
+      <div class="scr" id="s1">
+        <div class="eyebrow">Send via Claim Link</div>
+        <h2>Send a Claim Link</h2>
+        <div class="lead">Amount + token. Email optional — they claim with the link.</div>
+        <div class="fld">
+          <label>Amount</label>
+          <div class="row">
+            <input class="box" id="amt" value="100" inputmode="decimal" oninput="calc()" style="font-weight:700;flex:1">
+            <div class="seg" style="flex:0 0 150px">
+              <button class="on" id="tkA" onclick="tok('USDC')">USDC</button>
+              <button id="tkB" onclick="tok('USDT')">USDT</button>
+            </div>
+          </div>
+          <div class="hint">No per-link cap — you confirm every send yourself, same as a regular withdraw.</div>
+        </div>
+        <div class="fld">
+          <label>Recipient email <span class="opt">(optional)</span></label>
+          <input class="box" id="email" placeholder="leave blank to share link yourself">
+        </div>
+        <div class="fld">
+          <label>Message <span class="opt">(optional)</span></label>
+          <textarea class="box" id="msg" maxlength="200">Coffee's on me</textarea>
+        </div>
+        <div class="confhead">Breakdown</div>
+        <div class="kvbox">
+          <div class="kv"><span class="k">Amount</span><b id="fA">100.00 USDC</b></div>
+          <div class="kv"><span class="k feek" title="Reserved for on-chain gas so the receiver pays nothing. Unused surplus is not refunded.">Network fee</span><span id="fNet">1.00 USDC</span></div>
+          <div class="kv"><span class="k feek" title="Charged by AllScale for processing and securing your transaction.">Service fee</span><span id="fSvc">0.50 USDC</span></div>
+          <div class="kv total"><span class="k">Total</span><b id="fC">101.50 USDC</b></div>
+        </div>
+        <button class="btn" onclick="sGo()">Withdraw</button>
+        <div class="hint" style="text-align:center">You'll confirm with a 6-digit email verification code — same as the existing withdraw flow, no separate review page.</div>
+        <button class="btn link" onclick="S('s0b')">← Back</button>
+      </div>
+
+      <!-- processing (mirrors TransactionProgressOverlay) -->
+      <div class="scr" id="s1d">
+        <div class="done"><div class="mark">…</div><h2 id="procT">Processing… (2/12)</h2><div class="lead">Your transaction is being processed on-chain. This may take a few minutes.</div>
+        <button class="btn link" onclick="toast('open block explorer')">View on Explorer →</button></div>
+      </div>
+
+      <!-- detail -->
+      <div class="scr" id="s2">
+        <div class="eyebrow">Claim link created</div>
+        <h2 id="s2h">Claim link created</h2>
+        <div class="lead" id="s2sub">Claim email sent. You can also copy the link.</div>
+        <div class="qr" id="qr1"></div>
+        <div class="kvbox">
+          <div class="kv"><span class="k mono" style="font-size:12px">allscale.io/claim/8fK2…aQ</span><span class="copy" onclick="toast('Link copied')">Copy</span></div>
+          <div class="kv"><span class="k">Status</span><span class="pill wait" id="s2pill">Awaiting claim</span></div>
+          <div class="kv"><span class="k">Expires</span><span id="s2exp">in 13d 22h</span></div>
+        </div>
+        <div class="confhead">Payment</div>
+        <div class="kvbox">
+          <div class="kv"><span class="k">Total paid</span><b id="s2paid">101.50 USDC</b></div>
+          <div class="kv"><span class="k">From</span><span>My Wallet · Polygon</span></div>
+          <div class="kv"><span class="k">Tx Hash</span><span class="copy mono" onclick="toast('Tx hash copied')">0x12ab…34cd</span></div>
+        </div>
+        <button class="btn" onclick="S('s1')">Send another</button>
+        <div id="s2act">
+          <button class="btn ghost" id="s2resend" onclick="toast('Email resent (max 1 / 5min)')">Resend email</button>
+          <button class="btn link" id="s2cxl" onclick="sCancel()">Claim back to my wallet</button>
+        </div>
+        <div class="note" id="s2claiming" style="display:none"><b>Claiming…</b> Receiver submitted — on-chain tx in progress. Claim back is locked until it settles (§5.4).</div>
+        <div class="note" id="s2cancel" style="display:none"><b>Claimed back.</b> <b>100.00 USDC</b> returned to your wallet in full — the network fee prepaid at creation covers this transfer, so nothing extra is charged. Fees already paid are not refunded. Opener sees "This payment was claimed back by the sender."</div>
+        <button class="btn link" onclick="S('s3')">View in Activity →</button>
+      </div>
+
+      <!-- activity -->
+      <div class="scr" id="s3">
+        <div class="eyebrow">Wallet · Activity</div>
+        <h2>Activity</h2>
+        <div class="lead">Claim links appear as entries with status pills; 5+ entries of the same status fold into one row.</div>
+        <div class="kvbox">
+          <div class="kv"><span>Claim link · 100 USDC</span><span class="pill wait">Awaiting claim</span></div>
+          <div class="kv"><span>▸ 5 claimed claim links</span><span class="pill ok">Claimed</span></div>
+          <div class="kv"><span>Claim link · 40 USDC</span><span class="pill">Expired</span></div>
+          <div class="kv"><span>Claim link · 25 USDT</span><span class="pill">Claimed back</span></div>
+        </div>
+        <div class="note">MVP has no standalone "Pending claims" page and no bulk cancel (§5.1.2).</div>
+        <button class="btn link" onclick="S('s2')">← Back to link detail</button>
+      </div>
+    </div>
+
+    <div class="aside">
+      <div class="h">MVP · Function 1 (App single send)</div>
+      <ul>
+        <li><b>Entry shown</b>: Wallet → [Withdraw] → "Withdraw to" picker → Claim Link（带 New 徽章，同 UI 完整版）(§5.1.1)</li>
+        <li><b>无独立确认页</b>——对齐线上 withdraw 流程：费用 Breakdown 在表单内联展示（唯一一处），按钮 [Withdraw]，确认动作 = 「Verification code」弹窗输 6 位邮箱验证码（线上无 2FA/签名概念）。TransferConfirmSheet 仅 cashier 支付流在用（0611 核实）</li>
+        <li><b>Processing 页 = 线上 TransactionProgressOverlay</b>（确认数计数 + View on Explorer）</li>
+        <li>详情页含 <b>Payment 实付明细</b>：Total paid / From / Tx Hash——发完知道实际扣了多少</li>
+        <li>Email optional → pure-URL share (§4.3)</li>
+        <li>Fees = network reserve（receiver gasless）+ service fee (§5.2.1)</li>
+        <li>取消语义全面改 <b>"Claim back to my wallet"</b>（TipLink 学4）；状态机内部仍是 cancelled (§5.4)</li>
+        <li>States: pending → link_sent → claiming → claimed/expired/cancelled (§5.4)；<b>过期时长已定 2 周</b>（0611）</li>
+        <li>功能 1 <b>不设单笔上限</b>：同现有 send，每笔本人验证码确认；限额只存在于商家批量授权域（API 免逐笔确认才需要，见 Merchant tab）</li>
+        <li><b>Claiming locks Claim back</b> — try the state buttons (§5.4)；link re-send fission deferred to Phase 2 (0610)</li>
+      </ul>
+      <div class="statebtns">
+        <button onclick="sSt('wait')">awaiting</button>
+        <button onclick="sSt('claiming')">claiming</button>
+        <button onclick="sSt('claimed')">claimed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ RECEIVER ░░ -->
+  <div class="persona" id="p-receiver">
+    <div class="device">
+      <div class="dev-top"><span class="url">🔒 allscale.io/claim</span><span>9:41</span></div>
+
+      <!-- landing -->
+      <div class="scr on" id="r1">
+        <div class="trust">🔒 Official AllScale claim page · links start with allscale.io/claim</div>
+        <div class="avatar">Y</div>
+        <div class="amt">$100.00</div>
+        <div class="from">100 USDC · from <b>Yao</b> · expires in 13 days</div>
+        <div class="msg">"Coffee's on me"</div>
+        <button class="btn" id="claimCta" onclick="claimOpen()">Claim</button>
+        <div id="claimOpts" style="display:none">
+          <div class="opt-card reco" id="optAcct" style="display:none" onclick="CPATH='ACCT';R('r-go')">
+            <div class="rd"></div>
+            <div><div class="h">Claim into my AllScale Wallet <span class="tag">1-click</span></div><div class="s">Logged in as yao.wang@gmail.com — instant, no verification.</div></div>
+          </div>
+          <div class="opt-card reco" id="optOtp" onclick="R('r-otp')">
+            <div class="rd"></div>
+            <div><div class="h">Withdraw to AllScale Wallet <span class="tag" id="otpTag">Recommended</span></div><div class="s">No wallet? Verify email to open one — instant.</div></div>
+          </div>
+          <div class="opt-card" onclick="R('r-addr')">
+            <div class="rd"></div>
+            <div><div class="h" id="addrT">Withdraw to My Wallet</div><div class="s" id="addrS">Have a wallet? Enter a 0x address — no signup.</div></div>
+          </div>
+          <button class="btn link" id="optAlt" style="display:none" onclick="R('r-otp')">Claim into a different AllScale account →</button>
+        </div>
+      </div>
+
+      <!-- path A: address (direct claim, no OTP — confirmed) -->
+      <div class="scr" id="r-addr">
+        <div class="eyebrow">Withdraw to my wallet</div>
+        <h2>Enter your wallet</h2>
+        <div class="lead">Enter a 0x address and claim directly — no signup, no OTP.</div>
+        <div class="fld">
+          <label>Your 0x wallet address (EVM)</label>
+          <input class="box mono" id="addr" style="font-size:13px" value="0x9aB3f2c4D5e6789012345678AbCdEf0123456789" oninput="adChk()">
+          <div class="err" id="adErr">This payment is on EVM chains. Enter a 0x-prefix address.</div>
+        </div>
+        <label class="chk"><input type="checkbox" id="cf" onchange="adChk()"><span>I confirm the address is correct. On-chain transfers can't be reversed.</span></label>
+        <button class="btn" id="adBtn" disabled onclick="CPATH='A';R('r-go')">Withdraw</button>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+
+      <!-- path B step 1: confirm email, send code -->
+      <div class="scr" id="r-otp">
+        <div class="eyebrow">Open AllScale Wallet</div>
+        <h2>Verify your email</h2>
+        <div class="lead">We'll send a code to the email of the account you claim into.</div>
+        <div class="fld"><label>Email</label><input class="box" id="oemail" value="friend@example.com">
+          <div class="hint em">Prefilled with the email that received this link — change it to claim into another account.</div>
+        </div>
+        <button class="btn" onclick="otpSend()">Send verification code</button>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+
+      <!-- path B step 2: 6-digit code -->
+      <div class="scr" id="r-otp2">
+        <div class="eyebrow">Open AllScale Wallet</div>
+        <h2>Enter the 6-digit code</h2>
+        <div class="lead">Sent to <b id="otpTo">friend@example.com</b> · <span class="copy" onclick="toast('Code resent (max 1 / 5min)')">Resend</span></div>
+        <div class="otp" id="otp6"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"><input class="box" maxlength="1" inputmode="numeric" oninput="otpIn(this)"></div>
+        <button class="btn" id="otpBtn" disabled onclick="CPATH='B';R('r-go')">Verify &amp; open wallet</button>
+        <button class="btn link" onclick="R('r-otp')">← Back</button>
+      </div>
+
+      <!-- claiming -->
+      <div class="scr" id="r-go">
+        <div class="done"><div class="mark">…</div><h2>Submitting on-chain</h2><div class="lead">Gas prepaid by sender — free for you.</div></div>
+      </div>
+      <!-- done -->
+      <div class="scr" id="r-done">
+        <div class="done"><div class="mark">✓</div><h2>Received</h2><div class="lead" id="rDoneLead"><b>$100.00</b> (100 USDC) arrived in your wallet.</div><button class="btn link" onclick="toast('open block explorer')">View on-chain →</button></div>
+        <button class="btn ghost" id="rUpsell" onclick="toast('Open AllScale Wallet onboarding')">Want to send a link like this? Open your own AllScale Wallet →</button>
+        <button class="btn ghost" id="rGoWallet" style="display:none" onclick="toast('Go to AllScale Wallet dashboard')">Go to my AllScale Wallet →</button>
+      </div>
+      <!-- expired -->
+      <div class="scr" id="r-exp">
+        <div class="done muted"><div class="mark">⌛</div><h2>Link expired</h2><div class="lead">Not claimed within 14 days — refunded to sender.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+      <!-- cancelled / claimed back -->
+      <div class="scr" id="r-cxl">
+        <div class="done muted"><div class="mark">✕</div><h2>Link no longer available</h2><div class="lead">This payment was claimed back by the sender.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+      <!-- down -->
+      <div class="scr" id="r-down">
+        <div class="done muted"><div class="mark">!</div><h2>Temporarily unavailable</h2><div class="lead">Try again later. <b style="color:var(--text)">Funds are safe</b> — just temporarily inaccessible during maintenance.</div></div>
+        <button class="btn link" onclick="R('r1')">← Back</button>
+      </div>
+    </div>
+
+    <div class="aside">
+      <div class="h">MVP · Unified claim</div>
+      <div class="seg" style="margin-bottom:8px">
+        <button class="on" id="mE" onclick="mode('em')">Email mode (OTP)</button>
+        <button id="mU" onclick="mode('url')">Pure-URL</button>
+      </div>
+      <div class="seg" style="margin-bottom:12px">
+        <button class="on" id="sG" onclick="sess('guest')">Guest</button>
+        <button id="sI" onclick="sess('in')">Logged in</button>
+      </div>
+      <ul>
+        <li>Public page, no login (§5.2.1)</li>
+        <li><b>USD-first display</b>; token amount secondary (0610, TipLink 学3)</li>
+        <li><b>Expandable [Claim] CTA</b> — options appear on tap, recommended first (学1)</li>
+        <li>Shown amount = received amount, no hidden deductions (§8.2, 戒1)</li>
+        <li>UI pushes <b>Open AllScale Wallet</b> to onboard (Q2); path A success page upsells account (学2)</li>
+        <li>Path A: direct claim, <b>no OTP</b> (confirmed) — leak risk borne by link secrecy + limits (§5.2.2)</li>
+        <li>Path B <b>两步交互</b>：确认邮箱 → [Send code] → 6 位验证码自动跳格（0611）</li>
+        <li><b>邮箱解锁</b>：prefill 收件邮箱但可修改——A 邮箱收链接可领进 B 邮箱的账户；OTP = 账户鉴权，非收款人校验</li>
+        <li><b>已登录直通</b>：有会话时两项为 <b>AllScale / 非 AllScale</b> 二分——「Claim into my AllScale Wallet · 1-click」+「Withdraw to External Wallet（0x）」（<b>有账户即有钱包</b>，不出现"开钱包"和"no signup"话术）；A 收 B 领降级为小链接</li>
+        <li>成功页按路径区分：路径 A（外部地址）才出现开户引导；路径 B / 已登录领取完成时<b>本就已登录</b>，显示「Go to my AllScale Wallet」</li>
+        <li>0x check + irreversible confirm (§8.2)</li>
+        <li>Down: funds safe, temporarily unclaimable (§6.8)</li>
+      </ul>
+      <div class="statebtns">
+        <button onclick="R('r-done')">claimed</button>
+        <button onclick="R('r-exp')">expired</button>
+        <button onclick="R('r-cxl')">claimed back</button>
+        <button onclick="R('r-down')">backend down</button>
+        <button onclick="R('r1')">↺ reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ MERCHANT ░░ -->
+  <div class="persona" id="p-merchant">
+    <div class="panel">
+      <h2>Batch payout <span class="demo-ribbon">DEMO · 仅示意</span></h2>
+      <div class="lead">Function 2 ships as an <b>API + webhook</b>, not a dashboard page. This only illustrates the batch / shared-pool / webhook concept.</div>
+      <div class="stats">
+        <div class="stat"><div class="k">Links</div><div class="v">300</div></div>
+        <div class="stat"><div class="k">On-chain deposits</div><div class="v">1 <span>(v1: 300)</span></div></div>
+        <div class="stat"><div class="k">Pool</div><div class="v">12,000</div></div>
+        <div class="stat"><div class="k">Gas saved</div><div class="v">×299</div></div>
+      </div>
+
+      <div class="sec">Batch result (excerpt)</div>
+      <table class="tbl">
+        <thead><tr><th>reference_id</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">task_8821</td><td>40 USDC</td><td><span class="pill ok">claimed</span></td></tr>
+          <tr><td class="mono">task_8822</td><td>40 USDC</td><td><span class="pill wait">awaiting</span></td></tr>
+          <tr><td class="mono">refund_5510</td><td>88 USDC</td><td><span class="pill">expired→refunded</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="sec">Webhook · terminal-state only · HMAC signed</div>
+      <div class="code">POST /hooks  x-as-signature: hmac…<br>{ "reference_id":"task_8821", "status":"claimed", "amount":"40" }<br>// MVP: no intermediate states, no dead-letter queue</div>
+
+      <div class="sec">Store Settings · Claim Link limits</div>
+      <div class="lim"><span>Per-link limit<br><span style="font-size:11px;color:var(--text2)">Platform cap $10,000 — applies to batch authorization (Function 2)</span></span>
+        <span style="display:flex;gap:8px;align-items:center"><span style="color:var(--text2)">$</span><input class="box" id="mLim" value="500" inputmode="numeric" style="width:100px;height:38px;font-size:14px;font-weight:600" oninput="mLimChk()"><button class="btn" id="mLimBtn" style="width:auto;height:38px;padding:0 18px;font-size:13px" onclick="toast('Passkey verified — limit saved')">Save</button></span></div>
+      <div class="err" id="mLimErr" style="margin-top:-4px;margin-bottom:6px">Exceeds platform cap ($10,000)</div>
+      <div class="lim" style="opacity:.45"><span>Daily total</span><span><b>$50,000</b> · cap $100,000 · post-MVP</span></div>
+      <div class="lim" style="opacity:.45"><span>Rate</span><span><b>60/min · 100/batch</b> · post-MVP</span></div>
+      <div class="hint">Changing money-related limits requires dashboard login + Passkey — an API key alone can't raise them. Requests above your configured limit are rejected.</div>
+
+      <div class="note"><b>Merchant refund = a payout.</b> Same batch endpoint — no refund dashboard, no on-chain "mode 3". <b>Non-custodial:</b> AllScale never holds the full key; unclaimed funds only return to the locked sender address (Legal sign-off pending — see MRD).</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function P(p){document.querySelectorAll('.persona').forEach(e=>e.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p))}
+let TT;function toast(m){clearTimeout(TT);let t=document.getElementById('_t');if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#0C3124;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;z-index:50;box-shadow:0 8px 40px rgba(0,0,0,0.2);transition:opacity .3s';document.body.appendChild(t)}t.textContent=m;t.style.opacity='1';TT=setTimeout(()=>t.style.opacity='0',1400)}
+
+/* decorative QR pattern (not scannable) */
+function qr(el){const n=21;let seed=7;const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648};let h='';
+for(let y=0;y<n;y++)for(let x=0;x<n;x++){const c=(x<7&&y<7)||(x>=n-7&&y<7)||(x<7&&y>=n-7);let on;
+if(c){const cx=x<7?x:x-(n-7),cy=y<7?y:y-(n-7);on=(cx===0||cx===6||cy===0||cy===6)||(cx>=2&&cx<=4&&cy>=2&&cy<=4)}else on=rnd()>0.52;
+if(on)h+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>'}
+el.innerHTML='<svg viewBox="0 0 '+n+' '+n+'" fill="#0C3124">'+h+'</svg>'}
+
+/* sender */
+let TOK='USDC';
+function fees(v){return {net: v>0?1.00:0, svc: v>0?Math.max(v*0.005,0.2):0}}
+function tok(t){TOK=t;document.getElementById('tkA').classList.toggle('on',t==='USDC');document.getElementById('tkB').classList.toggle('on',t==='USDT');calc()}
+function calc(){let v=parseFloat(document.getElementById('amt').value)||0;let f=fees(v);document.getElementById('fA').textContent=v.toFixed(2)+' '+TOK;document.getElementById('fNet').textContent=f.net.toFixed(2)+' '+TOK;document.getElementById('fSvc').textContent=f.svc.toFixed(2)+' '+TOK;document.getElementById('fC').textContent=(v+f.net+f.svc).toFixed(2)+' '+TOK}
+function S(id){document.querySelectorAll('#p-sender .scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+function sGo(){let v=parseFloat(document.getElementById('amt').value)||0;if(v<=0){toast('Enter an amount');return}
+  toast('Verification code confirmed');sPay()}
+function sPay(){let v=parseFloat(document.getElementById('amt').value)||0,f=fees(v);
+  let hasEmail=document.getElementById('email').value.trim()!=='';
+  S('s1d');let c=2;document.getElementById('procT').textContent='Processing… ('+c+'/12)';
+  let iv=setInterval(()=>{c+=4;if(c<12){document.getElementById('procT').textContent='Processing… ('+c+'/12)'}else{clearInterval(iv);
+    document.getElementById('s2sub').textContent=hasEmail?'Claim email sent. You can also copy the link.':'No email — copy the link / QR to share yourself.';
+    document.getElementById('s2resend').style.display=hasEmail?'flex':'none';
+    document.getElementById('s2paid').textContent=(v+f.net+f.svc).toFixed(2)+' '+TOK;
+    document.getElementById('s2act').style.display='';document.getElementById('s2cancel').style.display='none';document.getElementById('s2claiming').style.display='none';
+    document.getElementById('s2cxl').disabled=false;document.getElementById('s2resend').disabled=false;
+    document.getElementById('s2pill').textContent='Awaiting claim';document.getElementById('s2pill').className='pill wait';
+    S('s2')}},520)}
+function sCancel(){document.getElementById('s2act').style.display='none';document.getElementById('s2cancel').style.display='';document.getElementById('s2pill').textContent='Claimed back';document.getElementById('s2pill').className='pill'}
+function sSt(st){S('s2');let pill=document.getElementById('s2pill'),act=document.getElementById('s2act'),clm=document.getElementById('s2claiming'),cxl=document.getElementById('s2cxl'),rs=document.getElementById('s2resend');
+  document.getElementById('s2cancel').style.display='none';act.style.display='';clm.style.display='none';cxl.disabled=false;rs.disabled=false;
+  if(st==='wait'){pill.textContent='Awaiting claim';pill.className='pill wait'}
+  if(st==='claiming'){pill.textContent='Claiming';pill.className='pill wait';cxl.disabled=true;rs.disabled=true;clm.style.display=''}
+  if(st==='claimed'){pill.textContent='Claimed';pill.className='pill ok';act.style.display='none'}}
+
+/* receiver */
+let CPATH='B';
+function R(id){document.querySelectorAll('#p-receiver .scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');if(id==='r-go')setTimeout(()=>{if(document.getElementById('r-go').classList.contains('on'))R('r-done')},1300);if(id==='r1'){document.getElementById('claimOpts').style.display='none';document.getElementById('claimCta').style.display='flex'}
+  if(id==='r-done'){let a=CPATH==='A';document.getElementById('rUpsell').style.display=a?'flex':'none';document.getElementById('rGoWallet').style.display=a?'none':'flex';
+    document.getElementById('rDoneLead').innerHTML='<b>$100.00</b> (100 USDC) arrived in your '+(a?'wallet.':'AllScale Wallet.')}}
+function claimOpen(){document.getElementById('claimOpts').style.display='block';document.getElementById('claimCta').style.display='none'}
+function otpSend(){let v=document.getElementById('oemail').value.trim();if(!v){toast('Enter your email');return}
+  document.getElementById('otpTo').textContent=v;
+  document.querySelectorAll('#otp6 input').forEach(i=>i.value='');document.getElementById('otpBtn').disabled=true;
+  toast('Code sent');R('r-otp2')}
+function otpIn(el){el.value=el.value.replace(/\D/g,'').slice(0,1);if(el.value&&el.nextElementSibling)el.nextElementSibling.focus();
+  let full=[...document.querySelectorAll('#otp6 input')].every(i=>i.value!=='');document.getElementById('otpBtn').disabled=!full}
+
+/* merchant */
+function mLimChk(){let v=parseFloat(document.getElementById('mLim').value)||0;let bad=v>10000;
+  document.getElementById('mLim').classList.toggle('bad',bad);document.getElementById('mLimErr').classList.toggle('show',bad);
+  document.getElementById('mLimBtn').disabled=bad||v<=0}
+function adChk(){let v=document.getElementById('addr').value.trim();let ok=/^0x[0-9a-fA-F]{40}$/.test(v);let bad=v!==''&&!ok;document.getElementById('addr').classList.toggle('bad',bad);document.getElementById('adErr').classList.toggle('show',bad);document.getElementById('adBtn').disabled=!(ok&&document.getElementById('cf').checked)}
+function mode(m){document.getElementById('mE').classList.toggle('on',m==='em');document.getElementById('mU').classList.toggle('on',m==='url');
+  document.querySelectorAll('#p-receiver .em').forEach(e=>e.style.display=(m==='em')?'':'none');
+  document.querySelectorAll('#p-receiver .url').forEach(e=>e.style.display=(m==='url')?'':'none');
+  let oe=document.getElementById('oemail');if(m==='url'){oe.value='';oe.placeholder='you@example.com'}else{oe.value='friend@example.com'}}
+function sess(m){let li=m==='in';document.getElementById('sG').classList.toggle('on',!li);document.getElementById('sI').classList.toggle('on',li);
+  document.getElementById('optAcct').style.display=li?'flex':'none';
+  document.getElementById('optOtp').style.display=li?'none':'flex';
+  document.getElementById('optAlt').style.display=li?'block':'none';
+  document.getElementById('addrT').textContent=li?'Withdraw to External Wallet':'Withdraw to My Wallet';
+  document.getElementById('addrS').textContent=li?'Send to a 0x address outside AllScale.':'Have a wallet? Enter a 0x address — no signup.'}
+
+calc();adChk();qr(document.getElementById('qr1'));
+</script>
+</body>
+</html>
