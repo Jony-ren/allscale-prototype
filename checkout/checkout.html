@@ -214,6 +214,38 @@ body{
 .onr-rs-btn:hover{opacity:.9;}
 .onr-rs-btn.save{background:#009859;color:#FDFFFE;}
 .onr-rs-btn.close{background:#FAFBFA;color:#0C3124;}
+/* ════ Request Submitted 弹窗（Figma 24885:25683，1:1；容器沿用系统标准弹窗 .onr-sheet-ov/.onr-modal：距顶 50px、宽 420px。复用上方 .onr-rs-* 排版）════ */
+#onr-submitted-ov .onr-modal{height:fit-content;}
+.rs-top{display:flex;flex-direction:column;align-items:center;gap:48px;padding:32px 20px 0;width:100%;}
+.rs-foot{display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 20px 32px;width:100%;}
+.rs-sub{font-size:12px;font-weight:400;color:#83968F;text-align:center;line-height:1.35;}
+/* ════ Select network 弹窗（Figma 19721:13287，1:1；容器沿用系统标准弹窗 .onr-sheet-ov/.onr-modal：距顶 50px、宽 420px）════ */
+#onr-network-ov .onr-modal{height:fit-content;}
+.nw-head{display:flex;flex-direction:column;gap:10px;padding:22px 20px 14px;flex-shrink:0;}
+.nw-head-text{display:flex;flex-direction:column;gap:4px;}
+.nw-title{font-size:24px;font-weight:500;color:#0C3124;letter-spacing:-.02em;line-height:normal;}
+.nw-sub{font-size:14px;font-weight:400;color:#83968F;line-height:normal;}
+.nw-hide{display:inline-flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;padding:0;font-family:'Archivo',sans-serif;align-self:flex-start;}
+.nw-hide-dot{width:20px;height:20px;border-radius:50%;border:1px solid #83968F;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
+.nw-hide-dot svg{opacity:0;transition:opacity .15s;}
+.nw-hide.on .nw-hide-dot{background:#0C3124;border-color:#0C3124;}
+.nw-hide.on .nw-hide-dot svg{opacity:1;}
+.nw-hide-label{font-size:14px;font-weight:400;color:#0C3124;text-decoration:underline;text-underline-offset:2px;line-height:normal;}
+.nw-list{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;padding:0 20px 22px;}
+.nw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px;border:none;background:none;cursor:pointer;font-family:'Archivo',sans-serif;border-radius:12px;transition:background .12s;}
+.nw-row:hover{background:#F2F8F5;}
+.nw-list.hide-zero .nw-row--zero{display:none;}
+.nw-left{display:flex;align-items:center;gap:16px;min-width:0;}
+.nw-icon{position:relative;width:34px;height:34px;flex-shrink:0;}
+.nw-icon-main{width:34px;height:34px;border-radius:50%;display:block;object-fit:cover;}
+.nw-icon-badge{position:absolute;left:20px;top:20px;width:14px;height:14px;border-radius:50%;display:block;box-shadow:0 0 0 1.5px #FDFFFE;}
+.nw-name-col{display:flex;flex-direction:column;align-items:flex-start;min-width:0;}
+.nw-name{font-size:18px;font-weight:500;color:#0C3124;letter-spacing:-.02em;line-height:normal;}
+.nw-token{font-size:12px;font-weight:400;color:#83968F;line-height:normal;}
+.nw-amt-col{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;flex-shrink:0;}
+.nw-amt{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-.02em;line-height:normal;white-space:nowrap;}
+.nw-amt-usd{font-size:12px;font-weight:400;color:#83968F;line-height:normal;white-space:nowrap;}
+
 /* Toast（底部胶囊提示）*/
 .onr-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);z-index:9500;display:flex;align-items:center;gap:10px;background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 18px;font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.01em;box-shadow:0 8px 40px rgba(0,0,0,.12);font-family:'Archivo',sans-serif;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;white-space:nowrap;}
 .onr-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -487,9 +519,28 @@ function selOpt(which) {
 }
 
 /* ─── Next ─── */
-/* 后续支付流程屏已移除；此处留待接入真实下一步。 */
+/* 点 Next：Card & Local 走原报价浮层（由 act-btn-checkout 的独立监听处理），其余支付方式打开 Select network 弹窗 */
 function goNext() {
-  /* no-op placeholder */
+  var local=document.getElementById('opt-local');
+  if(local && local.classList.contains('sel')) return;   // 本地支付：交给报价浮层流程
+  if(typeof onrOpen==='function') onrOpen('onr-network-ov');
+}
+/* Select network：选链
+   - 有余额（funded）→ 关闭 Select network、切换到 Request Submitted 弹窗
+   - 无余额 → toast 提示余额不足，保持在选择弹窗 */
+function selectNetwork(name, funded){
+  if(!funded){
+    if(typeof onrToast==='function') onrToast('Insufficient balance');
+    return;
+  }
+  if(typeof onrClose==='function') onrClose('onr-network-ov');
+  if(typeof onrOpen==='function') onrOpen('onr-submitted-ov');
+}
+/* Hide assets < $1：切换隐藏余额不足 $1 的网络行（默认关，全部展示，1:1 对齐 Figma）*/
+function toggleHideAssets(){
+  var btn=document.getElementById('nw-hide'), list=document.getElementById('nw-list');
+  if(!btn||!list) return;
+  list.classList.toggle('hide-zero', btn.classList.toggle('on'));
 }
 </script>
 
@@ -739,6 +790,88 @@ function goNext() {
         <button class="act-btn" style="margin-top:0;background:#009859;" onclick="onrClpConfirm()">Enable</button>
         <button class="onr-btn-secondary" onclick="onrClpCancel()">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Select network 弹窗（点 Next 打开；Figma 19721:13287，1:1）-->
+<div class="onr-sheet-ov" id="onr-network-ov" onclick="if(event.target===this)onrClose('onr-network-ov')">
+  <div class="onr-modal">
+    <div class="nw-head">
+      <div class="nw-head-text">
+        <div class="nw-title">Select network</div>
+        <div class="nw-sub">Your deposit should appear in a few minutes.</div>
+      </div>
+      <button class="nw-hide" id="nw-hide" onclick="toggleHideAssets()">
+        <span class="nw-hide-dot"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.5 4L3.5 7L9.5 0.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="nw-hide-label">Hide assets &lt; $1</span>
+      </button>
+    </div>
+    <div class="nw-list" id="nw-list">
+      <button class="nw-row" onclick="selectNetwork('BSC (BEP20)', true)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/bnb.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">BSC (BEP20)</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">9,100.32 USDT</div><div class="nw-amt-usd">≈ 9,100.98 USD</div></div>
+      </button>
+      <button class="nw-row" onclick="selectNetwork('Base', true)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/base.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">Base</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">400.33 USDT</div><div class="nw-amt-usd">≈ 398.09 USD</div></div>
+      </button>
+      <button class="nw-row" onclick="selectNetwork('Ethereum', true)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/eth.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">Ethereum</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">400.33 USDT</div><div class="nw-amt-usd">≈ 400.33 USD</div></div>
+      </button>
+      <button class="nw-row nw-row--zero" onclick="selectNetwork('Polygon', false)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Polygon.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">Polygon</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
+      </button>
+      <button class="nw-row nw-row--zero" onclick="selectNetwork('Optimism', false)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Optimism.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">Optimism</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
+      </button>
+      <button class="nw-row nw-row--zero" onclick="selectNetwork('Arbitrum', false)">
+        <div class="nw-left">
+          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Arbitrum.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-name-col"><div class="nw-name">Arbitrum</div><div class="nw-token">USDT</div></div>
+        </div>
+        <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Submitted 弹窗（在 Select network 选择有余额的网络后切换打开；Figma 24885:25683，1:1）-->
+<div class="onr-sheet-ov" id="onr-submitted-ov" onclick="if(event.target===this)onrClose('onr-submitted-ov')">
+  <div class="onr-modal">
+    <div class="rs-top">
+      <img src="assets/done.png" class="onr-rs-illus" alt="">
+      <div class="onr-rs-head">
+        <div class="onr-rs-title">Request Submitted</div>
+        <div class="onr-rs-amtgrp">
+          <div class="onr-rs-amt-label">Amount</div>
+          <div class="onr-rs-amt-val">150.50 USDT</div>
+        </div>
+        <div class="rs-sub">Waiting for on-chain confirmation. This may take a few minutes.</div>
+      </div>
+    </div>
+    <div class="rs-foot">
+      <button class="onr-rs-btn save" onclick="onrToast('Opening transaction…')">View detail</button>
+      <button class="onr-rs-btn close" onclick="onrClose('onr-submitted-ov')">Back</button>
+      <button class="onr-rs-btn close" type="button">Return to merchant</button>
     </div>
   </div>
 </div>
