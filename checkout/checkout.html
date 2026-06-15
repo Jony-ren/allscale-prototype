@@ -184,6 +184,49 @@ body{
 .onr-sheet-ov.closing .onr-modal{animation:onr-modal-out .16s ease forwards;}
 .onr-sheet-foot{padding:8px 20px 20px;flex-shrink:0;}
 @media(max-width:768px){ .onr-sheet-ov{align-items:flex-end;padding:0;} }
+
+/* ════════════════════════════════════════════════
+   W002A / W003A 法则映射（设计系统，单一 633px 断点）
+   W002A（主流程 → ≤633 全屏、保留 Back、CTA 钉底）：#onr-overlay（Card & Local Payments）；#onr-submitted-ov（Request Submitted，见下方各自块）
+   W003A（次级 sheet → ≤633 底部浮动 sheet、无 back/close）：#onr-sheet-ov（Pay with xxx）、#onr-fiat-ov（Pay in）、#onr-handoff（Payment provider，主弹窗内步骤，用 .as-sheet 态切换）
+   ID 特异性高于共享 768 规则，覆盖之而不影响 #onr-activity-ov / #onr-settings-ov / #onr-confirm-ov
+   ════════════════════════════════════════════════ */
+/* ── Card & Local Payments → W002A ── */
+#onr-overlay{align-items:flex-start;padding:50px 20px;}
+#onr-overlay .onr-modal{width:420px;max-width:calc(100vw - 40px);max-height:90vh;border-radius:24px;}
+#onr-overlay #onr-back{display:none;}                                          /* 桌面 banner 仅标题 */
+#onr-overlay .onr-modal-hd .onr-circle-btn:not(#onr-back){display:none;}       /* 桌面隐藏 close（遮罩/内部按钮关闭）*/
+@media(max-width:633px){
+  #onr-overlay{padding:0;align-items:stretch;}
+  #onr-overlay .onr-modal{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;}
+  #onr-overlay #onr-back{display:flex;}                                        /* 全屏保留 Back（左上唯一导航）*/
+  #onr-overlay .onr-modal-hd .onr-circle-btn:not(#onr-back){display:flex;visibility:hidden;}  /* close 变占位，标题居中 */
+  #onr-overlay .onr-modal-body{display:flex;flex-direction:column;}
+  #onr-overlay .onr-panel.active{flex:1 1 auto;}
+  #onr-overlay .onr-foot{margin-top:auto;}                                     /* CTA 钉到屏幕底部 */
+  /* Payment provider（#onr-handoff）窄屏按 W003A 浮动 sheet：onrShow 给 #onr-overlay 加 .as-sheet */
+  #onr-overlay.as-sheet{padding:0 8px 16px;align-items:flex-end;}
+  #onr-overlay.as-sheet .onr-modal{width:100%;max-width:420px;height:auto;max-height:92vh;border-radius:24px;}
+  #onr-overlay.as-sheet #onr-back,
+  #onr-overlay.as-sheet .onr-modal-hd .onr-circle-btn:not(#onr-back){display:none;}   /* sheet 无按钮 */
+  #onr-overlay.as-sheet .onr-foot{margin-top:0;}
+}
+/* ── Pay with xxx（#onr-sheet-ov）→ W003A ── */
+#onr-sheet-ov{align-items:flex-start;padding:50px 20px;}
+#onr-sheet-ov .onr-modal{width:420px;max-width:calc(100vw - 40px);border-radius:24px;height:fit-content;}
+#onr-sheet-ov .onr-modal-hd .onr-circle-btn{display:none;}                     /* 无 back/close，点遮罩关闭 */
+@media(max-width:633px){
+  #onr-sheet-ov{align-items:flex-end;padding:0 8px 16px;}
+  #onr-sheet-ov .onr-modal{width:100%;max-width:420px;border-radius:24px;max-height:min(520px,92vh);}
+}
+/* ── Pay in（#onr-fiat-ov）→ W003A ── */
+#onr-fiat-ov{align-items:flex-start;padding:50px 20px;}
+#onr-fiat-ov .onr-modal{width:420px;max-width:calc(100vw - 40px);border-radius:24px;height:fit-content;max-height:500px;}
+#onr-fiat-ov .onr-modal-hd .onr-circle-btn{display:none;}
+@media(max-width:633px){
+  #onr-fiat-ov{align-items:flex-end;padding:0 8px 16px;}
+  #onr-fiat-ov .onr-modal{width:100%;max-width:420px;border-radius:24px;max-height:min(520px,92vh);}
+}
 .onr-method-row{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--as-border-cyan);border-radius:12px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;}
 .onr-method-row:hover{background:#F2F8F5;}
 .onr-method-row.sel{border-color:#0D0D0D;background:#FAFBFA;}
@@ -214,13 +257,27 @@ body{
 .onr-rs-btn:hover{opacity:.9;}
 .onr-rs-btn.save{background:#009859;color:#FDFFFE;}
 .onr-rs-btn.close{background:#FAFBFA;color:#0C3124;}
-/* ════ Request Submitted 弹窗（Figma 24885:25683，1:1；容器沿用系统标准弹窗 .onr-sheet-ov/.onr-modal：距顶 50px、宽 420px。复用上方 .onr-rs-* 排版）════ */
-#onr-submitted-ov .onr-modal{height:fit-content;}
+/* ════ Request Submitted 弹窗（Figma 24885:25683，1:1；复用 .onr-rs-* 排版）→ W002A 法则 ════ */
+/* W002A：≥634 顶部居中 420px；≤633 全屏（圆角 0），按钮组 CTA 钉在屏幕底部。ID 选择器特异性高于共享 768 规则，故无需改动共享样式、不影响 #onr-confirm-ov */
+#onr-submitted-ov{align-items:flex-start;padding:50px 20px;}
+#onr-submitted-ov .onr-modal{width:420px;max-width:calc(100vw - 40px);height:fit-content;max-height:90vh;border-radius:24px;}
+@media(max-width:633px){
+  #onr-submitted-ov{align-items:stretch;padding:0;}
+  #onr-submitted-ov .onr-modal{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;}
+  #onr-submitted-ov .rs-top{flex:1 1 auto;overflow-y:auto;}   /* 内容填满，过长则内部滚动 */
+  #onr-submitted-ov .rs-foot{margin-top:auto;}                /* CTA 钉到屏幕底部 */
+}
 .rs-top{display:flex;flex-direction:column;align-items:center;gap:48px;padding:32px 20px 0;width:100%;}
 .rs-foot{display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 20px 32px;width:100%;}
 .rs-sub{font-size:12px;font-weight:400;color:#83968F;text-align:center;line-height:1.35;}
-/* ════ Select network 弹窗（Figma 19721:13287，1:1；容器沿用系统标准弹窗 .onr-sheet-ov/.onr-modal：距顶 50px、宽 420px）════ */
-#onr-network-ov .onr-modal{height:fit-content;}
+/* ════ Select network 弹窗（Figma 19721:13287，1:1）→ W003A 法则 ════ */
+/* W003A：≥634 顶部居中 420px；≤633 底部浮动 sheet（max-width 420 · 两侧 8px · 距底 16px · 四角 24px · 高 ≤520，超出内部滚动）；无 back/close 按钮，点遮罩关闭 */
+#onr-network-ov{align-items:flex-start;padding:50px 20px;}
+#onr-network-ov .onr-modal{width:420px;max-width:calc(100vw - 40px);height:fit-content;max-height:90vh;border-radius:24px;}
+@media(max-width:633px){
+  #onr-network-ov{align-items:flex-end;padding:0 8px 16px;}
+  #onr-network-ov .onr-modal{width:100%;max-width:420px;border-radius:24px;max-height:min(520px,92vh);}
+}
 .nw-head{display:flex;flex-direction:column;gap:10px;padding:22px 20px 14px;flex-shrink:0;}
 .nw-head-text{display:flex;flex-direction:column;gap:4px;}
 .nw-title{font-size:24px;font-weight:500;color:#0C3124;letter-spacing:-.02em;line-height:normal;}
@@ -245,6 +302,31 @@ body{
 .nw-amt-col{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;flex-shrink:0;}
 .nw-amt{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-.02em;line-height:normal;white-space:nowrap;}
 .nw-amt-usd{font-size:12px;font-weight:400;color:#83968F;line-height:normal;white-space:nowrap;}
+
+/* ════ Scan to Pay 弹窗 — W002A 法则（单一 633px 断点；≥634 顶部居中 420px；≤633 全屏、保留 Back、Close 变占位以居中标题）。内容移植自 swidge-demo.html 的 Scan to Pay / Pay with different tokens ════ */
+.w002a-ov{position:fixed;inset:0;z-index:8200;background:rgba(0,0,0,.25);display:flex;align-items:flex-start;justify-content:center;padding:50px 20px;opacity:0;pointer-events:none;}
+.w002a-ov.open{opacity:1;pointer-events:auto;animation:onr-ov-in .22s ease forwards;}
+.w002a-ov.closing{animation:onr-ov-out .18s ease forwards;pointer-events:none;}
+.w002a-modal{position:relative;width:420px;max-width:calc(100vw - 32px);max-height:90vh;background:#FDFFFE;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.w002a-ov.open .w002a-modal{animation:onr-modal-in .26s cubic-bezier(.34,1.1,.64,1) forwards;}
+.w002a-ov.closing .w002a-modal{animation:onr-modal-out .16s ease forwards;}
+@media(max-width:633px){
+  .w002a-ov{padding:0;align-items:stretch;}
+  .w002a-modal{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;}
+  .w002a-ov .w002a-close{visibility:hidden;}   /* Close 变占位，Back 居左、标题居中 */
+}
+/* QR 页元素（移植 swidge-demo） */
+.qr-amt-row{display:flex;align-items:baseline;gap:6px;margin-top:8px;}
+.copy-btn{width:34px;height:34px;border-radius:50%;background:var(--as-btn-cyan);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pay-other-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1px solid #E5EEEA;border-radius:48px;padding:14px 18px;cursor:pointer;background:#FAFBFA;margin-top:12px;transition:background .12s;font-family:'Archivo',sans-serif;}
+.pay-other-btn:hover{background:#f0f3f1;}
+.pay-other-btn-label{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-.01em;}
+.pf-chevron{width:6px;height:12px;margin-left:2px;flex-shrink:0;}
+.wp-tab{display:inline-flex;align-items:center;gap:8px;height:43px;padding:0 16px 0 10px;border-radius:50px;border:1.5px solid #E5EEEA;background:#FAFBFA;cursor:pointer;transition:all .15s;font-size:16px;font-weight:500;color:#83968F;letter-spacing:-0.02em;font-family:'Archivo',sans-serif;flex:0 0 auto;white-space:nowrap;box-sizing:border-box;}
+.wp-tab.active{border-color:#009859;background:#F2F8F5;color:#009859;}
+/* 钱包页签横向滚动条会在底部占 ~15px、把页签挤偏上；隐藏它（全局 ::-webkit-scrollbar 只设了 width:0，没消除横向条的 height），使页签在条内垂直居中 */
+#wp-wallet-scroll{scrollbar-width:none;-ms-overflow-style:none;}
+#wp-wallet-scroll::-webkit-scrollbar{display:none;width:0;height:0;}
 
 /* Toast（底部胶囊提示）*/
 .onr-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);z-index:9500;display:flex;align-items:center;gap:10px;background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 18px;font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.01em;box-shadow:0 8px 40px rgba(0,0,0,.12);font-family:'Archivo',sans-serif;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;white-space:nowrap;}
@@ -519,11 +601,78 @@ function selOpt(which) {
 }
 
 /* ─── Next ─── */
-/* 点 Next：Card & Local 走原报价浮层（由 act-btn-checkout 的独立监听处理），其余支付方式打开 Select network 弹窗 */
+/* 点 Next：Card & Local 走原报价浮层（由 act-btn-checkout 的独立监听处理）；Scan to Pay 打开扫码弹窗；其余（AllScale / Connect）打开 Select network */
 function goNext() {
   var local=document.getElementById('opt-local');
   if(local && local.classList.contains('sel')) return;   // 本地支付：交给报价浮层流程
-  if(typeof onrOpen==='function') onrOpen('onr-network-ov');
+  var connect=document.getElementById('opt-connect');
+  if(connect && connect.classList.contains('sel')){ if(typeof onrToast==='function') onrToast('Connecting wallet…'); return; }   // Connect wallet：弹 toast 表示正在连接钱包
+  var scan=document.getElementById('opt-scan');
+  if(scan && scan.classList.contains('sel')){ openScan(); return; }   // Scan to Pay → 扫码弹窗
+  if(typeof onrOpen==='function') onrOpen('onr-network-ov');   // Pay with AllScale → Select network
+}
+/* ─── Scan to Pay 弹窗（W002A）─── */
+function openScan(){
+  scanSetMode('a');
+  var ov=document.getElementById('onr-scan-ov');
+  if(ov){ ov.classList.remove('closing'); ov.classList.add('open'); }
+}
+function closeScan(){
+  var ov=document.getElementById('onr-scan-ov');
+  if(!ov||!ov.classList.contains('open')) return;
+  ov.classList.add('closing');
+  ov.addEventListener('animationend',function h(e){ if(e.target!==ov) return; ov.classList.remove('open','closing'); ov.removeEventListener('animationend',h); });
+}
+/* Back：Mode B → Mode A；Mode A → 关闭回到主界面（镜像 swidge-demo 返回逻辑）*/
+function scanBack(){
+  var b=document.getElementById('scan-mode-b');
+  if(b && b.style.display!=='none'){ scanSetMode('a'); return; }
+  closeScan();
+}
+/* 切换 Scan to pay（a）/ Pay with different tokens（b），同步标题 */
+function scanSetMode(mode){
+  var a=document.getElementById('scan-mode-a'), b=document.getElementById('scan-mode-b'), t=document.getElementById('onr-scan-title');
+  var isB=(mode==='b');
+  if(a) a.style.display=isB?'none':'flex';
+  if(b) b.style.display=isB?'flex':'none';
+  if(t) t.textContent=isB?'Pay with different tokens':'Scan to pay';
+}
+/* 钱包页签：高亮 + 同步 dApp 提示 / Open 按钮（移植 swidge-demo，去掉 canvas 假 QR）*/
+var SCAN_WALLET_NAMES={metamask:'MetaMask',trust:'Trust Wallet',okx:'OKX Wallet',rainbow:'Rainbow',coinbase:'Coinbase Wallet',imtoken:'imToken'};
+var SCAN_WALLET_ICONS={metamask:'assets/wallets-app/metamask.png',trust:'assets/wallets-app/trust.png',okx:'assets/wallets-app/okx.png',rainbow:'assets/wallets-app/rainbow.png',coinbase:'assets/wallets-app/coinbase.png',imtoken:'assets/wallets-app/imtoken.png'};
+function selWalletTab(el, wallet){
+  document.querySelectorAll('#onr-scan-ov .wp-tab').forEach(function(t){t.classList.remove('active');});
+  if(el) el.classList.add('active');
+  var nm=SCAN_WALLET_NAMES[wallet]||wallet;
+  var hint=document.getElementById('wp-qr-hint'); if(hint) hint.textContent="Opens in "+nm+"'s built-in browser";
+  var oi=document.getElementById('open-wallet-icon'); if(oi) oi.src=SCAN_WALLET_ICONS[wallet]||SCAN_WALLET_ICONS.metamask;
+  var ol=document.getElementById('open-wallet-label'); if(ol) ol.textContent='Open '+nm;
+}
+function toggleWalletDropdown(){
+  var dd=document.getElementById('wp-wallet-dropdown'), btn=document.getElementById('wp-all-btn');
+  if(!dd) return;
+  var isOpen=dd.style.display!=='none';
+  dd.style.display=isOpen?'none':'block';
+  if(btn){ btn.style.borderColor=isOpen?'#E5EEEA':'#009859'; btn.style.background=isOpen?'transparent':'#F2F8F5'; }
+  if(!isOpen) setTimeout(function(){ document.addEventListener('click',_closeWalletDD); },0);
+}
+function _closeWalletDD(e){
+  var dd=document.getElementById('wp-wallet-dropdown'), btn=document.getElementById('wp-all-btn');
+  if(dd && !dd.contains(e.target) && btn && !btn.contains(e.target)){
+    dd.style.display='none';
+    btn.style.borderColor='#E5EEEA'; btn.style.background='transparent';
+    document.removeEventListener('click',_closeWalletDD);
+  }
+}
+function selWalletFromDropdown(wallet){
+  var tabs=document.querySelectorAll('#onr-scan-ov .wp-tab');
+  var map={metamask:0,trust:1,okx:2,rainbow:3,coinbase:4,imtoken:5};
+  var idx=map[wallet];
+  if(idx!==undefined && tabs[idx]){ selWalletTab(tabs[idx],wallet); tabs[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }
+  var dd=document.getElementById('wp-wallet-dropdown'), btn=document.getElementById('wp-all-btn');
+  if(dd) dd.style.display='none';
+  if(btn){ btn.style.borderColor='#E5EEEA'; btn.style.background='transparent'; }
+  document.removeEventListener('click',_closeWalletDD);
 }
 /* Select network：选链
    - 有余额（funded）→ 关闭 Select network、切换到 Request Submitted 弹窗
@@ -876,6 +1025,97 @@ function toggleHideAssets(){
   </div>
 </div>
 
+<!-- Scan to Pay 弹窗（选 Scan to Pay + Next 打开；移植自 swidge-demo 的 Scan to Pay / Pay with different tokens；遵循 W002A 法则）-->
+<div class="w002a-ov" id="onr-scan-ov" onclick="if(event.target===this)closeScan()">
+  <div class="w002a-modal">
+    <div class="onr-modal-hd">
+      <button class="onr-circle-btn" onclick="scanBack()" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="onr-modal-title" id="onr-scan-title">Scan to pay</div>
+      <button class="onr-circle-btn w002a-close" onclick="closeScan()" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="onr-modal-body">
+
+      <!-- ═══ MODE A: Scan to pay（简单 QR）═══ -->
+      <div id="scan-mode-a" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#F0F9F4;padding:12px 14px;border-radius:12px;display:flex;align-items:flex-start;gap:10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10" stroke="var(--as-green)" stroke-width="1.8"/><path d="M12 8v5M12 15.5v.5" stroke="var(--as-green)" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div style="font-size:11.5px;color:var(--as-dark);line-height:1.6;">Send the exact amount to the address below. For other tokens or chains, tap "Pay with different tokens".</div>
+        </div>
+        <div style="background:var(--as-card);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;margin-top:8px;">
+          <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+          <div style="font-size:14px;font-weight:500;color:var(--as-dark);margin-top:8px;">Pay with wallet</div>
+          <div class="qr-amt-row">
+            <div style="display:flex;align-items:baseline;gap:0;">
+              <span style="font-size:38px;font-weight:500;letter-spacing:-.04em;color:var(--as-dark);">100</span>
+              <span style="font-size:22px;font-weight:500;letter-spacing:-.02em;color:var(--as-text);">.00 USDT</span>
+            </div>
+            <button class="copy-btn" onclick="onrToast('Copied')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6.667 6.667V5C6.667 3.159 8.16 1.667 10 1.667L15 1.667C16.841 1.667 18.333 3.159 18.333 5V10C18.333 11.841 16.841 13.333 15 13.333H13.333M6.667 6.667H5C3.159 6.667 1.667 8.159 1.667 10V15C1.667 16.841 3.159 18.333 5 18.333H10C11.841 18.333 13.333 16.841 13.333 15V13.333M6.667 6.667H10C11.841 6.667 13.333 8.159 13.333 10V13.333" stroke="#009859" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div style="width:100%;margin-top:14px;padding-top:14px;border-top:1px solid var(--as-border-cyan);">
+            <div style="font-size:11px;color:var(--as-text);margin-bottom:4px;">Recipient address</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="flex:1;min-width:0;font-size:16px;font-weight:500;color:var(--as-dark);word-break:break-all;font-family:'Archivo',sans-serif;">0x3f8A4c9E2bC1d7F6a23E9D0b5C8e1F4d2A7B6c9a8b4D7</div>
+              <button class="copy-btn" onclick="onrToast('Copied')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6.667 6.667V5C6.667 3.159 8.16 1.667 10 1.667L15 1.667C16.841 1.667 18.333 3.159 18.333 5V10C18.333 11.841 16.841 13.333 15 13.333H13.333M6.667 6.667H5C3.159 6.667 1.667 8.159 1.667 10V15C1.667 16.841 3.159 18.333 5 18.333H10C11.841 18.333 13.333 16.841 13.333 15V13.333M6.667 6.667H10C11.841 6.667 13.333 8.159 13.333 10V13.333" stroke="#009859" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+            </div>
+            <button onclick="onrToast('Copied')" style="display:flex;align-items:center;justify-content:center;gap:14px;width:100%;margin-top:12px;padding:14px 0;background:var(--as-green);border:none;border-radius:48px;cursor:pointer;font-size:16px;font-weight:500;color:#FFFFFF;font-family:'Archivo',sans-serif;transition:background .15s;" onmouseover="this.style.background='#00b368'" onmouseout="this.style.background='var(--as-green)'">
+              <img src="assets/copy-white.svg" width="20" height="20" style="display:block;">Copy address
+            </button>
+          </div>
+          <button class="pay-other-btn" onclick="scanSetMode('b')" style="margin-top:8px;">
+            <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
+            <span class="pay-other-btn-label">Pay with different tokens</span>
+            <svg class="pf-chevron" viewBox="0 0 6 12" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.28 0.16C-.04.42-.09.9.16 1.22L3.79 5.75.16 10.28C-.09 10.6-.04 11.08.28 11.34.6 11.59 1.08 11.54 1.34 11.22L5.34 6.22C5.55 5.94 5.55 5.56 5.34 5.28L1.34 0.28C1.08-.04.6-.09.28.16Z" fill="#0C3124"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="assets/allscale-logo.svg" height="20" style="display:block;"></div>
+      </div>
+
+      <!-- ═══ MODE B: Pay with different tokens（dApp QR + 钱包页签）═══ -->
+      <div id="scan-mode-b" style="display:none;flex-direction:column;gap:0;">
+        <div id="wp-wallet-scroll-wrap" style="flex-shrink:0;padding:0 0 8px;position:relative;">
+          <div style="display:flex;align-items:center;gap:0;">
+            <div style="flex:1;min-width:0;overflow-x:auto;display:flex;gap:8px;align-items:center;-webkit-overflow-scrolling:touch;padding:8px 8px 8px 8px;" id="wp-wallet-scroll">
+              <button class="wp-tab active" onclick="selWalletTab(this,'metamask')"><img src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> MetaMask</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'trust')"><img src="assets/wallets-app/trust.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Trust</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'okx')"><img src="assets/wallets-app/okx.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> OKX</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'rainbow')"><img src="assets/wallets-app/rainbow.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Rainbow</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'coinbase')"><img src="assets/wallets-app/coinbase.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Coinbase</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'imtoken')"><img src="assets/wallets-app/imtoken.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> imToken</button>
+            </div>
+            <button id="wp-all-btn" class="wp-tab" onclick="event.stopPropagation();toggleWalletDropdown()" style="flex-shrink:0;background:transparent;color:#0C3124;gap:6px;padding:0 16px;">All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div id="wp-wallet-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:100;background:#fff;border:1px solid #E5EEEA;border-radius:16px;padding:8px;width:220px;box-shadow:0 8px 40px rgba(0,0,0,0.10);max-height:320px;overflow-y:auto;">
+            <div onclick="selWalletFromDropdown('metamask')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/metamask.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">MetaMask</span></div>
+            <div onclick="selWalletFromDropdown('trust')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/trust.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Trust Wallet</span></div>
+            <div onclick="selWalletFromDropdown('okx')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/okx.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">OKX Wallet</span></div>
+            <div onclick="selWalletFromDropdown('rainbow')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/rainbow.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Rainbow</span></div>
+            <div onclick="selWalletFromDropdown('coinbase')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/coinbase.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Coinbase Wallet</span></div>
+            <div onclick="selWalletFromDropdown('imtoken')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/imtoken.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">imToken</span></div>
+          </div>
+        </div>
+        <div style="background:var(--as-card);border-radius:12px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;">
+          <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+          <div style="display:flex;align-items:center;gap:6px;margin-top:10px;"><span style="font-size:14px;font-weight:500;color:var(--as-dark);">Scan to open payment page</span></div>
+          <div style="font-size:12px;color:var(--as-text);margin-top:3px;" id="wp-qr-hint">Opens in MetaMask's built-in browser</div>
+        </div>
+        <button id="open-wallet-btn" onclick="onrToast('Opening wallet…')" style="width:100%;height:48px;border-radius:999px;border:none;background:#FAFBFA;cursor:pointer;font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;color:var(--as-dark);display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#EDEFED'" onmouseout="this.style.background='#FAFBFA'">
+          <img id="open-wallet-icon" src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;">
+          <span id="open-wallet-label">Open MetaMask</span>
+        </button>
+        <div style="background:var(--as-card);border-radius:12px;padding:16px;margin-top:10px;">
+          <div style="font-size:14px;font-weight:600;color:var(--as-dark);margin-bottom:10px;">What happens next?</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:22px;height:22px;border-radius:50%;background:#F2F8F5;color:#009859;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div style="font-size:13px;color:#0C3124;line-height:1.5;">Scan the QR code with your wallet app</div></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:22px;height:22px;border-radius:50%;background:#F2F8F5;color:#009859;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div style="font-size:13px;color:#0C3124;line-height:1.5;">The payment page opens — select your token &amp; chain</div></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:22px;height:22px;border-radius:50%;background:#F2F8F5;color:#009859;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div style="font-size:13px;color:#0C3124;line-height:1.5;">Confirm &amp; pay — we handle the cross-chain bridging</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script>
 /* ─── On-ramp（新增，纯附加，不改动上方已有 JS）─── */
 
@@ -913,6 +1153,9 @@ function onrShow(id){
   // Request Submitted（onr-waiting）按 Figma 无顶部 header
   var hd=document.querySelector('#onr-overlay .onr-modal-hd');
   if(hd) hd.style.display = (id==='onr-waiting') ? 'none' : 'flex';
+  // Payment provider 步骤在窄屏按 W003A 浮动 sheet 呈现（W003A-as-sheet）
+  var ovEl=document.getElementById('onr-overlay');
+  if(ovEl) ovEl.classList.toggle('as-sheet', id==='onr-handoff');
   // Request Submitted：金额取所选「You'll pay」，并让整个弹窗用系统进场动画重新弹出
   var mf=document.querySelector('#onr-overlay .onr-modal');
   if(id==='onr-waiting'){
