@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale — Multi-Stablecoin Support Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#009859;--green-hover:#0CAA67;--green-bg:#EAF9F1;--card:#FAFBFA;--btn:#F2F8F5;--border:#E5EEEA;--dark:#0C3124;--text:#83968F;--white:#FFFFFF;--usdt:#26A17B;--usdc:#2775CA;--dai:#F5AC37;--busd:#F0B90B;--red:#E5484D;--orange:#F5A623}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#F0F4F2;font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+
+  .topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(12,49,36,.04)}
+  .topbar-logo{width:28px;height:28px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0}
+  .topbar-title{font-size:15px;font-weight:600;color:var(--dark);flex:1}
+  .topbar-title span{color:var(--text);font-weight:400;font-size:13px;margin-left:6px}
+  .mode-btns{display:flex;gap:6px}
+  .mode-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Archivo',sans-serif}
+  .mode-btn:hover{border-color:var(--green);color:var(--dark)}
+  .mode-btn.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+
+  .container{max-width:960px;margin:0 auto;padding:20px}
+  .section-block{margin-bottom:36px}
+  .section-title{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-left:4px}
+  .compare-row{display:flex;gap:16px;align-items:flex-start}
+  .compare-col{flex:1;min-width:0}
+  .col-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;border-radius:50px;display:inline-block;margin-bottom:10px}
+  .col-label.current{background:#FEF3E2;color:var(--orange)}
+  .col-label.proposed{background:var(--green-bg);color:var(--green)}
+
+  .card{background:var(--white);border:1px solid var(--border);border-radius:27px;padding:22px 18px;position:relative;overflow:hidden;}
+  .screenshot-card{background:var(--white);border:1px solid var(--border);border-radius:27px;overflow:hidden;display:flex;flex-direction:column}
+  .screenshot-card img{width:100%;height:auto;display:block}
+
+  /* ── Highlight ── */
+  .hl{border:2px dashed var(--green);border-radius:16px;padding:12px;background:rgba(0,152,89,.03);margin:8px 0}
+  .hl-label{font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+
+  /* ── Coin ── */
+  .coin-icon{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;flex-shrink:0;vertical-align:middle}
+  .coin-icon.usdt{background:var(--usdt)}.coin-icon.usdc{background:var(--usdc)}.coin-icon.dai{background:var(--dai)}.coin-icon.busd{background:var(--busd)}
+  .coin-icon.lg{width:32px;height:32px;font-size:14px}
+
+  /* ── Wallet ── */
+  .wallet-center{text-align:center;padding:8px 0 16px}
+  .bal-label{font-size:14px;color:#0C3124;font-weight:400;margin-bottom:4px}
+  .bal-amount{font-weight:600;color:var(--dark);letter-spacing:-0.04em;line-height:1.1;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .bal-amount .bal-nums{display:flex;align-items:baseline;gap:0;}
+  .bal-amount .whole{font-size:54px;letter-spacing:-3px;}
+  .bal-amount .dec{font-size:28px;color:var(--text)}
+  .bal-toggle{display:flex;align-items:center;flex-shrink:0;}
+  .bal-toggle img{transition:transform 0.3s ease;transform:rotate(180deg);}
+  .bal-toggle.open img{transform:rotate(0deg);}
+  .bal-amount{cursor:pointer;}
+  .pills-wrap{overflow:hidden;max-height:200px;opacity:1;transition:max-height 0.35s ease,opacity 0.25s ease,margin-top 0.3s ease;}
+  .pills-wrap.collapsed{max-height:0;opacity:0;margin-top:0 !important;}
+  .asset-pill{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:40px;background:var(--btn);cursor:pointer}
+  .asset-pill-info{display:flex;flex-direction:column;align-items:flex-start;}
+  .asset-pill-text{font-size:16px;font-weight:600;color:var(--dark)}
+  .asset-pill-sub{font-size:12px;color:var(--text)}
+  .action-btns{display:flex;gap:8px;margin-top:16px;justify-content:center}
+  .action-btn{border-radius:50px;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 14px;}
+  .action-btn.primary{background:var(--green);color:var(--btn)}
+  .action-btn.secondary{background:#FAFBFA;color:var(--dark);border:none;}
+
+  /* ── Deposit Steps ── */
+  .popup-title{font-size:28px;font-weight:500;color:#0C3124;margin-bottom:24px;letter-spacing:-0.02em;}
+  .step-block{margin-bottom:0;padding:20px 0;}
+  .step-divider{height:1px;background:#E5EEEA;margin:0;}
+  .step-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .step-num{width:32px;height:32px;border-radius:50%;background:#F2F8F5;color:#009859;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step-desc{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .step-warn{font-size:13px;color:#E53E3E;margin-top:10px;line-height:1.5;}
+  .dep-token-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:50px;background:#FAFBFA;display:inline-flex;}
+  .dep-token-wrap{display:flex;gap:10px;flex-wrap:wrap;}
+  .dep-token-name{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .dep-net-btn{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:#FAFBFA;border:none;cursor:pointer;font-family:'Archivo',sans-serif;transition:background 0.2s ease;}
+  .dep-net-btn:hover{background:#F2F8F5;}
+  .net-sheet-subtitle{font-size:14px;color:#83968F;padding:0 20px 20px;font-weight:500;line-height:1.0;}
+  .dep-net-label{font-size:16px;font-weight:500;color:#0C3124;flex:1;text-align:left;letter-spacing:-0.02em;}
+  .dep-net-chevron{color:#83968F;font-size:18px;}
+  .addr-block{background:#FAFBFA;border-radius:14px;border:1.5px solid #E5EEEA;padding:14px 16px;font-size:13px;font-family:'DM Mono','SF Mono',monospace;color:#0C3124;word-break:break-all;margin-bottom:12px;line-height:1.6;}
+  .addr-btns{display:flex;flex-direction:column;gap:8px;}
+  .addr-btn-primary{width:100%;padding:14px;border-radius:50px;border:none;background:#009859;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-0.02em;transition:background 0.2s ease;}
+  .addr-btn-primary:hover{background:#0B8B4D;}
+  .addr-btn-secondary{width:100%;padding:14px;border-radius:50px;border:none;background:#FAFBFA;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#0C3124;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-0.02em;text-decoration:none;transition:background 0.2s ease;}
+  .addr-btn-secondary:hover{background:#F2F8F5;}
+
+  /* ── Network Picker Bottom Sheet ── */
+  .net-sheet-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.25);border-radius:27px;opacity:0;pointer-events:none;transition:opacity 0.25s ease;z-index:20;}
+  .net-sheet-overlay.open{opacity:1;pointer-events:all;}
+  .net-sheet{position:absolute;left:8px;right:8px;bottom:16px;background:#FFFFFF;border-radius:24px;padding:0;overflow:hidden;transform:translateY(calc(100% + 32px));transition:transform 0.32s cubic-bezier(0.32,0.72,0,1),opacity 0.22s ease;opacity:0;z-index:21;}
+  .net-sheet.open{transform:translateY(0);opacity:1;}
+  .net-sheet-handle{width:36px;height:4px;background:#E5EEEA;border-radius:99px;margin:12px auto 0;}
+  .net-sheet-header{padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .net-sheet-title{font-size:24px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1.2;}
+  .net-sheet-close{width:32px;height:32px;border-radius:50%;background:#F2F8F5;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0C3124;flex-shrink:0;}
+  .net-sheet-close:hover{background:#E5EEEA;}
+  .net-sheet-subtitle{font-size:14px;color:#83968F;padding:0 20px 20px;font-weight:500;line-height:1.5;}
+  .net-sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 24px;}
+  .net-sheet-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:50px;background:#FAFBFA;cursor:pointer;transition:background 0.12s;}
+  .net-sheet-item:hover{background:#F2F8F5;}
+  .net-sheet-item-name{font-size:18px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+
+  /* ── Withdraw Token Picker Sheet ── */
+  .wd-sheet-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.25);border-radius:27px;opacity:0;pointer-events:none;transition:opacity 0.25s ease;z-index:20;}
+  .wd-sheet-overlay.open{opacity:1;pointer-events:all;}
+  .wd-sheet{position:absolute;left:8px;right:8px;bottom:16px;max-height:538px;background:#FFFFFF;border-radius:24px;overflow:hidden;transform:translateY(calc(100% + 32px));transition:transform 0.32s cubic-bezier(0.32,0.72,0,1),opacity 0.22s ease,height 0.3s cubic-bezier(0.32,0.72,0,1);opacity:0;z-index:21;display:flex;flex-direction:column;}
+  .wd-sheet.open{transform:translateY(0);opacity:1;}
+  .wd-sheet-header{padding:20px 20px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .wd-sheet-title{font-size:24px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-sheet-close{width:32px;height:32px;border-radius:50%;background:#F2F8F5;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0C3124;flex-shrink:0;}
+  .wd-sheet-close:hover{background:#E5EEEA;}
+  .wd-sheet-subtitle{font-size:14px;color:#83968F;padding:0 20px 12px;font-weight:500;line-height:1.5;flex-shrink:0;}
+  .wd-sheet-tabs{display:flex;gap:8px;padding:0 20px 16px;flex-shrink:0;}
+  .wd-sheet-tab{display:inline-flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:50px;border:1.5px solid #E5EEEA;background:#FAFBFA;cursor:pointer;transition:all .15s;font-size:16px;font-weight:500;color:#83968F;letter-spacing:-0.02em;font-family:'Archivo',sans-serif;}
+  .wd-sheet-tab.active{border-color:#009859;background:#F2F8F5;color:#009859;}
+  .wd-sheet-tab img{width:24px;height:24px;display:block;}
+  .wd-sheet-list{overflow-y:auto;flex:1;padding:0 16px 20px;}
+  .wd-sheet-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid #E5EEEA;cursor:pointer;transition:background .12s;border-radius:8px;}
+  .wd-sheet-item:last-child{border-bottom:none;}
+  .wd-sheet-item:hover{background:#FAFBFA;}
+  .wd-sheet-item-info{flex:1;}
+  .wd-sheet-item-name{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-sheet-item-sub{font-size:13px;color:#83968F;font-weight:500;margin-top:2px;}
+  .wd-sheet-item-bal{text-align:right;}
+  .wd-sheet-item-bal-main{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-sheet-item-bal-sub{font-size:13px;color:#83968F;font-weight:500;margin-top:2px;}
+
+  /* ── Withdraw NEW ── */
+  .wd-section{background:#FAFBFA;border-radius:16px;padding:16px;margin-bottom:12px;}
+  .wd-section-label{display:inline-block;font-size:13px;color:var(--green);font-weight:500;margin-bottom:12px;background:#F2F8F5;padding:4px 6px;border-radius:10px;}
+  .wd-token-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#FAFBFA;border-radius:12px;border:1px solid #E5EEEA;cursor:pointer;transition:border-color .15s;}
+  .wd-token-row:hover{border-color:var(--green);}
+  .wd-token-icon-wrap{position:relative;width:28px;height:28px;flex-shrink:0;}
+  .wd-token-icon-wrap img{width:28px;height:28px;border-radius:0;display:block;}
+  .wd-token-name{flex:1;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-token-chevron{color:#83968F;font-size:18px;}
+
+  .wd-amount-section{background:#FAFBFA;border-radius:16px;padding:16px;margin-bottom:12px;}
+  .wd-amount-label{display:inline-block;font-size:13px;color:var(--green);font-weight:500;margin-bottom:12px;background:#F2F8F5;padding:4px 6px;border-radius:10px;}
+  .wd-amount-row{display:flex;align-items:center;gap:8px;}
+  .wd-amount-inner{display:flex;align-items:baseline;flex:1;min-width:0;gap:6px;}
+  .wd-amount-input{font-size:38px;font-weight:500;color:#0C3124;letter-spacing:-0.03em;line-height:1;border:none;background:transparent;outline:none;font-family:'Archivo',sans-serif;min-width:1ch;width:1ch;}
+  .wd-amount-sizer{position:absolute;visibility:hidden;pointer-events:none;font-size:38px;font-weight:500;font-family:'Archivo',sans-serif;letter-spacing:-0.03em;white-space:pre;}
+  .wd-amount-unit{font-size:38px;font-weight:500;color:#83968F;letter-spacing:-0.03em;white-space:nowrap;flex-shrink:0;}
+  .wd-max-btn{padding:6px 14px;border-radius:50px;border:none;background:transparent;color:#0C3124;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:-0.02em;}
+  .wd-max-btn:hover{background:transparent;}
+  .wd-avail{font-size:13px;color:#83968F;margin-top:8px;font-weight:500;}
+  .wd-avail span{color:#83968F;}
+
+  .wd-to-section{background:#FAFBFA;border-radius:16px;padding:16px;margin-bottom:12px;}
+  .wd-to-label{display:inline-block;font-size:13px;color:var(--green);font-weight:500;margin-bottom:12px;background:#F2F8F5;padding:4px 6px;border-radius:10px;}
+  .wd-to-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FAFBFA;border-radius:12px;border:1px solid #E5EEEA;cursor:pointer;transition:border-color .15s;}
+  .wd-to-row:hover{border-color:var(--green);}
+  .wd-to-text{flex:1;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-to-chevron{color:#83968F;font-size:18px;}
+
+  .wd-fees{padding:4px 0 12px;}
+  .wd-fee-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;}
+  .wd-fee-label{font-size:16px;font-weight:500;color:#83968F;letter-spacing:-0.02em;}
+  .wd-fee-value{font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .wd-fee-row.total .wd-fee-label{color:#0C3124;}
+  .wd-fee-row.total .wd-fee-value{color:#009859;}
+  .wd-fee-skeleton{height:16px;width:72px;border-radius:8px;background:linear-gradient(90deg,#E5EEEA 25%,#F2F8F5 50%,#E5EEEA 75%);background-size:200% 100%;animation:skeletonShimmer 1.2s infinite;}
+  @keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  .btn-primary{width:100%;height:52px;border-radius:50px;border:none;background:var(--green);color:#FFFFFF;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;}
+  .btn-primary:hover{background:#0B8B4D;}
+  .btn-primary[style*="pointer-events: none"]:hover,.btn-primary[style*="pointer-events:none"]:hover{background:var(--green);}
+  .btn-disabled{background:var(--border);color:var(--text);cursor:default;}
+
+  .wd-to{background:var(--card);border-radius:16px;padding:14px;margin-bottom:14px}
+  .wd-to-icon{width:32px;height:32px;border-radius:10px;background:var(--btn);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .wd-token-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 16px 10px 10px;border-radius:50px;background:var(--white);border:1px solid var(--border);cursor:pointer;transition:border-color .15s}
+  .wd-token-pill:hover{border-color:var(--green)}
+  .wd-token-pill .chain-badge{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--white);margin-left:-18px;margin-right:4px;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;color:white}
+  .wd-token-pill-name{font-size:14px;font-weight:500;color:var(--dark)}
+
+  /* ── Withdraw Asset List ── */
+  .asset-list-item{display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:8px}
+  .asset-list-item:last-child{border-bottom:none}
+  .asset-list-item:hover{background:var(--btn)}
+  .ali-icon-stack{position:relative;width:36px;height:36px;flex-shrink:0}
+  .ali-icon-stack .coin-icon{position:absolute;top:0;left:0;width:32px;height:32px;font-size:13px}
+  .ali-icon-stack .chain-mini{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--white);display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;color:white}
+  .ali-info{flex:1}
+  .ali-name{font-size:14px;font-weight:500;color:var(--dark)}
+  .ali-sub{font-size:11px;color:var(--text)}
+  .ali-bal{text-align:right}
+  .ali-bal-main{font-size:14px;font-weight:600;color:var(--dark)}
+  .ali-bal-sub{font-size:11px;color:var(--text)}
+
+  /* ── Activity ── */
+  .act-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .act-item:last-child{border-bottom:none}
+  .act-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .act-icon.dep{background:var(--green-bg);color:var(--green)}
+  .act-icon.wd{background:#FEF3E2;color:var(--orange)}
+  .act-info{flex:1}
+  .act-type{font-size:13px;font-weight:500}
+  .act-date{font-size:11px;color:var(--text)}
+  .act-amt{font-size:13px;font-weight:600;text-align:right}
+  .act-amt.pos{color:var(--green)}
+
+  /* ── Invoice ── */
+  .inv-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:10px}
+  .inv-item:last-child{border-bottom:none}
+  .inv-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .inv-icon.in{background:var(--green-bg);color:var(--green)}
+  .inv-info{flex:1}
+  .inv-party{font-size:13px;font-weight:500}
+  .inv-meta{font-size:11px;color:var(--text);margin-top:1px}
+  .inv-amt{font-size:14px;font-weight:600;text-align:right}
+  .inv-amt.pos{color:var(--green)}
+  .badge{display:inline-flex;padding:1px 7px;border-radius:50px;font-size:10px;font-weight:600}
+  .badge-usdt{background:rgba(38,161,123,.1);color:var(--usdt)}
+  .badge-usdc{background:rgba(39,117,202,.1);color:var(--usdc)}
+
+
+
+  .divider{height:1px;background:var(--border);margin:14px 0}
+
+  #toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .toast{background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 16px;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;box-shadow:0 8px 40px rgba(0,0,0,0.10);display:inline-flex;align-items:center;gap:10px;pointer-events:auto;animation:toastIn 0.25s ease;white-space:nowrap;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .card-toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 16px;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;box-shadow:0 8px 40px rgba(0,0,0,0.10);display:inline-flex;align-items:center;gap:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.25s ease,transform 0.25s ease;z-index:30;}
+  .card-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:700px){.compare-row{flex-direction:column}.compare-col{width:100%}}
+
+  /* ── 3.15 setting menu ── */
+  .s315-menu-item{display:flex;align-items:center;gap:14px;padding:16px 12px;border-radius:14px;background:#FAFBFA;transition:background .15s;}
+  .s315-menu-item:hover{background:#EDEFED;}
+  .s315-menu-item.clickable{cursor:pointer;}
+  .s315-menu-item-icon{width:36px;height:36px;border-radius:10px;background:#F0F4F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* ── Invoice sub-modal ── */
+  @keyframes s315-overlay-in{from{opacity:0}to{opacity:1}}
+  @keyframes s315-overlay-out{from{opacity:1}to{opacity:0}}
+  @keyframes s315-modal-in{from{opacity:0;transform:translateY(20px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes s315-modal-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(12px) scale(0.97)}}
+  .s315-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:600;display:flex;align-items:flex-start;justify-content:center;padding-top:50px;opacity:0;pointer-events:none;}
+  .s315-overlay.open{pointer-events:auto;animation:s315-overlay-in .22s ease forwards;}
+  .s315-overlay.closing{animation:s315-overlay-out .18s ease forwards;pointer-events:none;}
+  .s315-overlay.open .s315-modal{animation:s315-modal-in .26s cubic-bezier(0.34,1.1,0.64,1) forwards;}
+  .s315-overlay.closing .s315-modal{animation:s315-modal-out .16s ease forwards;}
+  .s315-modal{background:#fff;border-radius:24px;width:420px;overflow:hidden;}
+  .s315-modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;}
+  .s315-modal-title{font-size:24px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;}
+  .s315-nav-btn{width:40px;height:40px;border-radius:50%;background:#F0F2F0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0C3124;transition:background .15s;flex-shrink:0;}
+  .s315-nav-btn:hover{background:#E5EEEA;}
+  .s315-coin-opt{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:border-color .15s,background .15s;font-family:'Archivo',sans-serif;}
+  .s315-coin-opt.active{border-color:var(--green);background:var(--green-bg);}
+  .s315-coin-opt:hover{border-color:#aac8bb;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">AllScale Pay <span>Multi-Stablecoin Demo</span>
+    <div style="font-size:12px;font-weight:400;color:var(--text);margin-top:2px;letter-spacing:0">只改动 USDT、USDC 相关的部分，其他部分样式不进行改动</div>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn active" data-mode="1" onclick="setMode(1)">+ USDC</button>
+    <button class="mode-btn" data-mode="2" onclick="setMode(2)">Multi-Coin</button>
+  </div>
+</div>
+
+<div class="container" id="app"></div>
+<div id="toast-container"></div>
+
+<script>
+const C={
+  USDT:{letter:'T',cls:'usdt',color:'#26A17B',name:'Tether USD',balance:312.04},
+  USDC:{letter:'U',cls:'usdc',color:'#2775CA',name:'USD Coin',balance:220.50},
+  DAI:{letter:'D',cls:'dai',color:'#F5AC37',name:'Dai',balance:85.00},
+  BUSD:{letter:'B',cls:'busd',color:'#F0B90B',name:'Binance USD',balance:40.00},
+};
+const MC={1:['USDT','USDC'],2:['USDT','USDC','DAI','BUSD']};
+const CH=[
+  {name:'BSC CHAIN',color:'#F0B90B',letter:'B',rec:true},
+  {name:'BASE',color:'#0052FF',letter:'B'},
+  {name:'ETHEREUM',color:'#627EEA',letter:'E'},
+  {name:'POLYGON',color:'#8247E5',letter:'P'},
+  {name:'OPTIMISM',color:'#FF0420',letter:'O'},
+  {name:'ARBITRUM',color:'#28A0F0',letter:'A'},
+];
+const _toastTimers = new Map();
+// per-chain balances for withdraw asset list
+const CB={
+  USDT:{'BSC CHAIN':96.48,BASE:0.00,ETHEREUM:215.42,POLYGON:0.06,OPTIMISM:0.00,ARBITRUM:0.08},
+  USDC:{'BSC CHAIN':80.00,BASE:50.50,ETHEREUM:60.00,POLYGON:20.00,OPTIMISM:10.00,ARBITRUM:0.00},
+  DAI:{ETHEREUM:70.00,'BSC CHAIN':15.00,ARBITRUM:0.00,POLYGON:0.00,BASE:0.00,OPTIMISM:0.00},
+  BUSD:{'BSC CHAIN':40.00,ETHEREUM:0.00,ARBITRUM:0.00,POLYGON:0.00,BASE:0.00,OPTIMISM:0.00},
+};
+let mode=1, payInvCoin=0, payCkCoin=0;
+function coins(){return MC[mode]}
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function ic(sym,lg){return `<span class="coin-icon ${C[sym].cls} ${lg?'lg':''}">${C[sym].letter}</span>`}
+function setMode(m){mode=m;payInvCoin=0;payCkCoin=0;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',+b.dataset.mode===m));render()}
+function togglePayInv(){const list=coins();payInvCoin=(payInvCoin+1)%list.length;render()}
+function togglePayCk(){const list=coins();payCkCoin=(payCkCoin+1)%list.length;render()}
+
+function netRows(){return CH.map((c,i)=>`<div class="net-row ${i===0?'active':''}"><div class="net-icon" style="background:${c.color}">${c.letter}</div><div class="net-name">${c.name}</div>${c.rec?'<div class="net-badge">Recommended</div>':''}</div>`).join('')}
+
+/* ─── Network Sheet ─── */
+function openNetSheet(btn) {
+  const card    = btn.closest('.card');
+  const overlay = card.querySelector('#dep-net-overlay');
+  const sheet   = card.querySelector('#dep-net-sheet');
+  if (!overlay || !sheet) return;
+  overlay.classList.add('open');
+  sheet.getBoundingClientRect();
+  sheet.classList.add('open');
+  initSheetDrag(sheet, overlay);
+}
+
+function closeNetSheet() {
+  document.querySelectorAll('#dep-net-sheet').forEach(sheet => {
+    sheet.style.transition = '';
+    sheet.classList.remove('open');
+  });
+  document.querySelectorAll('#dep-net-overlay').forEach(overlay => {
+    overlay.classList.remove('open');
+  });
+}
+
+function initSheetDrag(sheet, overlay) {
+  // avoid double-binding
+  if (sheet._dragBound) return;
+  sheet._dragBound = true;
+
+  let startY = 0, currentY = 0, dragging = false;
+
+  function onStart(e) {
+    startY   = e.touches ? e.touches[0].clientY : e.clientY;
+    currentY = 0;
+    dragging = true;
+    sheet.style.transition = 'none';
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    currentY = Math.max(0, y - startY); // only downward
+    sheet.style.transform = `translateY(${currentY}px)`;
+    // fade overlay proportionally
+    const sheetH = sheet.offsetHeight;
+    const ratio  = Math.max(0, 1 - currentY / sheetH);
+    overlay.style.opacity = (0.25 * ratio).toString();
+  }
+
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    sheet.style.transition = '';
+    const threshold = sheet.offsetHeight * 0.35;
+    if (currentY > threshold) {
+      // dismiss
+      sheet.style.transform = `translateY(calc(100% + 32px))`;
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        sheet.classList.remove('open');
+        overlay.classList.remove('open');
+        sheet.style.transform = '';
+        overlay.style.opacity = '';
+      }, 320);
+    } else {
+      // snap back
+      sheet.style.transform = '';
+      overlay.style.opacity = '';
+    }
+  }
+
+  sheet.addEventListener('touchstart', onStart, { passive: true });
+  sheet.addEventListener('touchmove',  onMove,  { passive: true });
+  sheet.addEventListener('touchend',   onEnd);
+  sheet.addEventListener('mousedown',  onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onEnd);
+}
+
+/* ─── Toggle pills ─── */
+function togglePills(balEl) {
+  const toggle = balEl.querySelector('.bal-toggle');
+  const pills  = balEl.closest('.wallet-center').querySelector('.pills-wrap');
+  if (!pills) return;
+  const isOpen = toggle.classList.contains('open');
+  if (isOpen) {
+    toggle.classList.remove('open');
+    pills.classList.add('collapsed');
+  } else {
+    toggle.classList.add('open');
+    pills.classList.remove('collapsed');
+  }
+}
+
+/* ═══ WALLET ═══ */
+function renderWallet(){
+  const list=coins(),total=list.reduce((s,c)=>s+C[c].balance,0);
+  const int=Math.floor(total),dec=((total%1)*100).toFixed(0).padStart(2,'0');
+  const pillIcon=s=>s==='USDT'?`<img src="asset/usdt.png" width="48" height="48" style="display:block;border-radius:50%;">`:s==='USDC'?`<img src="asset/usdc.png" width="48" height="48" style="display:block;border-radius:50%;">`:`${ic(s)}`;
+  const pills=list.map(s=>`<div class="asset-pill">${pillIcon(s)}<div class="asset-pill-info"><span class="asset-pill-text">${fmt(C[s].balance)}</span><span class="asset-pill-sub">${s}</span></div></div>`).join(' ');
+  return `<div class="section-block"><div class="section-title">Wallet Page</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current</div><div class="screenshot-card"><img src="screenshot/wallet.png" alt="Wallet"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed</div><div class="card">
+      <div style="font-size:32px;font-weight:500;margin-bottom:4px">Wallet</div>
+      <div class="wallet-center">
+        <div class="bal-label">Balance</div>
+        <div class="bal-amount" onclick="togglePills(this)"><span class="bal-nums"><span class="whole">$${int.toLocaleString()}</span><span class="dec">.${dec}</span></span><span class="bal-toggle"><img src="asset/arrow.svg" width="18" style="display:block;"></span></div>
+        <div class="pills-wrap collapsed" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px">${pills}</div>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn primary"><img src="asset/deposit.svg" width="20" height="20" style="display:block;"> Deposit</button>
+        <button class="action-btn secondary"><img src="asset/withdraw.svg" width="20" height="20" style="display:block;"> Withdraw</button>
+      </div>
+    </div></div></div></div>`;
+}
+
+/* ═══ DEPOSIT ═══ */
+function renderDeposit(){
+  return `<div class="section-block"><div class="section-title">3.2 Deposit Popup</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current</div><div class="screenshot-card"><img src="screenshot/deposit.png" alt="Deposit"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — 步骤 1、2 调换顺序</div><div class="card" style="height:853px">
+      <div class="popup-title">Deposit from wallet</div>
+
+      <div class="step-block">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div class="step-desc">Supported tokens</div>
+        </div>
+        <div class="dep-token-wrap">
+          <div class="dep-token-row">
+            <img src="asset/usdt.png" height="24" style="display:block;border-radius:50%;flex-shrink:0;">
+            <span class="dep-token-name">USDT</span>
+          </div>
+          <div class="dep-token-row">
+            <img src="asset/usdc.png" height="24" style="display:block;border-radius:50%;flex-shrink:0;">
+            <span class="dep-token-name">USDC</span>
+          </div>
+        </div>
+        <div class="step-warn">Please ONLY deposit supported token into this address. Other tokens sent to this address will not appear in this interface but remain recoverable via private key export.</div>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step-block">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div class="step-desc">Supported network</div>
+        </div>
+        <button class="dep-net-btn" onclick="openNetSheet(this)">
+          <img src="asset/networks.svg" height="24" style="display:block;flex-shrink:0;">
+          <span class="dep-net-label">Check available networks</span>
+          <span class="dep-net-chevron">›</span>
+        </button>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step-block">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div class="step-desc">Deposit address</div>
+        </div>
+        <div class="addr-block">0xD79f6476db5887a415806aB3A06FF15FFf5d50ed</div>
+        <div class="addr-btns">
+          <button class="addr-btn-primary" onclick="copyDepositAddress(this)"><img src="asset/copy.svg" height="24" style="display:block;filter:brightness(0) invert(1);"> Copy</button>
+          <button class="addr-btn-secondary"><img src="asset/qr-code.svg" height="24" style="display:block;"> Show QR code</button>
+        </div>
+      </div>
+
+      <!-- Card Toast -->
+      <div class="card-toast" id="dep-card-toast">
+        <img src="../checkout/assets/check.svg" width="24" height="24" style="display:block;flex-shrink:0;">
+        Address copied
+      </div>
+
+      <!-- Network Picker Bottom Sheet -->
+      <div class="net-sheet-overlay" id="dep-net-overlay" onclick="closeNetSheet()"></div>
+      <div class="net-sheet" id="dep-net-sheet">
+        <div class="net-sheet-handle"></div>
+        <div class="net-sheet-header">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="asset/tokens/supported-network.svg" height="24" style="display:block;flex-shrink:0;">
+            <span class="net-sheet-title">Supported network</span>
+          </div>
+          <button class="net-sheet-close" onclick="closeNetSheet()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="net-sheet-subtitle">The same address is shared across all chains below. Always double check before sending!</div>
+        <div class="net-sheet-grid">
+          <div class="net-sheet-item">
+            <img src="asset/tokens/BSC (BEP20).png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">BSC (BEP20)</span>
+          </div>
+          <div class="net-sheet-item">
+            <img src="asset/tokens/Base.png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">Base</span>
+          </div>
+          <div class="net-sheet-item">
+            <img src="asset/tokens/Ethereum.png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">Ethereum</span>
+          </div>
+          <div class="net-sheet-item">
+            <img src="asset/tokens/Polygon.png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">Polygon</span>
+          </div>
+          <div class="net-sheet-item">
+            <img src="asset/tokens/Optimism.png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">Optimism</span>
+          </div>
+          <div class="net-sheet-item">
+            <img src="asset/tokens/Arbitrum.png" width="34" height="34" style="display:block;border-radius:50%;">
+            <span class="net-sheet-item-name">Arbitrum</span>
+          </div>
+        </div>
+      </div>
+
+    </div></div></div></div>`;
+}
+
+/* ═══ WITHDRAW — Current ═══ */
+function renderWithdrawCurrent(){
+  return `<div class="compare-col"><div class="col-label current">Current</div>
+    <div class="screenshot-card"><img src="screenshot/withdraw.png" alt="Withdraw"></div>
+    <div style="margin-top:10px"><div class="screenshot-card"><img src="screenshot/withdraw-LIST.png" alt="Withdraw network list"></div></div>
+    <div style="margin-top:16px;font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Competitor Reference — Infinex</div>
+    <div class="screenshot-card"><img src="screenshot/withdraw-Infinex.png" alt="Infinex withdraw"></div>
+    <div style="margin-top:10px"><div class="screenshot-card"><img src="screenshot/withdraw-Infinex-LIST.png" alt="Infinex asset list"></div></div>
+  </div>`;
+}
+
+/* ═══ WITHDRAW — Proposed ═══ */
+function renderWithdrawProposed(){
+  return `<div class="compare-col" style="position:relative;"><div class="col-label proposed">Proposed</div><div class="card" id="wd-proposed-card" style="height:849px;">
+    <div class="popup-title">Withdraw to wallet</div>
+
+    <div class="wd-to-section">
+      <div class="wd-to-label">Withdraw to</div>
+      <div class="wd-to-row">
+        <img src="asset/wallet.svg" width="54" height="54" style="display:block;flex-shrink:0;">
+        <span class="wd-to-text">0x640...7F9K2</span>
+        <span class="wd-to-chevron">›</span>
+      </div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-label">Token&amp;Network</div>
+      <div class="wd-token-row" onclick="openWdSheet(this)">
+        <div class="wd-token-icon-wrap">
+          <img id="wd-token-img" src="asset/asset-token/bnb-usdc.png" width="28" height="28" style="display:block;">
+        </div>
+        <span class="wd-token-name" id="wd-token-name">BSC (BEP20) — USDC</span>
+        <span class="wd-token-chevron">›</span>
+      </div>
+    </div>
+
+    <div class="wd-amount-section">
+      <div class="wd-amount-label">Amount</div>
+      <div class="wd-amount-row">
+        <div class="wd-amount-inner">
+          <span class="wd-amount-sizer" id="wd-amount-sizer">0</span>
+          <input class="wd-amount-input" id="wd-amount-input" type="text" inputmode="decimal" value="0" oninput="onWdAmountInput(this)" onfocus="if(this.value==='0')this.value=''" onblur="if(this.value==='')this.value='0';onWdAmountInput(this)">
+          <span class="wd-amount-unit">USDC</span>
+        </div>
+        <button class="wd-max-btn" onclick="document.getElementById('wd-amount-input').value='2450.90';onWdAmountInput(document.getElementById('wd-amount-input'))">MAX</button>
+      </div>
+      <div class="wd-avail">Available: <span>2,450.90 USDC</span></div>
+    </div>
+
+    <div class="wd-fees" id="wd-fees" style="display:none;">
+      <div class="wd-fee-row">
+        <span class="wd-fee-label">Network fee</span>
+        <span class="wd-fee-value" id="wd-net-fee"><div class="wd-fee-skeleton"></div></span>
+      </div>
+      <div class="wd-fee-row">
+        <span class="wd-fee-label">Service fee</span>
+        <span class="wd-fee-value" id="wd-svc-fee"><div class="wd-fee-skeleton"></div></span>
+      </div>
+      <div class="wd-fee-row total">
+        <span class="wd-fee-label">Total</span>
+        <span class="wd-fee-value" id="wd-total-fee"><div class="wd-fee-skeleton"></div></span>
+      </div>
+    </div>
+
+    <!-- Token Picker Sheet -->
+    <div class="wd-sheet-overlay" id="wd-sheet-overlay" onclick="closeWdSheet()"></div>
+    <div class="wd-sheet" id="wd-sheet">
+      <div class="wd-sheet-header">
+        <span class="wd-sheet-title">Select network</span>
+        <button class="wd-sheet-close" onclick="closeWdSheet()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="wd-sheet-subtitle">Your deposit should appear in a few minutes.</div>
+      <label style="display:inline-flex;align-items:center;gap:8px;padding:0 20px 14px;cursor:pointer;flex-shrink:0;" onclick="toggleWdHide(this)">
+        <img id="wd-hide-small-icon" src="asset/uncheck.svg" width="20" height="20" style="display:block;flex-shrink:0;">
+        <input type="checkbox" id="wd-hide-small" style="display:none;">
+        <span style="font-size:14px;font-weight:500;color:#0C3124;letter-spacing:0;text-decoration:underline;">Hide assets &lt; $1</span>
+      </label>
+      <div class="wd-sheet-tabs">
+        <button class="wd-sheet-tab active" id="wd-tab-usdt" onclick="switchWdTab('USDT')">
+          <img src="asset/usdt.png" width="24" height="24"> USDT
+        </button>
+        <button class="wd-sheet-tab" id="wd-tab-usdc" onclick="switchWdTab('USDC')">
+          <img src="asset/usdc.png" width="24" height="24"> USDC
+        </button>
+      </div>
+      <div class="wd-sheet-list" id="wd-sheet-list"></div>
+    </div>
+  </div>
+  <button class="btn-primary" id="wd-submit-btn" style="position:absolute;bottom:28px;left:20px;right:20px;width:auto;opacity:0.5;pointer-events:none;">Withdraw</button>
+  </div>`;
+}
+
+/* ═══ WITHDRAW ASSET LIST ═══ */
+function renderWithdrawAssetList(){
+  return `<div class="section-block"><div class="section-title">3.3 Withdraw — Token List 选择列表</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Competitor Reference (Infinex)</div>
+      <div class="screenshot-card"><img src="screenshot/withdraw-Infinex-LIST.png" alt="Infinex asset list"></div>
+    </div>
+    <div class="compare-col" style="position:relative;"><div class="col-label proposed">Proposed</div>
+      <div style="position:absolute;left:calc(100% + 16px);top:580px;width:180px;background:#FFFBE6;border:1.5px solid #F5E84A;border-radius:12px;padding:12px 14px;font-size:12px;color:#7A6600;line-height:1.5;z-index:10;pointer-events:none;">
+        <div style="font-weight:600;margin-bottom:4px;">开发备注</div>
+        如果其中一个 token 余额为 0，则不展示该 tab
+      </div>
+      <div class="card" id="wd-list-card" style="height:849px;">
+        <div class="popup-title">Withdraw to wallet</div>
+        <div class="wd-section">
+          <div class="wd-section-label">Token&amp;Network</div>
+          <div class="wd-token-row" onclick="openWdListSheet(this)">
+            <div class="wd-token-icon-wrap">
+              <img id="wd-list-token-img" src="asset/asset-token/bnb-usdc.png" width="28" height="28" style="display:block;">
+            </div>
+            <span class="wd-token-name" id="wd-list-token-name">BSC (BEP20) — USDC</span>
+            <span class="wd-token-chevron">›</span>
+          </div>
+        </div>
+        <div class="wd-amount-section">
+          <div class="wd-amount-label">Amount</div>
+          <div class="wd-amount-row">
+            <div class="wd-amount-inner">
+              <span class="wd-amount-sizer" id="wd-list-amount-sizer">0</span>
+              <input class="wd-amount-input" id="wd-list-amount-input" type="text" inputmode="decimal" value="0" oninput="onWdListAmountInput(this)" onfocus="if(this.value==='0')this.value=''" onblur="if(this.value==='')this.value='0';onWdListAmountInput(this)">
+              <span class="wd-amount-unit" id="wd-list-amount-unit">USDC</span>
+            </div>
+            <button class="wd-max-btn" onclick="document.getElementById('wd-list-amount-input').value='2450.90';onWdListAmountInput(document.getElementById('wd-list-amount-input'))">MAX</button>
+          </div>
+          <div class="wd-avail" id="wd-list-avail">Available: <span>2,450.90 USDC</span></div>
+        </div>
+        <div class="wd-to-section">
+          <div class="wd-to-label">Withdraw to</div>
+          <div class="wd-to-row">
+            <img src="asset/wallet.svg" width="54" height="54" style="display:block;flex-shrink:0;">
+            <span class="wd-to-text">0x640...7F9K2</span>
+            <span class="wd-to-chevron">›</span>
+          </div>
+        </div>
+        <div class="wd-fees" id="wd-list-fees" style="display:none;">
+          <div class="wd-fee-row"><span class="wd-fee-label">Network fee</span><span class="wd-fee-value" id="wd-list-net-fee"><div class="wd-fee-skeleton"></div></span></div>
+          <div class="wd-fee-row"><span class="wd-fee-label">Service fee</span><span class="wd-fee-value" id="wd-list-svc-fee"><div class="wd-fee-skeleton"></div></span></div>
+          <div class="wd-fee-row total"><span class="wd-fee-label">Total</span><span class="wd-fee-value" id="wd-list-total-fee"><div class="wd-fee-skeleton"></div></span></div>
+        </div>
+        <!-- Token Picker Sheet -->
+        <div class="wd-sheet-overlay" id="wd-list-overlay" onclick="closeWdListSheet()"></div>
+        <div class="wd-sheet" id="wd-list-sheet">
+          <div class="wd-sheet-header">
+            <span class="wd-sheet-title">Select network</span>
+            <button class="wd-sheet-close" onclick="closeWdListSheet()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="wd-sheet-subtitle">Your deposit should appear in a few minutes.</div>
+          <label style="display:inline-flex;align-items:center;gap:8px;padding:0 20px 14px;cursor:pointer;flex-shrink:0;" onclick="toggleWdListHide(this)">
+            <img id="wd-list-hide-icon" src="asset/uncheck.svg" width="20" height="20" style="display:block;flex-shrink:0;">
+            <input type="checkbox" id="wd-list-hide-small" style="display:none;">
+            <span style="font-size:14px;font-weight:500;color:#0C3124;letter-spacing:0;text-decoration:underline;">Hide assets &lt; $1</span>
+          </label>
+          <div class="wd-sheet-tabs">
+            <button class="wd-sheet-tab active" id="wd-list-tab-usdt" onclick="switchWdListTab('USDT')">
+              <img src="asset/usdt.png" width="24" height="24"> USDT
+            </button>
+            <button class="wd-sheet-tab" id="wd-list-tab-usdc" onclick="switchWdListTab('USDC')">
+              <img src="asset/usdc.png" width="24" height="24"> USDC
+            </button>
+          </div>
+          <div class="wd-sheet-list" id="wd-list-sheet-list"></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="wd-list-submit-btn" style="position:absolute;bottom:28px;left:20px;right:20px;width:auto;opacity:0.5;pointer-events:none;">Withdraw</button>
+    </div>
+  </div></div>`;
+}
+
+/* ═══ WITHDRAW SECTION ═══ */
+function renderWithdraw(){
+  return `<div class="section-block"><div class="section-title">3.3 Withdraw Popup（通用修改，Invoice/Checkout 支付同样适用）</div><div class="compare-row">
+    ${renderWithdrawCurrent()}
+    ${renderWithdrawProposed()}
+  </div></div>`;
+}
+
+/* ═══ shared row renderer ═══ */
+function rowHTML(items){
+  return items.map(i=>{
+    const isPos=i.amt.startsWith('+');
+    const statusColor=i.status==='Pending'?'var(--orange)':i.status==='Completed'?'var(--green)':'';
+    return `<div class="act-item">
+      <div class="act-icon" style="background:${i.color}20;border:1.5px solid ${i.color}"><span style="font-size:11px;font-weight:700;color:${i.color}">${i.initial}</span></div>
+      <div class="act-info">
+        <div class="act-type">${i.name}</div>
+        <div class="act-date">${i.date}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="act-amt ${isPos?'pos':''}">${i.amt} <span class="badge badge-${i.coin.toLowerCase()}">${i.coin}</span></div>
+        ${i.status?`<div style="font-size:11px;color:${statusColor};font-weight:500;margin-top:2px;display:flex;align-items:center;justify-content:flex-end;gap:4px">${i.status==='Completed'?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" fill="'+statusColor+'"/><path d="M3.5 6L5.5 8L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="'+statusColor+'" stroke-width="1.2"/><circle cx="6" cy="6" r="2" fill="'+statusColor+'"/></svg>'}${i.status}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══ ACTIVITY LIST ═══ */
+function renderActivity(){
+  const list=coins();
+  const acts=[
+    {name:'Bravo',type:'store', date:'Apr 13, 2026 | 18:09',amt:'+15.00',coin:'USDT'},
+    {name:'Bravo',type:'store', date:'Apr 13, 2026 | 17:52',amt:'+15.00',coin:'USDC'},
+    {name:'Bravo',type:'store', date:'Apr 12, 2026 | 23:19',amt:'+15.00',coin:'USDT'},
+    {name:'Deposit',type:'deposit',date:'Apr 10, 2026 | 17:05',amt:'+500.00',coin:'USDC'},
+    {name:'Deposit',type:'deposit',date:'Apr 08, 2026 | 10:30',amt:'+500.00',coin:'USDC'},
+    {name:'Deposit',type:'deposit',date:'Apr 05, 2026 | 09:00',amt:'+500.00',coin:'USDC'},
+    {name:'Withdraw',type:'withdraw',date:'Apr 03, 2026 | 17:08',amt:'-500.00',coin:'USDT'},
+  ];
+  function iconFor(type){
+    if(type==='store')    return `<img src="asset/store-icon.svg" width="44" height="44" style="display:block;">`;
+    if(type==='deposit')  return `<img src="asset/deposit-circle.svg" width="44" height="44" style="display:block;">`;
+    if(type==='withdraw') return `<img src="asset/withdraw-circle.svg" width="44" height="44" style="display:block;">`;
+  }
+  return `<div class="section-block"><div class="section-title">3.4 Activity List</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current</div><div class="screenshot-card"><img src="screenshot/activitylist.png" alt="Activity"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — multi-coin</div><div class="card" style="background:#FAFBFA;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:28px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">Activity</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button style="display:flex;align-items:center;justify-content:center;padding:8px 16px;border:1px solid #E5EEEA;border-radius:50px;background:transparent;cursor:pointer;">
+            <img src="asset/filter.svg" width="24" height="24" style="display:block;">
+          </button>
+          <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid #E5EEEA;border-radius:50px;background:transparent;cursor:pointer;font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">
+            All <img src="asset/arrow-stroke.svg" width="24" height="24" style="display:block;">
+          </button>
+        </div>
+      </div>
+      <div style="position:relative;margin-bottom:14px;">
+        <img src="asset/search.svg" width="15" height="15" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);display:block;pointer-events:none;">
+        <input type="text" placeholder="Name, email or address" style="width:100%;background:#FAFBFA;border:1.5px solid #E5EEEA;border-radius:12px;padding:12px 14px 12px 38px;font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;outline:none;box-sizing:border-box;" onfocus="this.style.background='#F2F8F5';this.style.borderColor='#009859';" onblur="this.style.background='#FAFBFA';this.style.borderColor='#E5EEEA';" onmouseover="if(document.activeElement!==this)this.style.background='#F2F8F5';" onmouseout="if(document.activeElement!==this)this.style.background='#FAFBFA';">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+      ${acts.filter(a=>list.includes(a.coin)).map(i=>{
+        const isPos=i.amt.startsWith('+');
+        return `<div class="act-item" style="padding:8px;border-bottom:none;border-radius:12px;cursor:pointer;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'">
+          <div style="flex-shrink:0;">${iconFor(i.type)}</div>
+          <div class="act-info"><div class="act-type" style="font-size:14px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">${i.name}</div><div class="act-date" style="font-size:13px;color:#83968F;font-weight:500;margin-top:2px;">${i.date}</div></div>
+          <div style="text-align:right;"><div style="font-size:14px;font-weight:500;letter-spacing:-0.02em;color:${isPos?'#009859':'#0C3124'}">${i.amt} ${i.coin}</div></div>
+        </div>`;
+      }).join('')}
+      </div>
+      <button style="width:100%;margin-top:8px;padding:14px;border-radius:48px;border:1.5px solid #E5EEEA;background:transparent;font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;cursor:pointer;">See More</button>
+    </div></div>
+  </div></div>`;
+}
+
+/* ═══ INVOICE LIST ═══ */
+function renderInvoices(){
+  const list=coins();
+  const invs=[
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Mar 27, 2026 | 03:26',amt:'+2.00',coin:'USDT',status:'Pending'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 15, 2026 | 02:59',amt:'+100.00',coin:'USDT',status:'Completed'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 15, 2026 | 02:59',amt:'+8,000.00',coin:'USDT',status:'Completed'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 15, 2026 | 02:58',amt:'+2,000.00',coin:'USDT',status:'Completed'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 16, 2026 | 10:30',amt:'+500.00',coin:'USDC',status:'Completed'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 17, 2026 | 14:15',amt:'+1,200.00',coin:'USDC',status:'Completed'},
+    {name:'yao@allscale.io',initial:'Y',color:'var(--green)',date:'Jan 18, 2026 | 09:00',amt:'+300.00',coin:'DAI',status:'Completed'},
+  ];
+  return `<div class="section-block"><div class="section-title">3.5 Invoice List</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current</div><div class="screenshot-card"><img src="screenshot/invoice. listpng.png" alt="Invoice list"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — paid via ${list.join(' / ')}</div><div class="card" style="background:#FAFBFA;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:28px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">Invoice activity</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button style="display:flex;align-items:center;justify-content:center;padding:8px 16px;border:1px solid #E5EEEA;border-radius:50px;background:transparent;cursor:pointer;">
+            <img src="asset/filter.svg" width="24" height="24" style="display:block;">
+          </button>
+          <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid #E5EEEA;border-radius:50px;background:transparent;cursor:pointer;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">
+            All <img src="asset/arrow-stroke.svg" width="24" height="24" style="display:block;">
+          </button>
+        </div>
+      </div>
+      <div style="position:relative;margin-bottom:14px;">
+        <img src="asset/search.svg" width="15" height="15" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);display:block;pointer-events:none;">
+        <input type="text" placeholder="Name, email or address" style="width:100%;background:#FAFBFA;border:1.5px solid #E5EEEA;border-radius:12px;padding:12px 14px 12px 38px;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;outline:none;box-sizing:border-box;" onfocus="this.style.background='#F2F8F5';this.style.borderColor='#009859';" onblur="this.style.background='#FAFBFA';this.style.borderColor='#E5EEEA';" onmouseover="if(document.activeElement!==this)this.style.background='#F2F8F5';" onmouseout="if(document.activeElement!==this)this.style.background='#FAFBFA';">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+      ${invs.filter(i=>list.includes(i.coin)).map(i=>{
+        const isPos=i.amt.startsWith('+');
+        return `<div class="act-item" style="padding:8px;border-bottom:none;border-radius:12px;cursor:pointer;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'">
+          <div style="flex-shrink:0;"><img src="asset/avatar-y.svg" width="44" height="44" style="display:block;"></div>
+          <div class="act-info"><div style="font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;">${i.name}</div><div style="font-size:13px;color:#83968F;font-weight:500;margin-top:2px;">${i.date}</div></div>
+          <div style="text-align:right;"><div style="font-size:16px;font-weight:500;letter-spacing:-0.02em;color:${isPos?'#009859':'#0C3124'}">${i.amt} ${i.coin}</div></div>
+        </div>`;
+      }).join('')}
+      </div>
+      <button style="width:100%;margin-top:8px;padding:14px;border-radius:48px;border:1.5px solid #E5EEEA;background:transparent;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;cursor:pointer;">See More</button>
+    </div></div>
+  </div></div>`;
+}
+
+/* ═══ INVOICE EDITOR ═══ */
+function renderInvoiceEditor(){
+  const list=coins();
+  // Custom-mode chips: multi-select subset of Setting. All selected by default (≡ default, see rule 3).
+  const coinOpts=list.map(c=>{
+    return `<div onclick="toggleInvoiceCustomCoin(this)" data-coin="${c}" data-active="1" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1.5px solid var(--green);background:var(--green-bg);cursor:pointer;transition:all .15s;user-select:none;">
+      <img src="asset/${c.toLowerCase()}.png" width="20" height="20" style="display:block;border-radius:50%;"> <span style="font-size:13px;font-weight:500">${c}</span>
+    </div>`;
+  }).join('');
+  // Inherited-mode compact chips: read-only display of what Setting allows
+  const inheritedChips=list.map(c=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 4px;border-radius:50px;background:var(--white);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--dark)"><img src="asset/${c.toLowerCase()}.png" width="16" height="16" style="display:block;border-radius:50%;">${c}</span>`).join('');
+  const canCustomize=list.length>=2;
+  return `<div class="section-block"><div class="section-title">3.6 Invoice Editor — 创建 Invoice</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current — 无币种选择</div><div class="screenshot-card"><img src="screenshot/invoice editor.png" alt="Invoice Editor"></div></div>
+    <div class="compare-col" style="position:relative;"><div class="col-label proposed">Proposed — 默认继承 Setting，可选"Customize"覆盖</div>
+      <div style="position:absolute;left:calc(100% + 16px);top:180px;width:240px;background:#FFFBE6;border:1.5px solid #F5E84A;border-radius:12px;padding:12px 14px;font-size:12px;color:#7A6600;line-height:1.6;z-index:10;">
+        <div style="font-weight:600;margin-bottom:6px;">开发备注 — Customize 多选逻辑</div>
+        <div>1. chip 支持<b>多选</b>（非互斥），点击切换选中状态</div>
+        <div>2. 至少保留 <b>1 个</b>选中，不能全部取消</div>
+        <div>3. 若选中集合 = Setting 全集，等同默认 → 保存时自动折回继承态（不写 override）</div>
+        <div>4. 仅对本张 invoice 生效，不影响 Setting</div>
+        <div>5. 付款端 Checkout 只展示此子集的币种</div>
+      </div>
+      <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:600">INVOICE</div>
+        <div style="font-size:12px;color:var(--text)">AllScale</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1"><div style="font-size:11px;color:var(--text);margin-bottom:4px">Item</div><div style="padding:8px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:13px">Service</div></div>
+        <div style="width:50px"><div style="font-size:11px;color:var(--text);margin-bottom:4px">Qty</div><div style="padding:8px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:13px;text-align:center">1</div></div>
+        <div style="width:80px"><div style="font-size:11px;color:var(--text);margin-bottom:4px">Amount (USD)</div><div style="padding:8px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:13px;text-align:right">$20.00</div></div>
+      </div>
+
+      <!-- Default (inherited) mode: no picker, just a read-only summary -->
+      <div id="inv-accepts-inherited" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text);font-weight:500">Accepts:</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${inheritedChips}</div>
+        <span style="flex:1;min-width:0"></span>
+        ${canCustomize?`<span onclick="toggleInvAcceptsCustom(true)" style="font-size:12px;font-weight:500;color:var(--green);text-decoration:underline;cursor:pointer">Customize</span>`:''}
+      </div>
+
+      <!-- Custom mode: override for this invoice only (hidden by default) -->
+      <div id="inv-accepts-custom" style="display:none;padding:12px;border-radius:12px;background:var(--green-bg);border:1px solid var(--green);margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:12px;color:var(--green);font-weight:600">Custom for this invoice</span>
+          <span onclick="toggleInvAcceptsCustom(false)" style="font-size:11px;color:var(--green);text-decoration:underline;cursor:pointer">Reset to default</span>
+        </div>
+        <div id="inv-editor-coins" style="display:flex;gap:8px;flex-wrap:wrap">${coinOpts}</div>
+        <div id="inv-editor-coins-hint" style="font-size:11px;color:var(--text);margin-top:8px">All selected — equivalent to default. Will not be saved as an override.</div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600">
+        <span>Total (USD)</span><span>$20.00</span>
+      </div>
+    </div></div>
+  </div></div>`;
+}
+
+/* ═══ PAY INVOICE ═══ */
+function renderPayInvoice(){
+  const list=coins();
+  const hasMulti=list.length>1;
+  const sym=list[payInvCoin]||list[0];
+  const rates={USDT:'20.012',USDC:'19.996',DAI:'20.041',BUSD:'20.008'};
+  const amt=rates[sym]||'20.00';
+  const intPart=amt.split('.')[0], decPart=amt.split('.')[1]||'00';
+  const toggleIcons=hasMulti?list.map((c,i)=>`<span onclick="togglePayInv()" style="cursor:pointer;opacity:${i===payInvCoin?1:0.35};transition:opacity .15s">${ic(c)}</span>`).join(''):'';
+  return `<div class="section-block"><div class="section-title">3.7 Pay Invoice — 付款人视角</div><div class="compare-row" style="align-items:flex-start;flex-wrap:nowrap;">
+    <div style="flex:none;width:300px;"><div class="col-label current">Current — 只能 USDT 支付</div><div class="screenshot-card"><img src="screenshot/pay Invoice.png" alt="Pay Invoice"></div></div>
+    <div style="flex:none;width:393px;">
+      <div class="col-label proposed">PROPOSED — 点击icon切换币种</div>
+      <iframe src="../checkout/phone-embed-invoice.html" style="width:393px;height:750px;border:none;border-radius:28px;display:block;overflow:hidden;" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div style="flex:none;width:393px;">
+      <div class="col-label proposed">PROPOSED — 点击icon切换币种</div>
+      <iframe src="../checkout/phone-embed-invoice-static.html" style="width:393px;height:750px;border:none;border-radius:28px;display:block;overflow:hidden;" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div style="flex:none;width:200px;margin-top:32px;background:#FFFBE6;border:1.5px solid #F5E84A;border-radius:12px;padding:12px 14px;font-size:12px;color:#7A6600;line-height:1.5;">
+      <div style="font-weight:600;margin-bottom:4px;">开发备注</div>
+      Details 部分（这部分纯展示，不改变）
+    </div>
+  </div></div>`;
+}
+
+/* ═══ CHECKOUT ═══ */
+function renderCheckout(){
+  const list=coins();
+  const hasMulti=list.length>1;
+  const sym=list[payCkCoin]||list[0];
+  const ckRates={USDT:'4.998937',USDC:'4.996012',DAI:'5.002100',BUSD:'4.999400'};
+  const amt=ckRates[sym]||'5.00';
+  const intPart=amt.split('.')[0], decPart=amt.split('.')[1]||'00';
+  const toggleIcons=hasMulti?list.map((c,i)=>`<span onclick="togglePayCk()" style="cursor:pointer;opacity:${i===payCkCoin?1:0.35};transition:opacity .15s">${ic(c)}</span>`).join(''):'';
+  return `<div class="section-block"><div class="section-title">3.8 Checkout 收银台 — 付款人视角</div><div class="compare-row" style="align-items:flex-start;flex-wrap:nowrap;">
+    <div style="flex:none;width:300px;"><div class="col-label current">Current — 写死 USDT</div><div class="screenshot-card"><img src="screenshot/paycheckout.png" alt="Checkout"></div></div>
+    <div style="flex:none;width:393px;">
+      <div class="col-label proposed">PROPOSED — 点击icon切换币种</div>
+      <iframe src="../checkout/phone-embed.html" style="width:393px;height:750px;border:none;border-radius:28px;display:block;overflow:hidden;" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div style="flex:none;width:393px;">
+      <div class="col-label proposed">PROPOSED — 点击icon切换币种</div>
+      <iframe src="../checkout/phone-embed-static.html" style="width:393px;height:750px;border:none;border-radius:28px;display:block;overflow:hidden;" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div style="flex:none;width:200px;margin-top:32px;background:#FFFBE6;border:1.5px solid #F5E84A;border-radius:12px;padding:12px 14px;font-size:12px;color:#7A6600;line-height:1.5;">
+      <div style="font-weight:600;margin-bottom:4px;">开发备注</div>
+      Details 部分（这部分纯展示，不改变）
+    </div>
+  </div></div>`;
+}
+
+/* ═══ STORE SETTING ═══ */
+function renderStoreSetting(){
+  const list=coins();
+  const coinOpts=['All','USDT','USDC'].filter(c=>c==='All'||list.includes(c)).map(c=>{
+    const active=c==='All';
+    const hasIcon=c!=='All';
+    return `<div onclick="selectInvoiceCoin(this,'s314-coins')" data-coin="${c}" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1.5px solid ${active?'var(--green)':'var(--border)'};background:${active?'var(--green-bg)':'#FAFBFA'};cursor:pointer;transition:all .15s;">
+      ${hasIcon?`<img src="asset/${c.toLowerCase()}.png" width="20" height="20" style="display:block;border-radius:50%;">`:''} <span style="font-size:13px;font-weight:500">${c}</span>
+    </div>`;
+  }).join('');
+  return `<div class="section-block"><div class="section-title">3.14 Checkout 商户 Setting</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current — 无币种配置</div><div class="screenshot-card"><img src="screenshot/Store Setting.png" alt="Store Setting"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — Advanced settings 下新增 Token</div><div class="card">
+      <div style="font-size:18px;font-weight:500;text-align:center;margin-bottom:16px">Costco</div>
+      <div class="wd-to"><div class="wd-to-label">Advanced settings</div>
+        <div style="font-size:12px;color:var(--text);margin-bottom:6px">Order expire in</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          <span style="padding:6px 14px;border-radius:50px;border:1.5px solid var(--green);font-size:12px;font-weight:500;color:var(--green)">10 min</span>
+          <span style="padding:6px 14px;border-radius:50px;border:1px solid var(--border);font-size:12px;color:var(--text)">30min</span>
+          <span style="padding:6px 14px;border-radius:50px;border:1px solid var(--border);font-size:12px;color:var(--text)">1 hour</span>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:12px;color:var(--text);margin-bottom:6px">Default accepted token</div>
+        <div id="s314-coins" style="display:flex;gap:8px;margin-bottom:6px">${coinOpts}</div>
+        <div style="font-size:11px;color:var(--text)">Applied to all Checkout orders unless overridden via API.</div>
+      </div>
+    </div></div>
+  </div></div>`;
+}
+
+/* ═══ USER SETTING ═══ */
+function renderUserSetting(){
+  const list=coins();
+  const coinOpts=['USDT','USDC','Both'].filter(c=>c==='Both'||list.includes(c)).map((c,i)=>{
+    const active=c==='Both';
+    const hasIcon=c!=='Both';
+    return `<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;border:1.5px solid ${active?'var(--green)':'var(--border)'};background:${active?'var(--green-bg)':'var(--white)'}">
+      ${hasIcon?ic(c):''} <span style="font-size:12px;font-weight:500">${c}</span>
+    </div>`;
+  }).join('');
+  return `<div class="section-block"><div class="section-title">3.15 Invoice 用户 Setting</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current — 无币种配置</div><div class="screenshot-card"><img src="screenshot/user setting.png" alt="User Setting"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — Security 下新增 Invoice</div><div class="card" style="padding:0;overflow:hidden;background:#fff;border-radius:24px;">
+      <!-- Avatar + info -->
+      <div style="display:flex;flex-direction:column;align-items:center;padding:36px 28px 24px;gap:10px;">
+        <div style="width:106px;height:106px;border-radius:50%;background:#E8EAE8;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;color:#0C3124;">J</div>
+        <div style="font-size:28px;font-weight:400;color:#0C3124;letter-spacing:-0.02em;">Jony</div>
+        <div style="font-size:14px;color:#83968f;">rxy0823@gmail.com</div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#FAFBFA;border-radius:12px;padding:6px 16px;">
+          <span style="font-size:14px;font-weight:500;color:#0C3124;">UserID:</span>
+          <span style="font-size:14px;color:#83968f;">68c...af3</span>
+          <div style="width:32px;height:32px;border-radius:8px;background:#E8F5EE;display:flex;align-items:center;justify-content:center;color:#009859;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+        </div>
+      </div>
+      <!-- Menu rows -->
+      <div style="padding:8px 16px 20px;display:flex;flex-direction:column;gap:8px;">
+        <div class="s315-menu-item">
+          <div class="s315-menu-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0C3124"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>
+          <span style="font-size:16px;font-weight:500;color:#0C3124;">Profile</span>
+        </div>
+        <div class="s315-menu-item">
+          <div class="s315-menu-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0C3124"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14l-3-3 1.41-1.41L11 12.17l4.59-4.58L17 9l-6 6z"/></svg></div>
+          <span style="font-size:16px;font-weight:500;color:#0C3124;">Security</span>
+        </div>
+        <div class="s315-menu-item clickable" onclick="openInvoiceSetting()">
+          <div class="s315-menu-item-icon"><img src="asset/invoice-icon.svg" width="24" height="24"></div>
+          <span style="font-size:16px;font-weight:500;color:#0C3124;">Invoice</span>
+        </div>
+        <div class="s315-menu-item">
+          <div class="s315-menu-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0C3124" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+          <span style="font-size:16px;font-weight:500;color:#0C3124;">Commerce</span>
+        </div>
+        <div class="s315-menu-item" style="background:#FAFBFA;">
+          <div class="s315-menu-item-icon" style="background:#FFF0F0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+          <span style="font-size:16px;font-weight:500;color:#E53E3E;">Log out</span>
+        </div>
+      </div>
+    </div></div>
+  </div></div>`;
+}
+
+/* ═══ REWARDS ═══ */
+function renderRewards(){
+  const multi=mode>0;
+  return `<div class="section-block"><div class="section-title">3.10 Rewards 奖励页</div><div class="compare-row">
+    <div class="compare-col"><div class="col-label current">Current — 写死 USDT</div><div class="screenshot-card"><img src="screenshot/rewards.png" alt="Rewards"></div></div>
+    <div class="compare-col"><div class="col-label proposed">Proposed — USD 等值描述</div><div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px">&#x1F4CB;</div>
+        <span style="font-size:16px;font-weight:500">Tasks</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:500">Invoice Payments Received &nbsp;<span style="font-size:11px;color:var(--text)">&#x24D8;</span></div><div style="font-size:12px;color:var(--text);margin-top:2px">Up to $1 equivalent = 1 AS Points &nbsp;<span style="font-size:11px">&#x24D8;</span></div></div>
+        <div style="font-size:14px;font-weight:600;color:var(--green)">$2,377.00</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:500">Email Verification &nbsp;<span style="font-size:11px;color:var(--text)">&#x24D8;</span></div><div style="font-size:12px;color:var(--green);margin-top:2px">+100 AS Points</div></div>
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6L5.5 8.5L9.5 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:500">Receive First Invoice Payment &nbsp;<span style="font-size:11px;color:var(--text)">&#x24D8;</span></div><div style="font-size:12px;color:var(--green);margin-top:2px">+400 AS Points</div></div>
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6L5.5 8.5L9.5 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:500">7-Day Sign in Streak</div><div style="font-size:12px;color:var(--green);margin-top:2px">+300 AS Points</div></div>
+        <span style="font-size:14px;font-weight:500;color:var(--dark)">1/7</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0">
+        <div><div style="font-size:14px;font-weight:500">Referral: Receive First Invoice Payment &nbsp;<span style="font-size:11px;color:var(--text)">&#x24D8;</span></div><div style="font-size:12px;color:var(--green);margin-top:2px">+600 AS Points</div></div>
+        <span style="font-size:14px;font-weight:500;color:var(--dark)">0</span>
+      </div>
+    </div></div>
+  </div></div>`;
+}
+
+function render(){
+  document.getElementById('app').innerHTML=[
+    renderWallet(),
+    renderDeposit(),
+    renderWithdraw(),
+    renderWithdrawAssetList(),
+    renderActivity(),
+    renderInvoices(),
+    renderInvoiceEditor(),
+    renderPayInvoice(),
+    renderCheckout(),
+    renderRewards(),
+    renderStoreSetting(),
+    renderUserSetting(),
+  ].join('');
+}
+
+function toast(msg, type = 'success') {
+  const key = `${type}:${msg}`;
+  if (_toastTimers.has(key)) return;
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<img src="../checkout/assets/check.svg" width="24" height="24" style="display:block;flex-shrink:0;">${msg}`;
+  container.appendChild(el);
+  const timer = setTimeout(() => { el.remove(); _toastTimers.delete(key); }, 3500);
+  _toastTimers.set(key, timer);
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); toast('Address copied', 'success'); }
+  catch (e) { toast('Copy failed', 'error'); }
+  document.body.removeChild(ta);
+}
+
+function copyDepositAddress(btn) {
+  const address = '0xD79f6476db5887a415806aB3A06FF15FFf5d50ed';
+  const cardToast = btn.closest('.card').querySelector('#dep-card-toast');
+  function showCardToast() {
+    if (!cardToast) return;
+    clearTimeout(cardToast._t);
+    cardToast.classList.add('show');
+    cardToast._t = setTimeout(() => cardToast.classList.remove('show'), 3500);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(address).then(showCardToast).catch(showCardToast);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = address;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    showCardToast();
+  }
+}
+
+/* ── Withdraw Token Picker ── */
+const WD_TOKENS = {
+  USDT: [
+    {chain:'BSC (BEP20)', img:'bnb-usdt.png',    bal:'9,100.32', usd:'≈ 9,100.98 USD'},
+    {chain:'Base',        img:'Base-usdt.png',    bal:'400.33',   usd:'≈ 398.09 USD'},
+    {chain:'Ethereum',    img:'Ethereum-usdt.png',bal:'400.33',   usd:'≈ 400.33 USD'},
+    {chain:'Polygon',     img:'Polygon-usdt.png', bal:'0.00',     usd:'≈ 0.00'},
+    {chain:'Optimism',    img:'Optimism-usdt.png',bal:'0.00',     usd:'≈ 0.00'},
+    {chain:'Arbitrum',    img:'Arbitrum-usdt.png',bal:'0.00',     usd:'≈ 0.00'},
+  ],
+  USDC: [
+    {chain:'BSC (BEP20)', img:'bnb-usdc.png',    bal:'2,450.90', usd:'≈ 2,450.90 USD'},
+    {chain:'Base',        img:'Base-usdc.png',    bal:'50.50',    usd:'≈ 50.50 USD'},
+    {chain:'Ethereum',    img:'Ethereum-usdc.png',bal:'60.00',    usd:'≈ 60.00 USD'},
+    {chain:'Polygon',     img:'Polygon-usdc.png', bal:'20.00',    usd:'≈ 20.00 USD'},
+    {chain:'Optimism',    img:'Optimism-usdc.png',bal:'10.00',    usd:'≈ 10.00 USD'},
+    {chain:'Arbitrum',    img:'Arbitrum-usdc.png',bal:'0.00',     usd:'≈ 0.00'},
+  ],
+};
+let _wdCoin = 'USDC';
+let _wdChain = 'BSC (BEP20)';
+
+function toggleWdHide(label) {
+  const cb = document.getElementById('wd-hide-small');
+  const icon = document.getElementById('wd-hide-small-icon');
+  if (!cb || !icon) return;
+  cb.checked = !cb.checked;
+  icon.src = cb.checked ? 'asset/checked.svg' : 'asset/uncheck.svg';
+  renderWdSheetList(_wdCoin, true);
+}
+
+function renderWdSheetList(coin, animate) {
+  const list = document.getElementById('wd-sheet-list');
+  const sheet = document.getElementById('wd-sheet');
+  if (!list) return;
+  const hideSmall = document.getElementById('wd-hide-small');
+  const tokens = hideSmall && hideSmall.checked
+    ? WD_TOKENS[coin].filter(t => parseFloat(t.bal.replace(/,/g,'')) >= 1)
+    : WD_TOKENS[coin];
+
+  if (animate && sheet) {
+    // Lock current height before content changes
+    sheet.style.height = sheet.offsetHeight + 'px';
+  }
+
+  list.innerHTML = tokens.map(t => `
+    <div class="wd-sheet-item" onclick="selectWdToken('${coin}','${t.chain}','${t.img}')">
+      <img src="asset/asset-token/${t.img}" width="34" height="34" style="display:block;flex-shrink:0;">
+      <div class="wd-sheet-item-info">
+        <div class="wd-sheet-item-name">${t.chain}</div>
+        <div class="wd-sheet-item-sub">${coin}</div>
+      </div>
+      <div class="wd-sheet-item-bal">
+        <div class="wd-sheet-item-bal-main">${t.bal} ${coin}</div>
+        <div class="wd-sheet-item-bal-sub">${t.usd}</div>
+      </div>
+    </div>`).join('');
+
+  if (animate && sheet) {
+    // Temporarily set height:auto to measure new natural height
+    const prevH = sheet.offsetHeight;
+    sheet.style.transition = 'none';
+    sheet.style.height = 'auto';
+    const newH = Math.min(sheet.scrollHeight, 538);
+    sheet.style.height = prevH + 'px';
+    // Re-enable transition and animate to new height
+    requestAnimationFrame(() => {
+      sheet.style.transition = '';
+      sheet.style.height = newH + 'px';
+    });
+  }
+}
+
+function switchWdTab(coin) {
+  _wdCoin = coin;
+  document.getElementById('wd-tab-usdt').classList.toggle('active', coin === 'USDT');
+  document.getElementById('wd-tab-usdc').classList.toggle('active', coin === 'USDC');
+  renderWdSheetList(coin, true);
+}
+
+function openWdSheet(btn) {
+  const card = btn.closest('.card');
+  const overlay = card.querySelector('#wd-sheet-overlay');
+  const sheet = card.querySelector('#wd-sheet');
+  if (!overlay || !sheet) return;
+  renderWdSheetList(_wdCoin);
+  // Set explicit height so future transitions have a start value
+  sheet.style.height = Math.min(sheet.scrollHeight, 538) + 'px';
+  overlay.classList.add('open');
+  sheet.getBoundingClientRect();
+  sheet.classList.add('open');
+  initSheetDrag(sheet, overlay);
+}
+
+function closeWdSheet() {
+  const sheet = document.getElementById('wd-sheet');
+  const overlay = document.getElementById('wd-sheet-overlay');
+  if (sheet) { sheet.style.transition = ''; sheet.classList.remove('open'); }
+  if (overlay) overlay.classList.remove('open');
+}
+
+function selectWdToken(coin, chain, img) {
+  _wdCoin = coin;
+  _wdChain = chain;
+  const tokenData = WD_TOKENS[coin].find(t => t.chain === chain);
+
+  // Update token row
+  const tokenImg = document.getElementById('wd-token-img');
+  const tokenName = document.getElementById('wd-token-name');
+  if (tokenImg) { tokenImg.src = 'asset/asset-token/' + img; }
+  if (tokenName) tokenName.textContent = chain + ' — ' + coin;
+
+  // Update available balance
+  const availEl = document.querySelector('#wd-proposed-card .wd-avail');
+  if (availEl && tokenData) availEl.innerHTML = 'Available: <span>' + tokenData.bal + ' ' + coin + '</span>';
+
+  // Update unit label
+  const unitEl = document.querySelector('#wd-proposed-card .wd-amount-unit');
+  if (unitEl) unitEl.textContent = coin;
+
+  // Reset amount input and fees
+  const input = document.getElementById('wd-amount-input');
+  if (input) { input.value = '0'; onWdAmountInput(input); }
+
+  closeWdSheet();
+}
+
+/* ── Withdraw amount input ── */
+let _wdFeeTimer = null;
+function onWdAmountInput(input) {
+  // Allow only digits and at most one decimal point
+  let v = input.value.replace(/[^0-9.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+  if (input.value !== v) input.value = v;
+
+  // Sync input width to content
+  const sizer = document.getElementById('wd-amount-sizer');
+  if (sizer) { sizer.textContent = v || '0'; input.style.width = sizer.offsetWidth + 'px'; }
+
+  const feesEl = document.getElementById('wd-fees');
+  if (!feesEl) return;
+
+  const num = parseFloat(v);
+  const btn = document.getElementById('wd-submit-btn');
+
+  if (!v || isNaN(num) || num === 0) {
+    feesEl.style.display = 'none';
+    if (btn) { btn.textContent = 'Withdraw'; btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; btn.style.cursor = 'default'; }
+    return;
+  }
+
+  // Enable button, show skeleton
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.style.cursor = 'pointer'; btn.textContent = 'Withdraw'; }
+  feesEl.style.display = '';
+  document.getElementById('wd-net-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+  document.getElementById('wd-svc-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+  document.getElementById('wd-total-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+
+  clearTimeout(_wdFeeTimer);
+  _wdFeeTimer = setTimeout(() => {
+    const netFee = 0;
+    const svcFee = Math.round(Math.random() * 99) / 100;
+    const total = num + netFee + svcFee;
+    document.getElementById('wd-net-fee').textContent = '$' + netFee.toFixed(2);
+    document.getElementById('wd-svc-fee').textContent = '$' + svcFee.toFixed(2);
+    document.getElementById('wd-total-fee').textContent = total.toFixed(2) + ' ' + _wdCoin;
+    if (btn) btn.textContent = 'Withdraw • ' + total.toFixed(2) + ' ' + _wdCoin;
+  }, 1000);
+}
+
+/* ═══ Withdraw List Card — mirrors main card with separate IDs ═══ */
+let _wdListCoin = 'USDC', _wdListFeeTimer = null;
+
+function openWdListSheet(btn) {
+  const card = btn.closest('.card');
+  const overlay = card.querySelector('#wd-list-overlay');
+  const sheet = card.querySelector('#wd-list-sheet');
+  if (!overlay || !sheet) return;
+  renderWdListSheetList(_wdListCoin);
+  sheet.style.height = Math.min(sheet.scrollHeight, 538) + 'px';
+  overlay.classList.add('open');
+  sheet.getBoundingClientRect();
+  sheet.classList.add('open');
+  initSheetDrag(sheet, overlay);
+}
+
+function closeWdListSheet() {
+  const sheet = document.getElementById('wd-list-sheet');
+  const overlay = document.getElementById('wd-list-overlay');
+  if (sheet) { sheet.style.transition = ''; sheet.classList.remove('open'); }
+  if (overlay) overlay.classList.remove('open');
+}
+
+function renderWdListSheetList(coin, animate) {
+  const list = document.getElementById('wd-list-sheet-list');
+  const sheet = document.getElementById('wd-list-sheet');
+  if (!list) return;
+  const hideSmall = document.getElementById('wd-list-hide-small');
+  const tokens = hideSmall && hideSmall.checked
+    ? WD_TOKENS[coin].filter(t => parseFloat(t.bal.replace(/,/g,'')) >= 1)
+    : WD_TOKENS[coin];
+  if (animate && sheet) {
+    const prevH = sheet.offsetHeight;
+    sheet.style.transition = 'none';
+    sheet.style.height = 'auto';
+    const newH = Math.min(sheet.scrollHeight, 538);
+    sheet.style.height = prevH + 'px';
+    requestAnimationFrame(() => { sheet.style.transition = ''; sheet.style.height = newH + 'px'; });
+  }
+  list.innerHTML = tokens.map(t => `
+    <div class="wd-sheet-item" onclick="selectWdListToken('${coin}','${t.chain}','${t.img}')">
+      <img src="asset/asset-token/${t.img}" width="34" height="34" style="display:block;flex-shrink:0;">
+      <div class="wd-sheet-item-info">
+        <div class="wd-sheet-item-name">${t.chain}</div>
+        <div class="wd-sheet-item-sub">${coin}</div>
+      </div>
+      <div class="wd-sheet-item-bal">
+        <div class="wd-sheet-item-bal-main">${t.bal} ${coin}</div>
+        <div class="wd-sheet-item-bal-sub">${t.usd}</div>
+      </div>
+    </div>`).join('');
+}
+
+function switchWdListTab(coin) {
+  _wdListCoin = coin;
+  document.getElementById('wd-list-tab-usdt').classList.toggle('active', coin === 'USDT');
+  document.getElementById('wd-list-tab-usdc').classList.toggle('active', coin === 'USDC');
+  renderWdListSheetList(coin, true);
+}
+
+function toggleWdListHide(label) {
+  const cb = document.getElementById('wd-list-hide-small');
+  const icon = document.getElementById('wd-list-hide-icon');
+  if (!cb || !icon) return;
+  cb.checked = !cb.checked;
+  icon.src = cb.checked ? 'asset/checked.svg' : 'asset/uncheck.svg';
+  renderWdListSheetList(_wdListCoin, true);
+}
+
+function selectWdListToken(coin, chain, img) {
+  _wdListCoin = coin;
+  const tokenData = WD_TOKENS[coin].find(t => t.chain === chain);
+  const tokenImg = document.getElementById('wd-list-token-img');
+  const tokenName = document.getElementById('wd-list-token-name');
+  if (tokenImg) tokenImg.src = 'asset/asset-token/' + img;
+  if (tokenName) tokenName.textContent = chain + ' — ' + coin;
+  const availEl = document.getElementById('wd-list-avail');
+  if (availEl && tokenData) availEl.innerHTML = 'Available: <span>' + tokenData.bal + ' ' + coin + '</span>';
+  const unitEl = document.getElementById('wd-list-amount-unit');
+  if (unitEl) unitEl.textContent = coin;
+  const input = document.getElementById('wd-list-amount-input');
+  if (input) { input.value = '0'; onWdListAmountInput(input); }
+  closeWdListSheet();
+}
+
+function onWdListAmountInput(input) {
+  let v = input.value.replace(/[^0-9.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+  if (input.value !== v) input.value = v;
+  const sizer = document.getElementById('wd-list-amount-sizer');
+  if (sizer) { sizer.textContent = v || '0'; input.style.width = sizer.offsetWidth + 'px'; }
+  const feesEl = document.getElementById('wd-list-fees');
+  const btn = document.getElementById('wd-list-submit-btn');
+  if (!feesEl) return;
+  const num = parseFloat(v);
+  if (!v || isNaN(num) || num === 0) {
+    feesEl.style.display = 'none';
+    if (btn) { btn.textContent = 'Withdraw'; btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; btn.style.cursor = 'default'; }
+    return;
+  }
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.style.cursor = 'pointer'; btn.textContent = 'Withdraw'; }
+  feesEl.style.display = '';
+  document.getElementById('wd-list-net-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+  document.getElementById('wd-list-svc-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+  document.getElementById('wd-list-total-fee').innerHTML = '<div class="wd-fee-skeleton"></div>';
+  clearTimeout(_wdListFeeTimer);
+  _wdListFeeTimer = setTimeout(() => {
+    const netFee = 0, svcFee = Math.round(Math.random() * 99) / 100;
+    const total = num + netFee + svcFee;
+    document.getElementById('wd-list-net-fee').textContent = '$' + netFee.toFixed(2);
+    document.getElementById('wd-list-svc-fee').textContent = '$' + svcFee.toFixed(2);
+    document.getElementById('wd-list-total-fee').textContent = total.toFixed(2) + ' ' + _wdListCoin;
+    if (btn) btn.textContent = 'Withdraw • ' + total.toFixed(2) + ' ' + _wdListCoin;
+  }, 1000);
+}
+
+function selectInvoiceCoin(el, groupId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('[data-coin]').forEach(item => {
+    const isActive = item === el;
+    item.style.borderColor = isActive ? 'var(--green)' : 'var(--border)';
+    item.style.background  = isActive ? 'var(--green-bg)' : 'var(--white)';
+  });
+}
+
+function toggleInvAcceptsCustom(on){
+  const inh = document.getElementById('inv-accepts-inherited');
+  const cust = document.getElementById('inv-accepts-custom');
+  if(!inh || !cust) return;
+  inh.style.display  = on ? 'none' : 'flex';
+  cust.style.display = on ? 'block' : 'none';
+  // Reset chips to all-selected when (re)opening custom mode
+  if(on){
+    const group = document.getElementById('inv-editor-coins');
+    if(group){
+      group.querySelectorAll('[data-coin]').forEach(chip=>{
+        chip.dataset.active = '1';
+        chip.style.borderColor = 'var(--green)';
+        chip.style.background  = 'var(--green-bg)';
+      });
+      updateInvoiceCustomHint();
+    }
+  }
+}
+
+function toggleInvoiceCustomCoin(el){
+  const group = document.getElementById('inv-editor-coins');
+  if(!group) return;
+  const isActive = el.dataset.active === '1';
+  const activeCount = group.querySelectorAll('[data-active="1"]').length;
+  // Rule 2: min 1 selected — can't deselect the last one
+  if(isActive && activeCount <= 1){
+    // Brief shake to signal "can't deselect"
+    el.animate(
+      [{transform:'translateX(0)'},{transform:'translateX(-3px)'},{transform:'translateX(3px)'},{transform:'translateX(0)'}],
+      {duration:200}
+    );
+    return;
+  }
+  const next = isActive ? '0' : '1';
+  el.dataset.active = next;
+  el.style.borderColor = next==='1' ? 'var(--green)' : 'var(--border)';
+  el.style.background  = next==='1' ? 'var(--green-bg)' : 'var(--white)';
+  updateInvoiceCustomHint();
+}
+
+function updateInvoiceCustomHint(){
+  const group = document.getElementById('inv-editor-coins');
+  const hint  = document.getElementById('inv-editor-coins-hint');
+  if(!group || !hint) return;
+  const total  = group.querySelectorAll('[data-coin]').length;
+  const active = group.querySelectorAll('[data-active="1"]').length;
+  if(active === total){
+    // Rule 3: all selected ≡ default
+    hint.textContent = 'All selected — equivalent to default. Will not be saved as an override.';
+    hint.style.color = 'var(--text)';
+  } else {
+    const picked = Array.from(group.querySelectorAll('[data-active="1"]')).map(c=>c.dataset.coin).join(', ');
+    hint.textContent = `This invoice will only accept ${picked}. Setting stays unchanged.`;
+    hint.style.color = '#7A6600';
+  }
+}
+
+render();
+// Init withdraw input widths
+(function(){
+  const i=document.getElementById('wd-amount-input'); if(i) onWdAmountInput(i);
+  const j=document.getElementById('wd-list-amount-input'); if(j) onWdListAmountInput(j);
+  // Auto-open sheet in token list card
+  setTimeout(() => {
+    const listCard = document.getElementById('wd-list-card');
+    if (listCard) {
+      const overlay = listCard.querySelector('#wd-list-overlay');
+      const sheet = listCard.querySelector('#wd-list-sheet');
+      if (overlay && sheet) {
+        renderWdListSheetList(_wdListCoin);
+        sheet.style.height = Math.min(sheet.scrollHeight, 538) + 'px';
+        overlay.classList.add('open');
+        sheet.getBoundingClientRect();
+        sheet.classList.add('open');
+        initSheetDrag(sheet, overlay);
+      }
+    }
+  }, 50);
+})();
+</script>
+
+<!-- ── Invoice Setting Sub-modal ── -->
+<div class="s315-overlay" id="s315-overlay" onclick="if(event.target===this)closeInvoiceSetting()">
+  <div class="s315-modal">
+    <div class="s315-modal-header">
+      <button class="s315-nav-btn" onclick="closeInvoiceSetting()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="s315-modal-title">Invoice</span>
+      <button class="s315-nav-btn" onclick="closeInvoiceSetting()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:24px;">
+      <div style="font-size:14px;color:#83968f;margin-bottom:10px;">Accept payment in</div>
+      <div id="s315-coin-opts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"></div>
+      <div style="font-size:12px;color:#83968f;margin-top:6px;">Default from Setting. Can be changed per invoice.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let s315SelectedCoin = 0;
+
+function openInvoiceSetting() {
+  renderS315CoinOpts();
+  const overlay = document.getElementById('s315-overlay');
+  overlay.classList.remove('closing');
+  overlay.classList.add('open');
+}
+function closeInvoiceSetting() {
+  const overlay = document.getElementById('s315-overlay');
+  if (!overlay.classList.contains('open')) return;
+  overlay.classList.add('closing');
+  overlay.addEventListener('animationend', function h() {
+    overlay.classList.remove('open', 'closing');
+    overlay.removeEventListener('animationend', h);
+  }, { once: true });
+}
+function renderS315CoinOpts() {
+  const list = coins();
+  const opts = ['All', ...list];
+  const container = document.getElementById('s315-coin-opts');
+  container.innerHTML = opts.map((c, i) => {
+    const isActive = i === s315SelectedCoin;
+    const iconMap = { USDC: 'asset/usdc.png', USDT: 'asset/usdt.png' };
+    const icon = iconMap[c] ? `<img src="${iconMap[c]}" width="24" height="24" style="border-radius:50%;flex-shrink:0;">` : '';
+    return `<div class="s315-coin-opt${isActive ? ' active' : ''}" onclick="s315SelectCoin(${i})">
+      ${icon}<span style="font-size:15px;font-weight:500;color:#0C3124;">${c}</span>
+    </div>`;
+  }).join('');
+}
+function s315SelectCoin(i) {
+  s315SelectedCoin = i;
+  renderS315CoinOpts();
+}
+</script>
+</body>
+</html>

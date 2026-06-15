@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payroll — No Fixed Pay Cycle · Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --as-green:#009859; --as-brand-light:#12d16b; --as-dark:#0c3124;
+    --as-card:#fafbfa; --as-btn-cyan:#f2f8f5; --as-border-cyan:#e5eeea; --as-text-cyan:#83968f;
+  }
+  body{ font-family:"Archivo",sans-serif; letter-spacing:-0.02rem; }
+  /* —— 真实设计系统 token（取自 allscale 前端 design-tokens.css / typography）—— */
+  .as-h4{ font-weight:500; font-size:24px; letter-spacing:-0.02em; color:var(--as-dark);}
+  .as-body{ font-weight:400; font-size:16px; }
+  .as-body-sm{ font-weight:400; font-size:14px; letter-spacing:0; }
+  .as-card-box{ background:var(--as-card); border-radius:18px; padding:24px 16px; }
+  /* B001 主按钮 / B002 次按钮 / B003 ghost —— 对应前端 AllScaleButton 变体 */
+  .b001{ display:inline-flex; align-items:center; justify-content:center; gap:10px; border-radius:9999px; height:50px; padding:0 25px; background:var(--as-green); color:#fff; font-weight:500; font-size:16px; cursor:pointer; transition:opacity .2s;}
+  .b001:hover{ opacity:.8;} .b001:disabled{ opacity:.5; cursor:not-allowed;}
+  .b002{ display:inline-flex; align-items:center; justify-content:center; gap:10px; border-radius:9999px; height:50px; padding:0 25px; background:var(--as-btn-cyan); color:var(--as-dark); font-weight:500; font-size:16px; cursor:pointer; transition:opacity .2s;}
+  .b002:hover{ opacity:.8;}
+  .b002.compact{ border-radius:12px; height:39px; padding:0 13px; font-size:14px;}
+  .b003{ display:inline-flex; align-items:center; justify-content:center; gap:10px; border-radius:9999px; height:50px; padding:0 25px; background:transparent; color:var(--as-green); font-weight:500; font-size:16px; cursor:pointer; transition:opacity .2s;}
+  .b003:hover{ opacity:.7;} .b003:disabled{ opacity:.5; cursor:not-allowed;}
+  .w-full-btn{ width:100%;}
+  /* 应用框架 */
+  .app-frame{ width:980px; max-width:100%; height:680px; background:#fff; border:1px solid #d6dee2; border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.12); overflow:hidden; display:flex; flex-direction:column;}
+  .browser-bar{ height:34px; background:#f1f5f7; border-bottom:1px solid #e2e8ec; display:flex; align-items:center; gap:6px; padding:0 12px; font-size:11px; color:#8aa;}
+  .dot{ width:10px; height:10px; border-radius:50%;}
+  .side-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; font-size:15px; color:var(--as-text-cyan); cursor:pointer;}
+  .side-item.active{ background:var(--as-btn-cyan); color:var(--as-dark); font-weight:500;}
+  .row-line{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--as-border-cyan); font-size:14px;}
+  .row-line:last-child{ border-bottom:none;}
+  .pin{ font-size:11px; line-height:1.35;}
+  .fade-in{ animation:fade .35s ease;}
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .as-input{ border:1px solid #C6DFD3; border-radius:10px; padding:12px; width:100%; font-size:14px; color:var(--as-dark); background:#fff;}
+  .as-label{ font-size:13px; font-weight:600; color:var(--as-dark); margin-bottom:6px; display:block;}
+  .seg-active{ background:var(--as-dark); color:#fff;}
+  .amt-input{ width:96px; border:1px solid #C6DFD3; border-radius:8px; padding:6px 8px; font-size:13px; text-align:right;}
+  .amt-input:disabled{ background:#f8fafc; color:#cbd5e1;}
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<div class="max-w-[1280px] mx-auto px-5 py-8">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Payroll — No Fixed Pay Cycle（无固定发薪周期）</h1>
+    <p class="text-sm text-slate-500 mt-1">界面按真实前端组件还原（Archivo 字体 / 设计 token / UpcomingDueCard / PendingCard / UpcomingCard）。<span class="text-blue-600 font-medium">蓝色批注是给前端的讲解</span>。</p>
+
+    <div class="flex flex-wrap gap-4 mt-4 items-center">
+      <div class="inline-flex bg-white rounded-full p-1 shadow-sm border border-slate-200" id="view-tabs">
+        <button data-view="admin"    class="px-5 py-2 rounded-full text-sm font-semibold transition">① Admin 后台</button>
+        <button data-view="business" class="px-5 py-2 rounded-full text-sm font-semibold transition">② Business 端</button>
+        <button data-view="employee" class="px-5 py-2 rounded-full text-sm font-semibold transition">③ Employee 端</button>
+      </div>
+      <div class="inline-flex items-center gap-2 bg-white rounded-full p-1 shadow-sm border border-slate-200">
+        <span class="text-xs text-slate-400 pl-3">该公司账户的 Frequency：</span>
+        <button id="freq-monthly" class="px-4 py-2 rounded-full text-sm font-semibold transition">Monthly（现状）</button>
+        <button id="freq-nofixed" class="px-4 py-2 rounded-full text-sm font-semibold transition">On-demand（新增）</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col xl:flex-row gap-8 items-start" id="stage"></div>
+</div>
+
+<!-- Start-a-run modal -->
+<div id="run-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-[420px] rounded-3xl p-6 fade-in" id="run-modal-card"></div>
+</div>
+
+<script>
+/* ---------------- state ---------------- */
+let view = 'business';         // admin | business | employee
+let bizTab = 'dashboard';      // dashboard | payroll （Business 端左侧导航）
+let freq = 'nofixed';          // monthly | nofixed
+let nfcRun = null;             // {total, date} after an on-demand run is created
+const $ = s => document.querySelector(s);
+
+const RUN_MEMBERS = [
+  {n:'Jane Doe',  last:1200},
+  {n:'Bob Smith', last:980},
+  {n:'Alice Wang',last:null},
+];
+let runDraft = [];
+
+/* ---------------- shared bits ---------------- */
+function money(v){ return '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function pin(text){ return `<span class="pin bg-blue-600 text-white px-2 py-1 rounded-md shadow inline-block">${text}</span>`; }
+
+function explainCard(title, items){
+  return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 fade-in">
+    <h3 class="font-bold text-slate-800 mb-3">${title}</h3>
+    <ul class="space-y-2 text-sm text-slate-600">
+      ${items.map(i=>`<li class="flex gap-2"><span class="text-emerald-600 font-bold shrink-0">·</span><span>${i}</span></li>`).join("")}
+    </ul>
+  </div>`;
+}
+
+/* 应用框架：浏览器条 + 左侧导航 + 顶栏 + 内容区（还原 ResponsiveLayout + AppSidebar） */
+function appFrame(sideItems, activeKey, onClickAttr, contentHtml, who){
+  return `
+  <div class="app-frame shrink-0 fade-in">
+    <div class="browser-bar">
+      <span class="dot bg-[#f87171]"></span><span class="dot bg-[#fbbf24]"></span><span class="dot bg-[#34d399]"></span>
+      <span class="ml-3">app.allscale.io</span>
+    </div>
+    <div class="flex flex-1 min-h-0">
+      <div class="w-[210px] shrink-0 border-r p-4 flex flex-col gap-1" style="border-color:var(--as-border-cyan)">
+        <div class="flex items-center gap-2 px-2 pb-5">
+          <span class="w-7 h-7 rounded-full" style="background:var(--as-green)"></span>
+          <span class="font-semibold" style="color:var(--as-dark)">AllScale</span>
+        </div>
+        ${sideItems.map(it=>`
+          <div class="side-item ${it.key===activeKey?'active':''}" ${onClickAttr?`onclick="${onClickAttr}('${it.key}')"`:''}>
+            <span class="text-base">${it.icon}</span>${it.label}
+          </div>`).join('')}
+        <div class="mt-auto side-item">⚙️ Settings</div>
+      </div>
+      <div class="flex-1 min-w-0 flex flex-col">
+        <div class="h-[58px] shrink-0 border-b flex items-center justify-end gap-3 px-6" style="border-color:var(--as-border-cyan)">
+          <span class="w-9 h-9 rounded-full grid place-items-center text-sm font-semibold" style="background:var(--as-btn-cyan); color:var(--as-green)">${who}</span>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5">${contentHtml}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const BIZ_SIDE = [
+  {key:'dashboard', icon:'▦', label:'Dashboard'},
+  {key:'payroll',   icon:'💳', label:'Payroll'},
+  {key:'people',    icon:'👥', label:'People'},
+  {key:'apps',      icon:'⊞', label:'Apps'},
+];
+const EMP_SIDE = [
+  {key:'dashboard', icon:'▦', label:'Dashboard'},
+  {key:'wallet',    icon:'👛', label:'Wallet'},
+];
+
+/* ---------------- ① Admin ---------------- */
+function renderAdmin(){
+  const noFixed = freq==='nofixed';
+  return `
+  <div class="w-full xl:w-[560px] shrink-0 fade-in">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <h2 class="text-lg font-bold" style="color:var(--as-dark)">Create Business</h2>
+      <p class="text-xs text-slate-400 mt-1 mb-5">Admin console · New business payroll settings</p>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="as-label">Business Name</label>
+          <input class="as-input" value="Acme Studio Inc." readonly>
+        </div>
+        <div>
+          <label class="as-label">Timezone</label>
+          <input class="as-input" value="America/Los_Angeles" readonly>
+        </div>
+        <div>
+          <label class="as-label">Payment Frequency</label>
+          <select class="as-input" onchange="setFreq(this.value==='5'?'nofixed':'monthly')">
+            <option value="2">Weekly</option>
+            <option value="1" ${noFixed?'':'selected'}>Monthly</option>
+            <option value="3">Bi-weekly</option>
+            <option value="5" ${noFixed?'selected':''}>On-demand</option>
+          </select>
+          <div class="mt-2">${pin('新增选项 “On-demand” ←')}</div>
+        </div>
+        <div class="${noFixed?'opacity-40':''}">
+          <label class="as-label">Payroll Start Date ${noFixed?'<span class="text-slate-400 font-normal">(not required)</span>':'<span class="text-red-500">*</span>'}</label>
+          <input class="as-input" value="${noFixed?'—':'2026-07-01'}" ${noFixed?'disabled':''}>
+          ${noFixed?`<div class="mt-2">${pin('选中后不再必填，置灰 ↑')}</div>`:''}
+        </div>
+      </div>
+      <button class="b001 w-full-btn mt-6">Save</button>
+    </div>
+  </div>
+
+  <div class="flex-1 w-full space-y-4">
+    ${explainCard("这个页面要改什么", [
+      "<b>Payment Frequency</b> 下拉新增 <b>On-demand</b> 选项（<b>仅创建 Business 时提供</b>；编辑已有账户不提供该选项）",
+      "已设为固定周期的账户<b>不能切换</b>为 On-demand——这个选择只在新建账户时做一次",
+      "选中 On-demand 时，<b>Payroll Start Date 不再必填</b>，输入框置灰或隐藏，提交时不校验",
+      "切回 Weekly / Monthly / Bi-weekly 时恢复必填",
+      "保存后回显：详情页 Frequency 字段显示 “On-demand”",
+    ])}
+    ${explainCard("它意味着什么（产品口径）", [
+      "选了 On-demand 的公司<b>不进入周期调度</b>：系统不会按周期自动生成 Payroll Draft，也不会发周期相关的提醒",
+      "这类公司按需发薪：入口见 Business 端 Payroll 页的 <b>Start a payroll run</b>",
+      "存量公司（Monthly / Weekly / Bi-weekly）行为完全不变",
+    ])}
+  </div>`;
+}
+
+/* ---------------- ② Business ---------------- */
+/* UpcomingDueCard 还原：横向布局，左侧 Payment due + 金额，右侧 B002 Invoice 按钮 */
+function upcomingDueCard(dueText, amountText, notePin){
+  return `
+  <div class="as-card-box flex flex-row justify-between items-center relative">
+    ${notePin?`<span class="pin bg-blue-600 text-white px-2 py-1 rounded-md shadow absolute -top-3 right-4">${notePin}</span>`:''}
+    <div class="flex flex-col gap-3">
+      <span class="as-body-sm" style="color:var(--as-text-cyan)">${dueText}</span>
+      <p class="as-h4">${amountText}</p>
+    </div>
+    <button class="b002 compact">⤓ Invoice</button>
+  </div>`;
+}
+
+function bizDashboard(){
+  const noFixed = freq==='nofixed';
+  let due;
+  if(!noFixed){
+    due = upcomingDueCard('Payment due: July 01, 2026', '$12,450.00');
+  } else if(nfcRun){
+    due = upcomingDueCard('Payment due: '+nfcRun.date, money(nfcRun.total), '发起 run 后照常显示该期 ↓');
+  } else {
+    due = upcomingDueCard('Payment due: --', '$0.00', '不做空态：照常渲染接口数据 ↓');
+  }
+  return `
+  <h2 class="as-h4 mb-4">Dashboard</h2>
+  <div class="flex flex-col gap-4">
+    ${due}
+    ${freq==='nofixed' && !nfcRun ? `<div>${pin('invoice 照常下载：内容同原 invoice，时间字段随无周期口径变化 ↑')}</div>`:''}
+    <div class="as-card-box flex flex-row justify-between items-center">
+      <div class="flex flex-col gap-3">
+        <span class="as-body-sm" style="color:var(--as-text-cyan)">Balance</span>
+        <p class="as-h4">$58,200.00</p>
+      </div>
+      <button class="b002 compact">Deposit</button>
+    </div>
+    <div class="as-card-box">
+      <div class="flex justify-between items-center mb-3">
+        <span class="as-body-sm" style="color:var(--as-text-cyan)">Team</span>
+        <button class="b002 compact">+ Add member</button>
+      </div>
+      <div class="flex gap-2">
+        ${['J','B','A'].map(c=>`<span class="w-9 h-9 rounded-full grid place-items-center text-sm font-semibold" style="background:var(--as-btn-cyan); color:var(--as-green)">${c}</span>`).join('')}
+        <span class="as-body-sm self-center ml-1" style="color:var(--as-text-cyan)">3 members</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* PendingCard 还原：标题行 + 分割线 + 内容 + B003 主操作 + B002 次操作 */
+function pendingCard(inner, primary, secondary, tagHtml){
+  return `
+  <div class="as-card-box flex flex-col gap-6">
+    <div class="flex items-center gap-1">
+      <span class="w-6 h-6 grid place-items-center">🕐</span>
+      <span class="as-body" style="color:var(--as-dark)">Pending approval</span>
+      ${tagHtml||''}
+    </div>
+    <div class="h-px w-full" style="background:var(--as-border-cyan)"></div>
+    <div>${inner}</div>
+    <div class="flex flex-col w-full items-center gap-3">
+      ${primary}
+      ${secondary}
+    </div>
+  </div>`;
+}
+
+function bizPayroll(){
+  const noFixed = freq==='nofixed';
+  if(!noFixed){
+    return `
+    <h2 class="as-h4 mb-4">Payroll</h2>
+    ${pendingCard(`
+      <div class="flex items-end justify-between">
+        <span class="text-[40px] font-bold leading-none" style="color:var(--as-dark)">$12,450.00</span>
+        <span class="as-body-sm cursor-pointer" style="color:var(--as-dark)">✎ Edit</span>
+      </div>
+      <div class="as-body-sm mt-2" style="color:var(--as-text-cyan)">Due: July 01, 2026</div>
+      <div class="flex items-center justify-between as-body-sm mt-4 mb-1" style="color:var(--as-text-cyan)"><span>Approved</span><span>0/9</span></div>
+      <div class="h-1 rounded-full" style="background:var(--as-border-cyan)"></div>`,
+      `<button class="b003 w-full-btn">✓ Approve for all</button>`,
+      `<button class="b002 w-full-btn">⤓ Download invoice</button>`)}`;
+  }
+  if(!nfcRun){
+    /* 复用现有 PendingCard 的"无 upcoming"形态（真实代码已有：subtitle "No upcoming payroll" / Due: --），加发起入口 */
+    return `
+    <div class="flex items-center gap-2 mb-4"><h2 class="as-h4">Payroll</h2>
+      <span class="pin bg-blue-600 text-white px-2 py-0.5 rounded-md">不自动生成 Draft；复用现有"无 upcoming"形态 + 发起入口 ↓</span></div>
+    ${pendingCard(`
+      <div class="py-6 text-center as-body" style="color:var(--as-text-cyan)">
+        No upcoming payroll
+        <div class="as-body-sm mt-1">This account has no fixed pay schedule — payroll runs are initiated on demand.</div>
+        <div class="as-body-sm mt-1" style="color:var(--as-text-cyan)">Due: --</div>
+      </div>`,
+      `<button class="b001 w-full-btn" onclick="openRunModal()">+ Start a payroll run</button>`,
+      `<button class="b002 w-full-btn">⤓ Download invoice</button>`)}`;
+  }
+  return `
+  <h2 class="as-h4 mb-4">Payroll</h2>
+  ${pendingCard(`
+    <div class="flex items-end justify-between">
+      <span class="text-[40px] font-bold leading-none" style="color:var(--as-dark)">${money(nfcRun.total)}</span>
+      <span class="as-body-sm cursor-pointer" style="color:var(--as-dark)">✎ Edit</span>
+    </div>
+    <div class="as-body-sm mt-2" style="color:var(--as-text-cyan)">Due: ${nfcRun.date}</div>
+    <div class="flex items-center justify-between as-body-sm mt-4 mb-1" style="color:var(--as-text-cyan)"><span>Approved</span><span>0/${runDraft.filter(m=>m.checked).length||3}</span></div>
+    <div class="h-1 rounded-full" style="background:var(--as-border-cyan)"></div>`,
+    `<button class="b003 w-full-btn">✓ Approve for all</button>`,
+    `<button class="b002 w-full-btn">⤓ Download invoice</button>`,
+    `<span class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:var(--as-btn-cyan); color:var(--as-green)">On-demand</span>`)}
+  <button class="b002 w-full-btn mt-3" disabled style="opacity:.5; cursor:not-allowed">+ Start a payroll run</button>
+  <div class="mt-2 text-center">${pin('并存规则：有未结清 run 时入口置灰 ↑')}</div>`;
+}
+
+function renderBusiness(){
+  const content = bizTab==='dashboard' ? bizDashboard() : bizPayroll();
+  return `
+  ${appFrame(BIZ_SIDE, bizTab, 'setBizTab', content, 'A')}
+
+  <div class="flex-1 w-full space-y-4">
+    ${explainCard("展示适配（按真实组件标注）", [
+      "<b>Dashboard · UpcomingDueCard</b>：<b>不做空态处理</b>，照常渲染接口返回的日期与金额（示例 “Payment due: --” + $0.00 即真实组件的 fallback 形态）；Invoice 按钮照常（内容同原 invoice，时间字段随无周期口径变化）",
+      "<b>Payroll 页 · PendingCard</b>：复用现有“No upcoming payroll / Due: --”形态（真实代码已有），副文案换成无周期文案，<b>不要</b>报错或一直 loading",
+      "空状态仅在 <b>Payroll 页</b>：无未结清 Payroll 时显示该形态与发起入口；发起 run 后恢复正常 PendingCard",
+      "后端的 upcoming / invoice 读接口对这类账户<b>不会报错</b>，日期按无周期口径折算，照常渲染",
+      "<b>Add Member / Import</b>：新员工默认继承公司 frequency，展示为 “On-demand”",
+    ])}
+    ${explainCard("按需发起 · 切到 Payroll 页点按钮试试", [
+      "<b>Start a payroll run</b>（B001 主按钮）放在 PendingCard 主操作位，三步：选人与金额 → 选发薪日 → 确认创建",
+      "每人金额默认带出<b>上一次发放金额</b>（取自现有发放记录，History 同源，无需新增数据能力），无历史则必填",
+      "创建后<b>完全复用现有流程</b>：Approve for all（B003）→ 发薪日余额校验 → Admin 打款；错过进 Overdue 可补救（继承前置需求）",
+      "<b>并存规则</b>：同时只允许一个未结清的按需 run，未结清时入口置灰",
+      "❓ 待评审：默认金额口径（上次发放 vs 档案薪资）；是否放开多 run 并存",
+    ])}
+  </div>`;
+}
+
+/* ---------------- ③ Employee ---------------- */
+/* UpcomingCard 还原：绿色 Upcoming 标题 + 58px 金额 / 空态居中灰字 */
+function employeeContent(){
+  const noFixed = freq==='nofixed';
+  const upcoming = noFixed ? `
+    <div class="as-card-box flex flex-col relative">
+      <span class="pin bg-blue-600 text-white px-2 py-1 rounded-md shadow absolute -top-3 right-4">复用现有 UpcomingCard 空态 ↓</span>
+      <span class="as-body pb-5" style="color:var(--as-green)">Upcoming</span>
+      <div class="min-h-[100px] w-full flex items-center justify-center as-body text-center" style="color:var(--as-text-cyan)">No Upcoming Payroll</div>
+    </div>` : `
+    <div class="as-card-box flex flex-col">
+      <span class="as-body pb-5" style="color:var(--as-green)">Upcoming</span>
+      <div class="py-2 flex flex-wrap items-baseline">
+        <span class="text-[58px] font-bold" style="color:var(--as-dark)">5,000</span>
+        <span class="text-[24px]" style="color:var(--as-text-cyan)">.00</span>
+      </div>
+      <div class="as-body-sm" style="color:var(--as-text-cyan)">Next pay day: Jul 1, 2026</div>
+    </div>`;
+
+  const rows = noFixed ? [
+      ["Payment due date","—"],["Single payment","—"],["Frequency","On-demand"],
+      ["Annual salary","$60,000.00"],["Contract type","Contractor"],["Register date","Jan 15, 2026"],
+    ] : [
+      ["Payment due date","Jul 1, 2026"],["Single payment","$5,000.00"],["Frequency","Monthly"],
+      ["Annual salary","$60,000.00"],["Contract type","Contractor"],["Register date","Jan 15, 2026"],
+    ];
+
+  return `
+  <h2 class="as-h4 mb-4">Acme Studio</h2>
+  <div class="flex flex-col gap-4">
+    ${upcoming}
+    <div class="as-card-box relative">
+      ${noFixed?`<span class="pin bg-blue-600 text-white px-2 py-1 rounded-md shadow absolute -top-3 right-4">字段口径见右侧 ↓</span>`:''}
+      <span class="as-body-sm" style="color:var(--as-text-cyan)">Payment</span>
+      <div class="mt-2">
+        ${rows.map(([k,v])=>`<div class="row-line"><span style="color:var(--as-text-cyan)">${k}</span><span class="font-medium" style="color:${v==='—'?'#c8d4cf':'var(--as-dark)'}">${v}</span></div>`).join("")}
+      </div>
+    </div>
+    <div class="as-card-box">
+      <span class="as-body-sm" style="color:var(--as-text-cyan)">History</span>
+      <div class="mt-2">
+        <div class="row-line"><span style="color:var(--as-dark)">May 30, 2026</span><span class="font-medium" style="color:var(--as-dark)">$5,000.00</span></div>
+        <div class="row-line"><span style="color:var(--as-dark)">Apr 30, 2026</span><span class="font-medium" style="color:var(--as-dark)">$5,000.00</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderEmployee(){
+  return `
+  ${appFrame(EMP_SIDE, 'dashboard', '', employeeContent(), 'J')}
+
+  <div class="flex-1 w-full space-y-4">
+    ${explainCard("Employee 端字段口径（On-demand 时）", [
+      "<b>UpcomingCard</b>：复用现有空状态 “No Upcoming Payroll”（组件自带 isEmpty 形态），不显示金额和日期",
+      "<b>Payment due date / Single payment</b>：显示 “—”（没有可预期的下一笔）",
+      "<b>Frequency</b>：显示 “On-demand”",
+      "<b>Annual salary</b>：直接展示年薪，<b>不做周期换算</b>（现状按 Monthly ×12 / Weekly ×52 乘出；这类账户单期金额即年薪口径，乘数为 1）",
+      "<b>History</b>：照常显示已发生的发薪记录，不受影响",
+    ])}
+    ${explainCard("注意", [
+      "员工档案、Profile 里所有 frequency 展示位同口径处理",
+      "公司发起按需发薪后：UpcomingCard 显示该期金额与发薪日，Payment due date 显示该期发薪日；结清后回到空态",
+      "员工收到的<b>到账通知不变</b>；周期类提醒（即将发薪等）这类账户不会触发",
+    ])}
+  </div>`;
+}
+
+/* ---------------- Start-a-run modal ---------------- */
+function openRunModal(){
+  runDraft = RUN_MEMBERS.map(m=>({...m, checked:true, amt: m.last==null?'':String(m.last)}));
+  drawRunModal();
+  $('#run-modal').classList.remove('hidden');
+}
+function closeRunModal(){ $('#run-modal').classList.add('hidden'); }
+function runTotal(){ return runDraft.filter(m=>m.checked).reduce((s,m)=>s+(parseFloat(m.amt)||0),0); }
+function runValid(){
+  const sel = runDraft.filter(m=>m.checked);
+  return sel.length>0 && sel.every(m=>m.amt!=='' && !isNaN(parseFloat(m.amt)) && parseFloat(m.amt)>0);
+}
+function drawRunModal(){
+  $('#run-modal-card').innerHTML = `
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-lg font-semibold" style="color:var(--as-dark)">Start a payroll run</h3>
+      <button onclick="closeRunModal()" class="text-slate-400 text-xl leading-none">×</button>
+    </div>
+    <p class="text-xs mb-4" style="color:var(--as-text-cyan)">Select members, confirm amounts, pick a pay date.</p>
+
+    <div class="rounded-2xl border divide-y mb-4" style="border-color:var(--as-border-cyan); --tw-divide-opacity:1;">
+      ${runDraft.map((m,i)=>`
+        <div class="flex items-center gap-3 px-3 py-2.5" style="border-color:var(--as-border-cyan)">
+          <input type="checkbox" ${m.checked?'checked':''} onchange="runDraft[${i}].checked=this.checked; drawRunModal()" class="accent-emerald-600 w-4 h-4">
+          <div class="flex-1">
+            <div class="text-sm font-medium" style="color:var(--as-dark)">${m.n}</div>
+            <div class="text-[11px]" style="color:var(--as-text-cyan)">${m.last==null?'No payment history — amount required':'Last payment: '+money(m.last)}</div>
+          </div>
+          <input class="amt-input" type="number" min="0" step="0.01" placeholder="Required"
+            value="${m.amt}" ${m.checked?'':'disabled'}
+            oninput="runDraft[${i}].amt=this.value; updateRunFooter()">
+        </div>`).join('')}
+    </div>
+
+    <label class="as-label">Pay date</label>
+    <input id="run-date" type="date" value="2026-06-12" min="2026-06-12" class="as-input mb-4">
+
+    <div class="flex items-center justify-between text-sm mb-1">
+      <span style="color:var(--as-text-cyan)">Total (<span id="run-count">${runDraft.filter(m=>m.checked).length}</span> members)</span>
+      <span id="run-total" class="font-semibold" style="color:var(--as-dark)">${money(runTotal())}</span>
+    </div>
+    <div class="text-[11px] mb-4" style="color:var(--as-text-cyan)">Balance: $58,200.00</div>
+
+    <button id="run-confirm" onclick="confirmRun()" ${runValid()?'':'disabled'} class="b001 w-full-btn">Create payroll run</button>
+    <div class="mt-2 text-center">${pin('有成员金额未填时不能提交（Alice 无历史，必填）')}</div>
+  `;
+}
+function updateRunFooter(){
+  $('#run-total').textContent = money(runTotal());
+  $('#run-count').textContent = runDraft.filter(m=>m.checked).length;
+  $('#run-confirm').disabled = !runValid();
+}
+function confirmRun(){
+  if(!runValid()) return;
+  const d = $('#run-date').value || '2026-06-12';
+  const [y,mo,da] = d.split('-');
+  const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  nfcRun = { total: runTotal(), date: `${MON[parseInt(mo,10)-1]} ${('0'+da).slice(-2)}, ${y}` };
+  closeRunModal();
+  render();
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  document.querySelectorAll('#view-tabs button').forEach(b=>{
+    b.classList.toggle('seg-active', b.dataset.view===view);
+  });
+  $('#freq-monthly').classList.toggle('seg-active', freq==='monthly');
+  $('#freq-nofixed').classList.toggle('seg-active', freq==='nofixed');
+  $('#stage').innerHTML = view==='admin' ? renderAdmin() : view==='business' ? renderBusiness() : renderEmployee();
+}
+function setFreq(f){ freq=f; if(f==='monthly') nfcRun=null; render(); }
+function setBizTab(t){ if(t==='dashboard'||t==='payroll'){ bizTab=t; render(); } }
+
+document.querySelectorAll('#view-tabs button').forEach(b=>b.onclick=()=>{ view=b.dataset.view; render(); });
+$('#freq-monthly').onclick=()=>setFreq('monthly');
+$('#freq-nofixed').onclick=()=>setFreq('nofixed');
+$('#run-modal').addEventListener('click', e=>{ if(e.target.id==='run-modal') closeRunModal(); });
+render();
+</script>
+</body>
+</html>

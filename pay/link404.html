@@ -1,0 +1,314 @@
+                                                                                        <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Link Invalid — AllScale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+<style>
+  /* ── AllScale tokens (subset, from colors_and_type.css) ── */
+  :root {
+    --surface: #FAFBFA;
+    --border: #E5EEEA;
+    --text: #0C3124;
+    --text2: #83968F;
+    --ink: #0D0D0D;
+    --accent: #009859;
+    --neutral-text: #6B7280;
+    --red-alt: #FF383C;
+    --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --claim-card-grad: linear-gradient(104deg, #fff 7%, #f4f4f4 53%, #fff 98%);
+    --shadow-claim: 0 18px 50px rgba(0,0,0,0.30);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *::-webkit-scrollbar { display: none; }
+
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--text);
+    min-height: 100vh;
+    /* light flat register — vertical gradient #F5F5F5 → #F1F1F1 */
+    background: linear-gradient(to bottom, #F5F5F5, #F1F1F1) fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .claim-wrap {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 30px;
+    padding: 48px 18px 76px;
+  }
+
+  /* ── Terminal card ── */
+  .terminal-card {
+    width: 100%; max-width: 384px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 44px 28px 36px;
+    background: var(--claim-card-grad);
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(12,49,36,0.04), 0 12px 32px rgba(12,49,36,0.07);
+    opacity: 1;
+    transform: perspective(900px) rotateY(0) rotateX(0);
+    transition: transform .25s cubic-bezier(0.16,1,0.3,1), box-shadow .25s cubic-bezier(0.16,1,0.3,1);
+    will-change: transform;
+  }
+  .terminal-card.lift { box-shadow: 0 2px 4px rgba(12,49,36,0.05), 0 20px 44px rgba(12,49,36,0.10); }
+
+  .card-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+  }
+
+  .illus { width: 116px; height: 116px; display: block; }
+
+  .tx { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .t-title {
+    font-weight: 500; font-size: 28px; line-height: 1.05; letter-spacing: -1.12px; color: var(--ink);
+    text-wrap: balance;
+  }
+  .t-body {
+    font-weight: 400; font-size: 14px; line-height: 1.45; color: #2A2F2D; max-width: 300px;
+    text-wrap: pretty;
+  }
+  .t-meta { font-size: 14px; line-height: 1; color: var(--text2); }
+  .t-meta b { color: var(--text); font-weight: 500; }
+  .t-meta.hide, .t-body.hide { display: none; }
+
+  /* near-black claim CTA */
+  .btn-black {
+    width: 100%; height: 48px; margin-top: 4px;
+    border-radius: 30px; background: var(--ink); border: none; cursor: pointer;
+    font-family: var(--font-sans); font-weight: 500; font-size: 17px; letter-spacing: -0.34px;
+    color: #fff; line-height: 1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: filter .15s, transform .06s;
+    text-decoration: none;
+  }
+  .btn-black:hover { filter: brightness(1.32); }
+  .btn-black:active { transform: scale(0.985); }
+  .btn-black svg { display: block; }
+  .btn-black.hide { display: none; }
+
+  /* ── Footer (every recipient page) ── */
+  .pl-footer {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center;
+    font-weight: 400; font-size: 12px; line-height: 1.5; color: var(--text2);
+  }
+  .pl-footer .powered {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    font-weight: 500; letter-spacing: -0.01em; color: var(--text);
+  }
+  .pl-footer .links { display: flex; align-items: center; gap: 12px; }
+  .pl-footer .links span { opacity: 0.45; }
+  .pl-footer a { color: var(--text2); text-decoration: none; transition: color .15s; }
+  .pl-footer a:hover { color: var(--text); text-decoration: underline; }
+
+  /* gentle entrance — pure CSS, base state fully visible so it can never
+     leave the page blank (no JS / animation dependency for visibility). */
+  .card-inner > * { opacity: 1; }
+
+  /* ── Preview state switcher (REMOVE for production) ── */
+  .switcher {
+    position: fixed; z-index: 50; left: 50%; bottom: 16px; transform: translateX(-50%);
+    display: flex; gap: 3px; padding: 4px;
+    background: rgba(18,22,26,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 999px;
+    opacity: 0.42; transition: opacity .2s; font-family: var(--font-sans);
+  }
+  .switcher:hover { opacity: 1; }
+  .switcher[hidden] { display: none; }
+  .switcher button {
+    border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.78);
+    font-family: var(--font-sans); font-size: 12.5px; font-weight: 500; letter-spacing: -0.01em;
+    padding: 7px 14px; border-radius: 999px; transition: background .15s, color .15s;
+  }
+  .switcher button.on { background: #fff; color: var(--ink); }
+  .switcher .lbl { color: rgba(255,255,255,0.5); font-size: 11px; padding: 7px 4px 7px 10px; align-self: center; }
+
+  @media (max-width: 420px) {
+    .switcher .lbl { display: none; }
+    .switcher button { padding: 7px 11px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Splash / no-JS fallback for the offline bundle -->
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0C3124"/>
+    <g transform="translate(30,30)" fill="none" stroke="#12D16B" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 16l2.3-2.3a6.7 6.7 0 0 0-.2-9.4 6.7 6.7 0 0 0-9.3 0L14.5 6.6"/>
+      <path d="M6.9 15.7l-2.3 2.3a6.7 6.7 0 0 0 .2 9.4 6.7 6.7 0 0 0 9.3 0l2.3-2.3"/>
+      <path d="M10.7 2.7v4M2.7 10.7h4M21.3 25.3v4M25.3 21.3h4"/>
+    </g>
+  </svg>
+</template>
+
+<main class="claim-wrap">
+  <section class="terminal-card" id="card" data-screen-label="Link invalid">
+    <div class="card-inner">
+      <div class="illus" id="illus"></div>
+      <div class="tx">
+        <h1 class="t-title" id="title">This link is invalid</h1>
+        <p class="t-body" id="body"></p>
+        <div class="t-meta hide" id="meta">From <b id="meta-from">—</b></div>
+      </div>
+      <a class="btn-black" id="cta" href="https://allscale.io">Go to AllScale</a>
+    </div>
+  </section>
+
+  <footer class="pl-footer">
+    <div class="powered">Powered by <strong>AllScale</strong></div>
+    <div class="links">
+      <a href="https://www.allscale.io/agreement">Terms</a>
+      <span>·</span>
+      <a href="https://www.allscale.io/policy">Privacy</a>
+      <span>·</span>
+      <a href="/cdn-cgi/l/email-protection#12616762627d606652737e7e6171737e773c7b7d"><span class="__cf_email__" data-cfemail="e3909693938c9197a3828f8f9080828f86cd8a8c">[email&#160;protected]</span></a>
+    </div>
+  </footer>
+</main>
+
+<!-- PREVIEW ONLY — hidden in production; appears with ?preview=1 so you can flip
+     through the dead-end states. Safe to leave in or delete entirely. -->
+<nav class="switcher" id="switcher" aria-label="Preview state" hidden>
+  <span class="lbl">Preview</span>
+  <button data-state="invalid" class="on">Invalid</button>
+  <button data-state="expired">Expired</button>
+  <button data-state="cancelled">Cancelled</button>
+  <button data-state="failed">Failed</button>
+</nav>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function () {
+  // ── 116px round status illustrations, built in the AllScale chip construction
+  //    (#FAFBFA circle + a single monochrome line glyph, ~4px stroke). ──
+  function chip(glyph) {
+    return '<svg class="illus" width="116" height="116" viewBox="0 0 116 116" fill="none" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect width="116" height="116" rx="58" fill="#FAFBFA"/>' + glyph + '</svg>';
+  }
+  // unlink / broken-chain (Lucide-style), scaled & centered in the chip
+  var GLYPH_LINK =
+    '<g transform="translate(26.5,26.5) scale(2.625)" fill="none" stroke="#0C3124" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M18.84 12.25l1.72-1.71a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/>'
+    + '<path d="M5.17 11.75l-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/>'
+    + '<path d="M8 2v3M2 8h3M16 19v3M19 16h3"/>'
+    + '</g>';
+  var GLYPH_CLOCK =
+    '<g transform="translate(28,28) scale(2.5)" fill="none" stroke="#0C3124" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    + '<circle cx="12" cy="12" r="9.2"/><path d="M12 6.6V12l3.7 2.1"/>'
+    + '</g>';
+  var GLYPH_X =
+    '<g transform="translate(28,28) scale(2.5)" fill="none" stroke="#6B7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    + '<circle cx="12" cy="12" r="9.2"/><path d="M15.2 8.8l-6.4 6.4M8.8 8.8l6.4 6.4"/>'
+    + '</g>';
+  var GLYPH_ALERT =
+    '<g transform="translate(28,28) scale(2.5)" fill="none" stroke="#FF383C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    + '<circle cx="12" cy="12" r="9.2"/><path d="M12 7.4v5.2"/><circle cx="12" cy="16.3" r="0.2"/><path d="M12 16.3h0.01"/>'
+    + '</g>';
+
+  var STATES = {
+    invalid: {
+      glyph: GLYPH_LINK,
+      title: 'This link is invalid',
+      body: "The link you opened doesn’t exist or is no longer available. It may have been mistyped, or the page it pointed to was removed.",
+      cta: 'Go to AllScale',
+      meta: null
+    },
+    expired: {
+      glyph: GLYPH_CLOCK,
+      title: 'Link expired',
+      body: 'This payment link has expired. The funds have been returned to the sender.',
+      cta: null,
+      meta: 'Jony'
+    },
+    cancelled: {
+      glyph: GLYPH_X,
+      title: 'Cancelled',
+      body: 'This payment link was cancelled by the sender.',
+      cta: null,
+      meta: 'Jony'
+    },
+    failed: {
+      glyph: GLYPH_ALERT,
+      title: 'Transfer Failed',
+      body: 'Something went wrong with this payment link. The funds have been returned to the sender.',
+      cta: null,
+      meta: 'Jony'
+    }
+  };
+
+  var els = {
+    illus: document.getElementById('illus'),
+    title: document.getElementById('title'),
+    body: document.getElementById('body'),
+    meta: document.getElementById('meta'),
+    metaFrom: document.getElementById('meta-from'),
+    cta: document.getElementById('cta'),
+    card: document.getElementById('card')
+  };
+
+  function render(key) {
+    var s = STATES[key] || STATES.invalid;
+    els.illus.innerHTML = chip(s.glyph);
+    els.title.textContent = s.title;
+    els.body.textContent = s.body || '';
+    els.body.classList.toggle('hide', !s.body);
+    if (s.meta) { els.metaFrom.textContent = s.meta; els.meta.classList.remove('hide'); }
+    else { els.meta.classList.add('hide'); }
+    if (s.cta) { els.cta.textContent = s.cta; els.cta.classList.remove('hide'); }
+    else { els.cta.classList.add('hide'); }
+    els.card.setAttribute('data-screen-label', 'Link ' + key);
+  }
+
+  // initial state: ?state= overrides the default ("invalid")
+  var qs = new URLSearchParams(location.search);
+  var initial = (qs.get('state') || 'invalid').toLowerCase();
+  if (!STATES[initial]) initial = 'invalid';
+  render(initial);
+
+  // ── 3D tilt toward cursor (claim-card behaviour) ──
+  var card = els.card;
+  if (window.matchMedia('(hover: hover)').matches) {
+    card.addEventListener('mousemove', function (e) {
+      var r = card.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width - 0.5;
+      var py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = 'perspective(900px) rotateY(' + (px * 6) + 'deg) rotateX(' + (-py * 6) + 'deg)';
+      card.classList.add('lift');
+    });
+    card.addEventListener('mouseleave', function () {
+      card.style.transform = 'perspective(900px) rotateY(0) rotateX(0)';
+      card.classList.remove('lift');
+    });
+  }
+
+  // ── Preview switcher (only shown with ?preview=1) ──
+  var sw = document.getElementById('switcher');
+  if (sw && qs.get('preview') === '1') {
+    sw.hidden = false;
+    sw.querySelectorAll('button').forEach(function (b) {
+      if (b.dataset.state === initial) {
+        sw.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+      }
+      b.addEventListener('click', function () {
+        sw.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        render(b.dataset.state);
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

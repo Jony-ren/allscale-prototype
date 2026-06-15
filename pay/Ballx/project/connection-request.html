@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Connection request · AllScale</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #ffffff;
+    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px 64px;
+  }
+
+  /* ── Sheet ── */
+  .sheet {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+  }
+
+  /* ── Header ── */
+  .head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .brand-tile {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+  }
+  .brand-tile img {
+    width: 110px;
+    height: auto;
+    display: block;
+  }
+  .head-text { min-width: 0; }
+  .head-title {
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: #0C3124;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .head-sub {
+    font-size: 14px;
+    font-weight: 400;
+    color: #83968F;
+    line-height: 1.4;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: #FAFBFA;
+    border-radius: 18px;
+    padding: 4px 0;
+    margin-bottom: 10px;
+  }
+
+  .kv {
+    display: grid;
+    grid-template-columns: minmax(120px, auto) 1fr;
+    align-items: start;
+    gap: 16px;
+    padding: 13px 18px;
+  }
+  .kv + .kv { border-top: none; position: relative; }
+  .kv + .kv::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 18px; right: 18px;
+    height: 1px;
+    background: #E5EEEA;
+  }
+  .kv .k {
+    font-size: 14px;
+    font-weight: 400;
+    color: #83968F;
+    line-height: 1.4;
+  }
+  .kv .v {
+    font-size: 14px;
+    font-weight: 500;
+    color: #0C3124;
+    text-align: right;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .kv .v.mono {
+    font-family: 'DM Mono', 'Fira Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* ── Badge / pill ── */
+  .pill-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 999px;
+    background: #F2F8F5;
+    color: #009859;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .pill-success .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #009859;
+    flex-shrink: 0;
+  }
+
+  /* ── Network chips ── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px 4px 4px;
+    background: #FAFBFA;
+    border: 1px solid #E5EEEA;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #0C3124;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .chip img {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: block;
+  }
+
+  /* ── Method tags ── */
+  .methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .method {
+    font-family: 'DM Mono', 'Fira Mono', monospace;
+    font-size: 11.5px;
+    color: #0C3124;
+    background: #FAFBFA;
+    border: 1px solid #E5EEEA;
+    padding: 4px 10px;
+    border-radius: 8px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  /* ── Origin ── */
+  .origin {
+    font-family: 'DM Mono', 'Fira Mono', monospace;
+    font-size: 13px;
+    color: #0C3124;
+  }
+  .origin .scheme { color: #83968F; }
+
+  /* ── Address + copy ── */
+  .addr {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', 'Fira Mono', monospace;
+    font-size: 12.5px;
+    color: #0C3124;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+  .copy-btn {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #F2F8F5;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .copy-btn:hover { background: #E5EEEA; }
+  .copy-btn img { width: 14px; height: 14px; display: block; }
+
+  /* ── Toast ── */
+  #toast-wrap {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    background: #FAFBFA;
+    border: 1px solid #E5EEEA;
+    border-radius: 28px;
+    padding: 10px 16px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0C3124;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    animation: toastIn 0.22s ease;
+  }
+  .toast img { width: 16px; height: 16px; display: block; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    margin: 18px 0 22px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #83968F;
+  }
+  .disclaimer strong { color: #0C3124; font-weight: 500; }
+
+  /* ── Actions ── */
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    flex: 1;
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Archivo', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    height: 52px;
+    border-radius: 50px;
+    transition: opacity .15s, background .15s;
+  }
+  .btn:active { opacity: 0.85; }
+  .btn-ghost {
+    background: #FAFBFA;
+    color: #0C3124;
+  }
+  .btn-ghost:hover { background: #E5EEEA; }
+  .btn-primary {
+    background: #009859;
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  @media (max-width: 420px) {
+    .sheet { padding: 20px; border-radius: 20px; }
+    .head-title { font-size: 20px; }
+    .kv { padding: 11px 14px; gap: 12px; grid-template-columns: minmax(96px,auto) 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <main class="sheet" role="dialog" aria-labelledby="ttl">
+    <!-- Header -->
+    <header class="head">
+      <div class="brand-tile" aria-hidden="true">
+        <img src="assets/allscale-logo.svg" alt="AllScale">
+      </div>
+      <div class="head-text">
+        <h1 id="ttl" class="head-title">Connection request</h1>
+        <p class="head-sub">A site wants to connect to your AllScale wallet.</p>
+      </div>
+    </header>
+
+    <!-- Card 1: identity -->
+    <section class="card">
+      <div class="kv">
+        <span class="k">Request from</span>
+        <span class="v mono">localhost:5174</span>
+      </div>
+      <div class="kv">
+        <span class="k">App</span>
+        <span class="v">AllScale Demo dApp</span>
+      </div>
+      <div class="kv">
+        <span class="k">Signing in with</span>
+        <span class="v">AllScale</span>
+      </div>
+    </section>
+
+    <!-- Card 2: estimated changes -->
+    <section class="card">
+      <div class="kv">
+        <span class="k">Estimated changes</span>
+        <span class="v">
+          <span class="pill-success"><span class="dot"></span>No fund movement</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- Card 3: details -->
+    <section class="card">
+      <div class="kv">
+        <span class="k">Account</span>
+        <span class="v">
+          <span class="addr">
+            <span>0xccA7e7F77784113A3Be4aCC544Eda34591b4A633</span>
+            <button class="copy-btn" type="button" id="copyBtn" aria-label="Copy address" title="Copy">
+              <img src="assets/copy-green.svg" alt="copy">
+            </button>
+          </span>
+        </span>
+      </div>
+      <div class="kv">
+        <span class="k">Networks</span>
+        <span class="v">
+          <span class="chips">
+            <span class="chip"><img src="assets/chain/eth.png" alt="">Ethereum</span>
+            <span class="chip"><img src="assets/chain/bnb.png" alt="">BSC</span>
+            <span class="chip"><img src="assets/chain/Polygon.png" alt="">Polygon</span>
+            <span class="chip"><img src="assets/chain/base.png" alt="">Base</span>
+            <span class="chip"><img src="assets/chain/Optimism.png" alt="">Optimism</span>
+            <span class="chip"><img src="assets/chain/Arbitrum.png" alt="">Arbitrum</span>
+          </span>
+        </span>
+      </div>
+      <div class="kv">
+        <span class="k">Methods granted</span>
+        <span class="v">
+          <span class="methods">
+            <span class="method">personal_sign</span>
+            <span class="method">eth_sendTransaction</span>
+          </span>
+        </span>
+      </div>
+      <div class="kv">
+        <span class="k">Origin</span>
+        <span class="v"><span class="origin"><span class="scheme">http://</span>localhost:5174</span></span>
+      </div>
+    </section>
+
+    <!-- Disclaimer -->
+    <p class="disclaimer">
+      Approving lets <strong>AllScale Demo dApp</strong> request signatures from this account. No funds move until you approve a specific transaction.
+    </p>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-ghost" type="button" id="reject">Reject</button>
+      <button class="btn btn-primary" type="button" id="approve">Approve</button>
+    </div>
+  </main>
+
+  <div id="toast-wrap"></div>
+
+<script>
+  const copyBtn = document.getElementById('copyBtn');
+  const ADDR = '0xccA7e7F77784113A3Be4aCC544Eda34591b4A633';
+
+  function showToast(msg) {
+    const wrap = document.getElementById('toast-wrap');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<img src="assets/check.svg" alt=""><span>${msg}</span>`;
+    wrap.appendChild(t);
+    setTimeout(() => { t.style.transition = 'opacity 0.2s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 2000);
+  }
+
+  copyBtn?.addEventListener('click', () => {
+    try {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(ADDR).catch(() => {});
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = ADDR;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+    } catch(e) {}
+    showToast('Address copied');
+  });
+
+  document.getElementById('approve')?.addEventListener('click', e => {
+    e.currentTarget.textContent = 'Connecting…';
+    e.currentTarget.disabled = true;
+  });
+</script>
+</body>
+</html>

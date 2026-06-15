@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payroll — Invoice Detail Privacy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --as-green: #009859;
+    --as-card: #fafbfa;
+    --as-btn-cyan: #f2f8f5;
+    --as-border-cyan: #e5eeea;
+    --as-dark: #0c3124;
+    --as-text-cyan: #83968f;
+    --as-brand-light: #12d16b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Archivo", "Noto Sans SC", sans-serif;
+    background: #f0f4f2;
+    color: var(--as-dark);
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--as-border-cyan);
+    padding: 18px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .topbar h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; }
+  .topbar .sub { font-size: 13px; color: var(--as-text-cyan); }
+
+  .stage {
+    display: flex;
+    gap: 28px;
+    padding: 28px 32px 60px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- annotation (内部批注，中文) ---------- */
+  .note {
+    border: 1.5px dashed #e6a23c;
+    background: #fffaf0;
+    color: #8a5a00;
+    font-size: 12.5px;
+    line-height: 1.6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 10px 0 0;
+  }
+  .note b { color: #6b4400; }
+
+  /* ---------- Settings panel ---------- */
+  .settings-wrap { width: 420px; flex-shrink: 0; }
+  .panel-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--as-text-cyan); margin-bottom: 10px;
+  }
+  .settings {
+    background: #fff;
+    border: 1px solid var(--as-border-cyan);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 6px 24px rgba(12, 49, 36, 0.06);
+  }
+  .settings .head { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .settings .head h2 { font-size: 24px; font-weight: 500; letter-spacing: -0.02em; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+  .tab {
+    font-size: 14px; padding: 8px 16px; border-radius: 999px;
+    background: var(--as-btn-cyan); color: var(--as-text-cyan); cursor: default;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab.active { background: var(--as-dark); color: #fff; }
+
+  .avatar-row { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 6px 0 18px; }
+  .avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--as-btn-cyan); color: #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 500;
+  }
+  .upload-btn {
+    border: 1px solid var(--as-border-cyan); background: #fff; color: var(--as-dark);
+    border-radius: 999px; padding: 8px 18px; font-size: 14px; font-family: inherit; cursor: default;
+  }
+  .upload-btn span { color: var(--as-green); margin-right: 4px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 14px; color: var(--as-text-cyan); margin-bottom: 8px; }
+  .field input {
+    width: 100%; height: 46px; border: 1px solid var(--as-border-cyan); border-radius: 10px;
+    padding: 0 14px; font-size: 15px; font-family: inherit; color: var(--as-dark); background: #fff;
+  }
+
+  .pref-card {
+    border: 1px solid var(--as-border-cyan);
+    background: var(--as-card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .pref-card .txt { flex: 1; }
+  .pref-card .txt .t { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .pref-card .txt .d { font-size: 12.5px; color: var(--as-text-cyan); line-height: 1.5; }
+
+  .switch {
+    position: relative; width: 46px; height: 26px; flex-shrink: 0; cursor: pointer; margin-top: 2px;
+    border: none; padding: 0; background: #d6dedb; border-radius: 999px; transition: background .2s;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+    background: #fff; border-radius: 50%; transition: left .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  .switch.on { background: var(--as-green); }
+  .switch.on::after { left: 23px; }
+
+  .save-btn {
+    width: 100%; height: 48px; margin-top: 22px;
+    background: var(--as-green); color: #fff; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .save-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .toast {
+    position: fixed; top: 22px; left: 50%; transform: translateX(-50%) translateY(-8px);
+    background: var(--as-dark); color: #fff; font-size: 14px;
+    padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Invoice preview ---------- */
+  .invoice-wrap { width: 600px; max-width: 100%; }
+  .invoice-toolbar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .invoice-toolbar .panel-label { margin-bottom: 0; flex: 1; }
+  .badge {
+    font-size: 12px; padding: 4px 12px; border-radius: 999px; font-weight: 500;
+  }
+  .badge.detailed { background: var(--as-btn-cyan); color: var(--as-green); }
+  .badge.summary { background: var(--as-dark); color: #fff; }
+
+  .invoice {
+    background: #fff; border: 1px solid var(--as-border-cyan); border-radius: 8px;
+    padding: 34px 32px; color: #000;
+    box-shadow: 0 10px 30px rgba(12, 49, 36, 0.08);
+  }
+  .inv-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .inv-head .title { font-size: 28px; font-weight: 500; letter-spacing: -0.5px; }
+  .inv-head img { height: 22px; }
+
+  .inv-meta { font-size: 12px; margin-bottom: 28px; }
+  .inv-meta td { padding: 2px 0; }
+  .inv-meta .k { color: #999; padding-right: 10px; }
+
+  .inv-parties { width: 100%; margin-bottom: 28px; }
+  .inv-parties td { vertical-align: top; width: 50%; }
+  .inv-parties .role { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+  .inv-parties .nm { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+  .inv-parties .ln { font-size: 11px; color: #999; line-height: 1.5; max-width: 200px; }
+
+  .details-label { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+  .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .inv-table th {
+    background: #fcfcfc; color: #999; font-size: 10px; font-weight: 500;
+    text-align: left; padding: 8px 0 8px 12px;
+  }
+  .inv-table th:last-child, .inv-table td:last-child { text-align: right; padding-right: 14px; }
+  .inv-table td { color: #777; font-size: 10.5px; padding: 9px 0 0 12px; }
+  .inv-table tr.agg td { font-size: 11px; color: #444; font-weight: 500; padding-top: 12px; padding-bottom: 4px; }
+
+  .inv-note { color: #999; font-size: 10px; padding-left: 12px; margin-bottom: 22px; }
+  .inv-divider { height: 1px; background: #f5f5f5; margin-bottom: 14px; }
+
+  .inv-summary { width: 94%; margin: 0 auto 24px; border-collapse: separate; border-spacing: 0 9px; font-size: 12px; }
+  .inv-summary td { color: #999; font-weight: 500; }
+  .inv-summary td:last-child { text-align: right; }
+  .inv-summary tr.total td:last-child { color: #000; }
+
+  .inv-instr { width: 94%; margin: 0 auto; font-size: 10px; }
+  .inv-instr .t { font-weight: 500; margin-bottom: 4px; }
+  .inv-instr .d { color: #999; line-height: 1.5; }
+
+  .inv-legal {
+    margin-top: 26px; padding-top: 16px; border-top: 1px solid #f5f5f5;
+    text-align: center; font-size: 9.5px; color: #cecece; line-height: 1.6;
+  }
+  .inv-legal .powered { color: #dbdbdb; margin-top: 10px; }
+
+  .flash { animation: flash 0.9s ease; }
+  @keyframes flash {
+    0% { background: #f2f8f5; }
+    100% { background: transparent; }
+  }
+
+  @media (max-width: 1120px) {
+    .stage { padding: 20px 16px 60px; }
+    .settings-wrap, .invoice-wrap { width: 100%; max-width: 600px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Payroll — Invoice Detail Privacy</h1>
+  <span class="sub">Settings toggle → invoice rendering · PRD: payroll-invoice-detail-privacy</span>
+</div>
+
+<div class="stage">
+
+  <!-- ===================== Settings ===================== -->
+  <div class="settings-wrap">
+    <div class="panel-label">Settings &gt; Company</div>
+    <div class="settings">
+      <div class="head"><h2>Settings</h2></div>
+      <div class="tabs">
+        <div class="tab">Profile</div>
+        <div class="tab active">Company</div>
+        <div class="tab">Security</div>
+      </div>
+
+      <div class="avatar-row">
+        <div class="avatar">A</div>
+        <button class="upload-btn"><span>+</span>Upload logo</button>
+      </div>
+
+      <div class="field">
+        <label>Company name</label>
+        <input type="text" value="Acme Studio Ltd." readonly />
+      </div>
+      <div class="field">
+        <label>Company Address</label>
+        <input type="text" value="100 King St W, Toronto, ON" readonly />
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label>Invoice preferences</label>
+        <div class="pref-card">
+          <div class="txt">
+            <div class="t">Show team member details on invoices</div>
+            <div class="d">When turned off, invoices show the total amount only — individual names and amounts are not included.</div>
+          </div>
+          <button class="switch on" id="detailSwitch" aria-label="toggle invoice details" onclick="toggleDetail()"></button>
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveBtn" disabled onclick="save()">Save</button>
+    </div>
+
+    <div class="note">
+      <b>批注（内部）</b>：开关新增在 Settings &gt; Company，公司名 / 地址下方，默认<b>开</b>（保持现状）。
+      真实产品中点 <b>Save</b> 后生效；本 Demo 为了演示方便，切开关右侧 invoice 即时重渲染。
+      文案待 BD/PM 确认（PRD V2）。
+    </div>
+    <div class="note">
+      <b>为什么放设置而不是下载按钮旁</b>：invoice 还会通过邮件（批次完成 / 余额提醒）送达客户，
+      下载时的单次选择覆盖不了邮件出口；且这是低频长期偏好。开关对下载 + 邮件出口统一生效。
+    </div>
+  </div>
+
+  <!-- ===================== Invoice preview ===================== -->
+  <div class="invoice-wrap">
+    <div class="invoice-toolbar">
+      <div class="panel-label">Invoice PDF preview</div>
+      <span class="badge detailed" id="modeBadge">Detailed (current behavior)</span>
+    </div>
+
+    <div class="invoice">
+      <div class="inv-head">
+        <div class="title">INVOICE</div>
+        <img src="https://static.allscale.io/allscale_email_logo.png" alt="AllScale" />
+      </div>
+
+      <table class="inv-meta">
+        <tr><td class="k">Payment NO.:</td><td>Acme Studio Ltd. - 20260611</td></tr>
+        <tr><td class="k">Issue Date:</td><td>June 11, 2026</td></tr>
+        <tr><td class="k">Billing Period:</td><td>May 12, 2026 to June 11, 2026</td></tr>
+      </table>
+
+      <table class="inv-parties">
+        <tr>
+          <td>
+            <div class="role">Billed to</div>
+            <div class="nm">Acme Studio Ltd.</div>
+            <div class="ln">100 King St W, Toronto, ON<br/>Canada</div>
+            <div class="ln" style="margin-top:10px;">finance@acmestudio.com</div>
+          </td>
+          <td>
+            <div class="role">Issue by</div>
+            <div class="nm">AllScale</div>
+            <div class="ln">131 Continental Dr, Suite 305, Newark, DE 19713<br/>United States of America</div>
+            <div class="ln" style="margin-top:10px;">operation@allscale.io</div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="details-label">Details</div>
+      <table class="inv-table" id="detailsTable">
+        <!-- rows injected by JS -->
+      </table>
+      <div class="inv-note">To be fully distributed to contractors as per client instruction; not recognized as AllScale revenue.</div>
+
+      <div class="inv-divider"></div>
+
+      <table class="inv-summary">
+        <tr><td>Subtotal (All team members)</td><td>23,400.00 USDT</td></tr>
+        <tr><td>Service fee (1%)</td><td>234.00 USDT</td></tr>
+        <tr class="total"><td>Total</td><td>23,634.00 USDT</td></tr>
+      </table>
+
+      <div class="inv-instr">
+        <div class="t">Payment Instructions:</div>
+        <div class="d">Please complete payment of the total invoice amount by following the payment instructions provided in your AllScale Dashboard.</div>
+      </div>
+
+      <div class="inv-legal">
+        Legal Disclaimer: This invoice is issued by AllScale Inc. in its capacity as a contractor payment service provider acting on behalf of "Acme Studio Ltd.".<br/>
+        All contractor-related matters, including contractor rights, obligations, and tax liabilities, remain solely between "Acme Studio Ltd." and its contractors.<br/>
+        This invoice does not constitute a tax certificate or legal proof of employment by AllScale Inc..
+        <div class="powered">Powered by AllScale</div>
+      </div>
+    </div>
+
+    <div class="note" id="invNote">
+      <b>批注（内部）</b>：当前为<b>带明细</b>版（线上现状）——Details 表逐行列出成员姓名、Payment No.、周期、单人金额，客户反馈的问题就在这里。
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Updated success</div>
+
+<script>
+  // ----- mock data -----
+  const MEMBERS = [
+    { name: "Mason Walker",   no: "67e38e81c6e15367954baa8c", amount: "6,200.00" },
+    { name: "Ava Thompson",   no: "67e38e81c6e15367954baa91", amount: "5,400.00" },
+    { name: "Liam Chen",      no: "67e38e81c6e15367954baa95", amount: "4,800.00" },
+    { name: "Sofia Martinez", no: "67e38e81c6e15367954baa9a", amount: "3,900.00" },
+    { name: "Noah Kim",       no: "67e38e81c6e15367954baa9e", amount: "3,100.00" },
+  ];
+  const PERIOD = "May 12, 2026 - Jun 11, 2026";
+
+  // ----- state -----
+  let showDetails = true;    // current toggle state (drives invoice preview)
+  let savedDetails = true;   // last saved state (drives Save button)
+
+  const sw = document.getElementById("detailSwitch");
+  const saveBtn = document.getElementById("saveBtn");
+  const table = document.getElementById("detailsTable");
+  const badge = document.getElementById("modeBadge");
+  const invNote = document.getElementById("invNote");
+  const toast = document.getElementById("toast");
+
+  function renderInvoice() {
+    let html;
+    if (showDetails) {
+      html = `
+        <tr>
+          <th style="width:22%;">Team member</th>
+          <th style="width:32%;">Payment No.</th>
+          <th>Period Covered</th>
+          <th style="width:18%;">Amount (USDT)</th>
+        </tr>` +
+        MEMBERS.map(m => `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.no}</td>
+          <td>${PERIOD}</td>
+          <td>${m.amount}</td>
+        </tr>`).join("");
+      badge.textContent = "Detailed (current behavior)";
+      badge.className = "badge detailed";
+      invNote.innerHTML = "<b>批注（内部）</b>：当前为<b>带明细</b>版（线上现状）——Details 表逐行列出成员姓名、Payment No.、周期、单人金额，客户反馈的问题就在这里。";
+    } else {
+      html = `
+        <tr>
+          <th style="width:46%;">Team member</th>
+          <th>Period Covered</th>
+          <th style="width:20%;">Amount (USDT)</th>
+        </tr>
+        <tr class="agg">
+          <td>5 team members</td>
+          <td>${PERIOD}</td>
+          <td>23,400.00</td>
+        </tr>`;
+      badge.textContent = "Summary (details hidden)";
+      badge.className = "badge summary";
+      invNote.innerHTML = "<b>批注（内部）</b>：<b>汇总版</b>——Details 表收敛为单行：人数 + 账期 + 合计。全文不出现任何成员姓名与单人金额；账期、Subtotal / Service fee / Total、法务声明全部保留，仍是一张完整可入账的 invoice。Payment NO. 与金额跟明细版完全一致（同一张账单的两种版式）。";
+    }
+    table.innerHTML = html;
+    table.classList.remove("flash");
+    void table.offsetWidth; // restart animation
+    table.classList.add("flash");
+  }
+
+  function toggleDetail() {
+    sw.classList.toggle("on");
+    // Demo convenience: re-render invoice immediately (real product applies on Save)
+    showDetails = sw.classList.contains("on");
+    saveBtn.disabled = showDetails === savedDetails;
+    renderInvoice();
+  }
+
+  function save() {
+    savedDetails = showDetails;
+    saveBtn.disabled = true;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+
+  renderInvoice();
+</script>
+
+</body>
+</html>

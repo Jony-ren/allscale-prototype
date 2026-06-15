@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>AllScale 产品迭代甘特图</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif; color: #1f2937; background: #f8fafc; padding: 24px; }
+header { margin-bottom: 16px; max-width: 1600px; }
+h1 { font-size: 20px; }
+.meta { color: #6b7280; font-size: 13px; margin-top: 4px; }
+.meta a { color: #2563eb; text-decoration: none; }
+.legend { display: flex; gap: 14px; font-size: 12px; color: #4b5563; margin-top: 10px; flex-wrap: wrap; }
+.legend-item { display: inline-flex; align-items: center; gap: 4px; }
+.legend-box { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.legend-diamond { width: 10px; height: 10px; transform: rotate(45deg); display: inline-block; }
+.legend-dash { display: inline-block; width: 18px; border-top: 2px dashed #94a3b8; }
+.legend-circle { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.container { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; overflow-x: auto; }
+svg { display: block; }
+.bar-text { font-size: 10.5px; fill: white; font-weight: 500; pointer-events: none; }
+.epic-name { font-size: 12.5px; fill: #1f2937; font-weight: 500; }
+.epic-name-delivered { font-size: 12px; fill: #6b7280; }
+.section-title { font-size: 13px; font-weight: 700; fill: #475569; }
+.section-toggle { cursor: pointer; }
+.section-toggle:hover { fill: #0f172a; }
+.date-label { font-size: 10px; fill: #94a3b8; }
+.month-label { font-size: 11px; fill: #475569; font-weight: 600; }
+.weekly-line { stroke: #f1f5f9; stroke-width: 1; }
+.month-line { stroke: #e2e8f0; stroke-width: 1; }
+.today-line { stroke: #dc2626; stroke-width: 2; stroke-dasharray: 4 4; }
+.milestone-label { font-size: 9.5px; fill: #b45309; font-weight: 600; }
+.shift-note { font-size: 9.5px; fill: #6b7280; }
+.tooltip-target { cursor: pointer; }
+.section-bg { fill: #fafbfc; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AllScale 产品迭代甘特图</h1>
+  <div class="meta">截至 <span id="today-label"></span>（温哥华时间）· 数据源：<a href="https://qusvn0c81wtj.sg.larksuite.com/wiki/M2cVw0SpXiGD6akxx12l0So7glh?table=tblhVqGDPRRe7AlF" target="_blank">AllScale Task Management · Epic 表</a> · 每周 weekly 共享</div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-box" style="background:#10b981"></span>已交付</div>
+    <div class="legend-item"><span class="legend-box" style="background:#3b82f6"></span>在飞 顺利</div>
+    <div class="legend-item"><span class="legend-box" style="background:#f59e0b"></span>在飞 有风险</div>
+    <div class="legend-item"><span class="legend-box" style="background:#ef4444"></span>滑期</div>
+    <div class="legend-item"><span class="legend-dash"></span>提前出来的窗口（actual 早于预计）</div>
+    <div class="legend-item"><span class="legend-circle" style="background:#059669"></span>实际上线</div>
+    <div class="legend-item" style="margin-left:8px"><strong style="color:#475569">里程碑：</strong></div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#5eead4;border:1.5px solid #0f766e"></span>MRD 完成</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#7dd3fc;border:1.5px solid #0369a1"></span>POC 完成</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#38bdf8;border:1.5px solid #0369a1"></span>PRD 完成</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#0ea5e9"></span>开发节点</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#0c4a6e"></span>内部 IA（Gamma 封测结束）</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#047857"></span>最终 GA</div>
+    <div class="legend-item"><span class="legend-diamond" style="background:#fb923c;border:1.5px solid #c2410c"></span>客户演示</div>
+  </div>
+</header>
+<div class="container">
+  <div id="chart"></div>
+</div>
+<script>
+const DATA = {"today": "2026-06-12", "range_start": "2026-04-01", "range_end": "2026-06-30", "epics": [{"id": "recvkdCS3SbSJD", "name": "Payroll Dashboard 改版", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-03-12", "end": "2026-04-02", "actual": "2026-04-02", "slip": "上线", "points": 31.8, "weekly_pts": 0.0}, {"id": "recvkdCS3SLjSb", "name": "Checkout 自助 Onboarding + Store 管理", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-03-26", "end": "2026-04-22", "actual": "2026-04-22", "slip": "上线", "points": 6.2, "weekly_pts": 0.0}, {"id": "recvkdCS3SeAQT", "name": "广告位管理", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-04-09", "end": "2026-04-22", "actual": "2026-04-22", "slip": "上线", "points": 0.0, "weekly_pts": 0.0}, {"id": "recvkdCS3STHHY", "name": "Checkout USDT 本位支付", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-03-26", "end": "2026-04-22", "actual": "2026-04-22", "slip": "上线", "points": 0.0, "weekly_pts": 0.0}, {"id": "recvkdCS3SsvTc", "name": "Multi-Coin（多币种支持）", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-04-09", "end": "2026-05-06", "actual": "2026-05-06", "slip": "上线", "points": 32.5, "weekly_pts": 0.0}, {"id": "recvkdCS3Sjj2z", "name": "KYC/KYB（Sumsub）", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-04-30", "end": "2026-06-18", "actual": "2026-05-14", "slip": "已上线 -35 天", "points": 3.5, "weekly_pts": 0.0}, {"id": "recvkdCS3SzPAw", "name": "checkout P4 Swidge", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-04-16", "end": "2026-06-03", "actual": "2026-05-27", "slip": "已上线 -7 天", "points": 88.5, "weekly_pts": 0.0}, {"id": "recvkdCS3S6emG", "name": "Android 套壳", "weekly": 1, "stage": "已交付", "status": "顺利", "start": "2026-04-30", "end": "2026-05-29", "actual": "2026-05-29", "slip": "上线", "points": 22.1, "weekly_pts": 0.0}, {"id": "recvkdCS3SzoPy", "name": "OnRamp", "weekly": 1, "stage": "开发", "status": "顺利", "start": "2026-05-13", "end": "2026-06-24", "actual": null, "slip": "进行中", "points": 19.7, "weekly_pts": 6.0}, {"id": "recvkdCS3SbHKU", "name": "Claim Link", "weekly": 1, "stage": "开发", "status": "顺利", "start": "2026-05-21", "end": "2026-06-30", "actual": null, "slip": "进行中", "points": 14.0, "weekly_pts": 14.0}, {"id": "recvkdRPyPZe6o", "name": "Turnkey", "weekly": 1, "stage": "客户灰度", "status": "顺利", "start": "2026-05-28", "end": "2026-07-02", "actual": null, "slip": "进行中", "points": 57.65, "weekly_pts": 36.2}, {"id": "recvkdRPyPHfy2", "name": "E2E Regression", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 39.5, "weekly_pts": 2.7}, {"id": "recvkdRPyPKjgd", "name": "Wallet + Invoice Bugs", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 32.6, "weekly_pts": 6.5}, {"id": "recvkdRPyPGmWU", "name": "Checkout Bugs", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 78.05, "weekly_pts": 7.5}, {"id": "recvkdRPyPKpKl", "name": "Universal", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 55.5, "weekly_pts": 3.9}, {"id": "recvkdRPyPzwPB", "name": "后端优化", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 49.1, "weekly_pts": 12.6}, {"id": "recvkYRqcov7dy", "name": "Payroll", "weekly": 2, "stage": null, "status": null, "start": null, "end": null, "actual": null, "slip": "进行中", "points": 41.4, "weekly_pts": 3.0}], "milestones": [{"name": "Swidge IA", "date": "2026-05-14", "epic_id": "recvkdCS3SzPAw", "type": "内部 IA", "status": "已达成", "note": "进入测试阶段"}, {"name": "Swidge connect wallet GA", "date": "2026-05-27", "epic_id": "recvkdCS3SzPAw", "type": "最终 GA", "status": "已达成", "note": "Swidge 完整链路对客户开放"}, {"name": "KYB MVP 上线", "date": "2026-05-14", "epic_id": "recvkdCS3Sjj2z", "type": "最终 GA", "status": "已达成", "note": "Sumsub Full KYB 上线；原始预期 06-18 → 提前到 05-14"}, {"name": "Claim Link GA", "date": "2026-06-30", "epic_id": "recvkdCS3SbHKU", "type": "最终 GA", "status": "计划中", "note": "原始预期 05-21，推迟 1 周"}, {"name": "Android v1 客户演示", "date": "2026-05-14", "epic_id": "recvkdCS3S6emG", "type": "内部 IA", "status": "已达成", "note": "原计划 05-28 演示，被提前 2 周；要求演示内容达到原 05-28 GA 的功能水位"}, {"name": "Android APK Scope 完成", "date": "2026-05-04", "epic_id": "recvkdCS3S6emG", "type": "PRD 完成", "status": "已达成", "note": "ticket: Doc - [Scope]: Android APK；v2 立项 / 范围确认"}, {"name": "Multi-Coin 内部 IA", "date": "2026-04-29", "epic_id": "recvkdCS3SsvTc", "type": "内部 IA", "status": "已达成", "note": "来自 2026-04-16 weekly release，Gamma 封测结束 05-06 15:00 PST"}, {"name": "Payroll Dashboard 内部 IA", "date": "2026-04-01", "epic_id": "recvkdCS3SbSJD", "type": "内部 IA", "status": "已达成", "note": "来自 2026-03-26 weekly release，Gamma 封测结束 04-01 16:00 PST"}, {"name": "Swidge 补丁 Tron IA", "date": "2026-05-18", "epic_id": "recvkdCS3SzPAw", "type": "内部 IA", "status": "已达成", "note": "进入测试阶段"}, {"name": "Android 白标 Demo Day", "date": "2026-05-23", "epic_id": "recvkdCS3S6emG", "type": "最终 GA", "status": "已达成", "note": null}, {"name": "Android 白标 需求确认", "date": "2026-05-17", "epic_id": "recvkdCS3S6emG", "type": "PRD 完成", "status": "已达成", "note": null}, {"name": "unLimit POC", "date": "2026-05-13", "epic_id": "recvkdCS3SzoPy", "type": "POC 完成", "status": "已达成", "note": null}, {"name": "MRD确认", "date": "2026-05-26", "epic_id": "recvkdCS3SzoPy", "type": "MRD确认", "status": "已达成", "note": null}, {"name": "Changelly POC 完成", "date": "2026-06-03", "epic_id": "recvkdCS3SzoPy", "type": "POC 完成", "status": "已达成", "note": null}, {"name": "MRD确认", "date": "2026-06-02", "epic_id": "recvkdCS3SbHKU", "type": "MRD确认", "status": "已达成", "note": null}, {"name": "onRamp GA", "date": "2026-06-18", "epic_id": "recvkdCS3SzoPy", "type": "最终 GA", "status": "计划中", "note": null}, {"name": "迁移（白名单）", "date": "2026-06-10", "epic_id": "recvkdRPyPZe6o", "type": "最终 GA", "status": "已达成", "note": null}, {"name": "迁移（全量）（非强制）", "date": "2026-06-17", "epic_id": "recvkdRPyPZe6o", "type": "最终 GA", "status": "计划中", "note": null}, {"name": "PRD评审完成", "date": "2026-06-11", "epic_id": "recvkdCS3SzoPy", "type": "PRD 完成", "status": "已达成", "note": null}, {"name": "PRD评审完成", "date": "2026-06-16", "epic_id": "recvkdCS3SbHKU", "type": "PRD 完成", "status": "计划中", "note": null}], "interrupts": [{"name": "Barker Money POC", "start": "2026-05-13", "end": "2026-05-13", "days": 0.5, "type": "POC 调研", "source": "Barker", "note": "ticket: Feat - [Barker]: Money POC — treasury yield integration；ticket 上 🌟预估Point=0，dev 待估时"}]};
+
+const DAY_PX = 11;
+const ROW_H = 54;
+const NAME_W = 240;
+const HEADER_H = 56;
+const PAD_L = 16;
+const PAD_R = 24;
+
+function parseDate(s) {
+  const [y, m, d] = s.split("-").map(Number);
+  return { y, m, d, t: Date.UTC(y, m - 1, d) };
+}
+function daysBetween(a, b) {
+  return Math.round((b.t - a.t) / 86400000);
+}
+const rangeStart = parseDate(DATA.range_start);
+const rangeEnd = parseDate(DATA.range_end);
+const today = parseDate(DATA.today);
+const totalDays = daysBetween(rangeStart, rangeEnd);
+const chartW = NAME_W + totalDays * DAY_PX + PAD_L + PAD_R;
+
+function clampDate(s) {
+  if (!s) return null;
+  const d = parseDate(s);
+  if (d.t < rangeStart.t) return rangeStart;
+  if (d.t > rangeEnd.t) return rangeEnd;
+  return d;
+}
+function dateToX(s) {
+  const d = clampDate(s);
+  if (!d) return null;
+  return NAME_W + daysBetween(rangeStart, d) * DAY_PX + PAD_L;
+}
+
+function statusColor(e) {
+  if (e.stage === "已交付") return "#10b981";
+  if (e.status === "滑期") return "#ef4444";
+  if (e.status === "有风险") return "#f59e0b";
+  return "#3b82f6";
+}
+
+function esc(s) {
+  return String(s || "").replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]);
+}
+
+const delivered = DATA.epics.filter(e => e.weekly === 1 && e.stage === "已交付");
+const inflight = DATA.epics.filter(e => e.weekly === 1 && e.stage !== "已交付");
+const backlog = DATA.epics.filter(e => e.weekly === 2);
+
+// 折叠状态：localStorage 持久化，刷新后保留
+const COLLAPSE_KEY = "gantt_collapsed_v1";
+const collapsed = (() => {
+  try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || {}; } catch (e) { return {}; }
+})();
+window.toggleSection = function(key) {
+  collapsed[key] = !collapsed[key];
+  try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch (e) {}
+  render();
+};
+
+let parts = [];
+let y = HEADER_H + 8;
+
+function addSection(title, items, renderFn, key) {
+  if (!items.length) return;
+  const isCollapsed = !!collapsed[key];
+  const bodyH = isCollapsed ? 0 : items.length * ROW_H;
+  parts.push(`<rect x="0" y="${y - 4}" width="${chartW}" height="${22 + bodyH}" class="section-bg" />`);
+  const chevron = isCollapsed ? "▶" : "▼";
+  parts.push(`<text x="${PAD_L}" y="${y + 14}" class="section-title section-toggle" onclick="toggleSection('${key}')"><tspan style="font-size:11px">${chevron}</tspan> ${esc(title)}（${items.length}）</text>`);
+  y += 24;
+  if (!isCollapsed) {
+    for (const it of items) {
+      parts.push(renderFn(it, y));
+      y += ROW_H;
+    }
+  }
+  y += 6;
+}
+
+function renderEpicRow(e, ry) {
+  const out = [];
+  const color = statusColor(e);
+  const nameClass = e.stage === "已交付" ? "epic-name-delivered" : "epic-name";
+  // Name + points badge
+  out.push(`<text x="${PAD_L}" y="${ry + ROW_H / 2 + 4}" class="${nameClass}">${esc(e.name)}</text>`);
+  // 右侧 badge：累计 pts + 近 7 天吞吐
+  const cumPts = (e.points != null && e.points > 0) ? (Math.round(e.points * 10) / 10) : null;
+  const wkPts = (e.weekly_pts != null && e.weekly_pts > 0) ? (Math.round(e.weekly_pts * 10) / 10) : null;
+  if (cumPts != null && wkPts != null) {
+    out.push(`<text x="${NAME_W - 8}" y="${ry + ROW_H / 2 - 3}" text-anchor="end" style="font-size:10.5px;fill:#059669;font-weight:700">近 7 天 +${wkPts}</text>`);
+    out.push(`<text x="${NAME_W - 8}" y="${ry + ROW_H / 2 + 11}" text-anchor="end" style="font-size:9.5px;fill:#94a3b8">累计 ${cumPts}</text>`);
+  } else if (cumPts != null) {
+    out.push(`<text x="${NAME_W - 8}" y="${ry + ROW_H / 2 + 4}" text-anchor="end" style="font-size:10.5px;fill:#6b7280;font-weight:600">${cumPts} pts</text>`);
+  }
+  // 主横条 — 规则：
+  //   actual 早于 end → start→actual 实线 + actual→end 虚线（提前完成）+ "提前 X 天" 标注
+  //   其他              → start→end   实线
+  if (e.start && e.end) {
+    const x1 = dateToX(e.start);
+    const xEnd = dateToX(e.end);
+    const xAct = e.actual ? dateToX(e.actual) : null;
+    const tooltip = `${esc(e.name)}\n阶段：${esc(e.stage || "-")}\n状态：${esc(e.status || "-")}\n窗口：${e.start} → ${e.end}${e.actual ? "\n实际上线：" + e.actual : ""}${e.slip ? "\n" + esc(e.slip) : ""}${e.note ? "\n\n备注：" + esc(e.note) : ""}`;
+    const isEarly = e.actual && e.actual < e.end;
+    if (isEarly && x1 != null && xAct != null && xEnd != null && xAct > x1) {
+      // 实线 start → actual
+      out.push(`<rect x="${x1}" y="${ry + 5}" width="${xAct - x1}" height="${ROW_H - 10}" rx="3" fill="${color}" class="tooltip-target"><title>${tooltip}</title></rect>`);
+      // 虚线框 actual → end（提前出来的那段）
+      if (xEnd > xAct) {
+        out.push(`<rect x="${xAct}" y="${ry + 5}" width="${xEnd - xAct}" height="${ROW_H - 10}" rx="3" fill="none" stroke="${color}" stroke-width="1.3" stroke-dasharray="5 3" />`);
+        const days = daysBetween(parseDate(e.actual), parseDate(e.end));
+        out.push(`<text x="${xEnd + 4}" y="${ry + ROW_H / 2 + 4}" style="font-size:10.5px;fill:#059669;font-weight:600;paint-order:stroke;stroke:white;stroke-width:3px;stroke-linejoin:round">提前 ${days} 天</text>`);
+      }
+    } else if (x1 != null && xEnd != null && xEnd > x1) {
+      out.push(`<rect x="${x1}" y="${ry + 5}" width="${xEnd - x1}" height="${ROW_H - 10}" rx="3" fill="${color}" class="tooltip-target"><title>${tooltip}</title></rect>`);
+      // bar 上的滑期文字
+      if (e.slip && (xEnd - x1) > 70) {
+        out.push(`<text x="${x1 + 6}" y="${ry + ROW_H / 2 + 4}" class="bar-text">${esc(e.slip)}</text>`);
+      }
+    }
+  }
+  // 实际上线封口圆点
+  if (e.actual) {
+    const cx = dateToX(e.actual);
+    if (cx != null) {
+      out.push(`<circle cx="${cx}" cy="${ry + ROW_H / 2}" r="5" fill="#059669" stroke="white" stroke-width="2" />`);
+    }
+  }
+  // 里程碑（同 Epic 多个，按日期排序，标签上下交替）
+  const ms = DATA.milestones
+    .filter(m => m.epic_id === e.id && m.date)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const milestoneStyle = {
+    "MRD完成":   { fill: "#5eead4", stroke: "#0f766e", label: "#0f766e" },
+    "POC 完成":  { fill: "#7dd3fc", stroke: "#0369a1", label: "#075985" },
+    "PRD 完成":  { fill: "#38bdf8", stroke: "#0369a1", label: "#075985" },
+    "开发节点":  { fill: "#0ea5e9", stroke: "white",   label: "#0c4a6e" },
+    "内部 IA":   { fill: "#0c4a6e", stroke: "white",   label: "#0c4a6e" },
+    "最终 GA":   { fill: "#047857", stroke: "white",   label: "#064e3b" },
+    "客户演示":  { fill: "#fb923c", stroke: "#c2410c", label: "#c2410c" }
+  };
+  // 去掉里程碑名字里和 Epic 名重复的公共前缀
+  function stripEpicPrefix(milestoneName, epicName) {
+    let i = 0;
+    while (i < milestoneName.length && i < epicName.length && milestoneName[i] === epicName[i]) i++;
+    if (i >= 3) {
+      return milestoneName.slice(i).replace(/^[\s\-:：·，,（(）)]+/, "");
+    }
+    return milestoneName;
+  }
+  ms.forEach((m, idx) => {
+    const mx = dateToX(m.date);
+    if (mx == null) return;
+    const cy = ry + ROW_H / 2;
+    const st = milestoneStyle[m.type] || { fill: "#9ca3af", stroke: "white", label: "#475569" };
+    const tooltip = `${esc(m.name)} · ${m.date} · ${esc(m.type || "未分类")}${m.note ? "\n" + esc(m.note) : ""}`;
+    const r = 9;
+    out.push(`<path d="M ${mx} ${cy - r} L ${mx + r} ${cy} L ${mx} ${cy + r} L ${mx - r} ${cy} Z" fill="${st.fill}" stroke="${st.stroke}" stroke-width="2.5" class="tooltip-target"><title>${tooltip}</title></path>`);
+    // 标签：奇数项放上方，偶数项放下方；用 paint-order 描白边避免被横条挡
+    const above = (idx % 2 === 0);
+    const labelY = above ? cy - 14 : cy + 22;
+    const stripped = stripEpicPrefix(m.name, e.name);
+    const shortName = stripped.length > 16 ? stripped.slice(0, 15) + "…" : stripped;
+    const weight = m.type === "客户演示" ? 700 : 600;
+    out.push(`<text x="${mx}" y="${labelY}" text-anchor="middle" style="font-size:12px;fill:${st.label};font-weight:${weight};paint-order:stroke;stroke:white;stroke-width:3.5px;stroke-linejoin:round">${esc(shortName)} ${m.date.slice(5)}</text>`);
+  });
+  return out.join("");
+}
+
+function renderBacklogRow(e, ry) {
+  const out = [];
+  out.push(`<text x="${PAD_L}" y="${ry + ROW_H / 2 + 4}" class="epic-name">${esc(e.name)}</text>`);
+  const cum = (e.points != null) ? Math.round(e.points * 10) / 10 : 0;
+  const wk = (e.weekly_pts != null) ? Math.round(e.weekly_pts * 10) / 10 : 0;
+  // 中间留白；只用文字呈现：右侧 累计 N pts；旁边可选 近7天 +X 绿色
+  out.push(`<text x="${NAME_W + PAD_L + 12}" y="${ry + ROW_H / 2 + 4}" style="font-size:11px;fill:#475569;font-weight:600">累计 ${cum} pts</text>`);
+  if (wk > 0) {
+    out.push(`<text x="${NAME_W + PAD_L + 120}" y="${ry + ROW_H / 2 + 4}" style="font-size:11px;fill:#059669;font-weight:700">近 7 天 +${wk}</text>`);
+  }
+  return out.join("");
+}
+
+function renderInterruptRow(it, ry) {
+  const out = [];
+  const label = it.source ? `${it.name}　《${it.source}》` : it.name;
+  out.push(`<text x="${PAD_L}" y="${ry + ROW_H / 2 + 4}" class="epic-name">${esc(label)}</text>`);
+  if (it.start && it.end) {
+    const x1 = dateToX(it.start);
+    const x2 = dateToX(it.end);
+    if (x1 != null && x2 != null) {
+      const w = Math.max(x2 - x1, DAY_PX);
+      // 占用人天 fallback：POC 调研 0 → 默认 2 天；PRD 撰写 0 → 默认 3 天
+      let effDays = it.days || 0;
+      let label2 = `${effDays} 人天`;
+      if (effDays === 0) {
+        if (it.type === "POC 调研") { effDays = 2; label2 = `2 人天（POC 默认）`; }
+        else if (it.type === "PRD 撰写") { effDays = 3; label2 = `3 人天（PRD 默认）`; }
+      }
+      out.push(`<rect x="${x1}" y="${ry + 9}" width="${w}" height="${ROW_H - 18}" rx="2" fill="#fca5a5" opacity="0.9" class="tooltip-target"><title>${esc(it.name)}\n时间：${it.start} → ${it.end}\n占用：${label2}\n类型：${esc(it.type || "-")}\n来源：${esc(it.source || "-")}</title></rect>`);
+      out.push(`<text x="${x1 + w + 6}" y="${ry + ROW_H / 2 + 4}" style="font-size:11px;fill:#b91c1c;font-weight:600">${label2}</text>`);
+    }
+  }
+  return out.join("");
+}
+
+function render() {
+  parts = [];
+  y = HEADER_H + 8;
+  addSection("已交付", delivered, renderEpicRow, "delivered");
+  addSection("在飞 / 进行中", inflight, renderEpicRow, "inflight");
+  addSection("持续滚动 backlog", backlog, renderBacklogRow, "backlog");
+  addSection("插队任务（占用开发资源）", DATA.interrupts, renderInterruptRow, "interrupts");
+
+  const totalH = y + 12;
+
+  // 顶部时间轴：月份 + 周
+  let header = "";
+// 月份分隔线 + 标签
+const monthMarks = [];
+let cursor = new Date(rangeStart.t);
+while (cursor.getTime() <= rangeEnd.t) {
+  const m = cursor.getUTCMonth() + 1;
+  const ds = `${cursor.getUTCFullYear()}-${String(m).padStart(2, "0")}-01`;
+  const x = dateToX(ds);
+  if (x != null) {
+    monthMarks.push({ x, label: `${m} 月` });
+  }
+  cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  cursor.setUTCDate(1);
+}
+for (const mk of monthMarks) {
+  header += `<line x1="${mk.x}" y1="20" x2="${mk.x}" y2="${totalH - 12}" class="month-line" />`;
+  header += `<text x="${mk.x + 6}" y="18" class="month-label">${mk.label}</text>`;
+}
+// 周刻度
+for (let d = 0; d <= totalDays; d += 7) {
+  const x = NAME_W + d * DAY_PX + PAD_L;
+  const dt = new Date(rangeStart.t + d * 86400000);
+  const label = `${dt.getUTCMonth() + 1}/${dt.getUTCDate()}`;
+  header += `<text x="${x}" y="38" class="date-label" text-anchor="middle">${label}</text>`;
+  header += `<line x1="${x}" y1="42" x2="${x}" y2="${totalH - 12}" class="weekly-line" />`;
+}
+// 今天的红线 — 放在最后画，避免被 section 背景覆盖
+let todayOverlay = "";
+const todayX = dateToX(DATA.today);
+if (todayX != null) {
+  todayOverlay += `<line x1="${todayX}" y1="20" x2="${todayX}" y2="${totalH - 12}" class="today-line" />`;
+  todayOverlay += `<text x="${todayX + 4}" y="14" style="font-size:12px;fill:#dc2626;font-weight:700;paint-order:stroke;stroke:white;stroke-width:4px;stroke-linejoin:round">今天 ${DATA.today.slice(5)}</text>`;
+}
+
+  const svg = `<svg width="${chartW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg">${header}${parts.join("")}${todayOverlay}</svg>`;
+  document.getElementById("chart").innerHTML = svg;
+}
+
+document.getElementById("today-label").textContent = DATA.today;
+render();
+</script>
+</body>
+</html>

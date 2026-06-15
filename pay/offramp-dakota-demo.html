@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale — Off-Ramp Demo (Dakota P1)</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#009859;--green-hover:#0CAA67;--green-bg:#EAF9F1;--card:#FAFBFA;--btn:#F2F8F5;--border:#E5EEEA;--dark:#0C3124;--text:#83968F;--white:#FFFFFF;--surface:#F0F4F2;--usdt:#26A17B;--usdc:#2775CA;--red:#E5484D;--red-bg:rgba(229,72,77,.08);--orange:#F5A623;--orange-bg:rgba(245,166,35,.10);--blue:#2775CA;--blue-bg:rgba(39,117,202,.08);--purple:#6E56CF;--purple-bg:rgba(110,86,207,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(12,49,36,.04);flex-wrap:wrap}
+.topbar-logo{width:28px;height:28px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--dark);flex:1;min-width:200px}
+.topbar-title span{color:var(--text);font-weight:400;font-size:13px;margin-left:6px}
+.topbar-sub{font-size:12px;font-weight:400;color:var(--text);margin-top:2px;letter-spacing:0}
+.mode-btns{display:flex;gap:6px;flex-wrap:wrap}
+.mode-btn{padding:8px 14px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Archivo',sans-serif}
+.mode-btn:hover{border-color:var(--green);color:var(--dark)}
+.mode-btn.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+
+.persona-bar{max-width:480px;margin:12px auto 0;padding:0 20px;display:flex;gap:8px;align-items:center}
+.persona-bar .label{font-size:11px;color:var(--text);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.persona-tabs{display:flex;background:var(--white);border:1px solid var(--border);border-radius:50px;padding:3px;gap:2px}
+.persona-tab{padding:6px 14px;border-radius:50px;border:none;background:transparent;font-family:'Archivo',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.persona-tab.active{background:var(--dark);color:white}
+
+.container{max-width:480px;margin:0 auto;padding:20px}
+.section-title{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-left:4px}
+.section-block{margin-bottom:28px}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:27px;padding:24px 20px;position:relative;overflow:hidden}
+
+.screen{display:none;animation:fadeIn .25s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;padding:8px 0;margin-bottom:12px;background:none;border:none;font-family:'Archivo',sans-serif;letter-spacing:-0.02em}
+.back-btn:hover{color:var(--dark)}
+
+.pg-title{font-size:28px;font-weight:500;color:var(--dark);margin-bottom:8px;letter-spacing:-0.02em}
+.pg-subtitle{font-size:14px;color:var(--text);margin-bottom:20px}
+
+.rev-balance{font-size:42px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;line-height:1.1}
+.rev-balance .dec{font-size:22px;color:var(--text)}
+.rev-label{font-size:14px;color:var(--text);margin-bottom:6px;font-weight:500}
+.rev-sub{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text);margin-top:8px}
+.coin-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.btn-primary{width:100%;height:52px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--green-hover)}
+.btn-primary.disabled{background:var(--border);color:var(--text);cursor:default;pointer-events:none}
+.btn-secondary{width:100%;height:52px;border-radius:50px;border:none;background:var(--card);color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-secondary:hover{background:var(--btn)}
+.btn-outline{width:100%;height:48px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--dark);font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-row{display:flex;gap:10px;margin-top:16px}
+.btn-row>*{flex:1}
+
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.form-label .req{color:var(--red)}
+.form-input{width:100%;height:48px;border:1.5px solid var(--border);border-radius:14px;padding:0 16px;font-size:15px;font-family:'Archivo',sans-serif;color:var(--dark);background:var(--white);outline:none;transition:border-color .15s;letter-spacing:-0.02em}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:#B0C4BB}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2383968F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;cursor:pointer}
+.form-hint{font-size:12px;color:var(--text);margin-top:4px}
+
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.type-card{padding:12px 14px;border:1.5px solid var(--border);border-radius:14px;background:var(--white);cursor:pointer;transition:all .15s;text-align:left}
+.type-card:hover{border-color:var(--green)}
+.type-card.selected{border-color:var(--green);background:var(--green-bg)}
+.type-card .name{font-size:14px;font-weight:600;color:var(--dark)}
+.type-card .desc{font-size:12px;color:var(--text);margin-top:2px}
+
+.info-section{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.info-label{display:inline-block;font-size:13px;color:var(--green);font-weight:500;margin-bottom:10px;background:var(--btn);padding:4px 8px;border-radius:10px}
+.info-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:12px;border:1.5px solid var(--border);cursor:pointer;transition:border-color .15s}
+.info-row:hover{border-color:var(--green)}
+.info-row.disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
+.info-row-text{flex:1;font-size:16px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.info-row-sub{font-size:13px;color:var(--text);font-weight:400}
+.chevron{color:var(--text);font-size:18px;flex-shrink:0}
+
+.amount-section{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.amount-row{display:flex;align-items:center;gap:8px}
+.amount-inner{display:flex;align-items:baseline;flex:1;min-width:0;gap:6px}
+.amount-input{font-size:38px;font-weight:500;color:var(--dark);letter-spacing:-0.03em;line-height:1;border:none;background:transparent;outline:none;font-family:'Archivo',sans-serif;width:100%;max-width:200px}
+.amount-input::placeholder{color:#B0C4BB}
+.amount-unit{font-size:38px;font-weight:500;color:var(--text);letter-spacing:-0.03em;white-space:nowrap;flex-shrink:0}
+.max-btn{padding:6px 14px;border-radius:50px;border:none;background:transparent;color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.avail{font-size:13px;color:var(--text);margin-top:8px;font-weight:500}
+
+.fee-section{padding:8px 0}
+.fee-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0}
+.fee-label{font-size:15px;font-weight:500;color:var(--text);letter-spacing:-0.02em}
+.fee-value{font-size:15px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.fee-row.total{border-top:1px solid var(--border);padding-top:12px;margin-top:4px}
+.fee-row.total .fee-label{color:var(--dark);font-weight:600}
+.fee-row.total .fee-value{color:var(--green);font-weight:600;font-size:16px}
+.fee-row.receive .fee-label{color:var(--dark);font-size:16px;font-weight:600}
+.fee-row.receive .fee-value{font-size:20px;font-weight:600;color:var(--green)}
+.fee-toggle{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text);font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;padding:6px 0}
+.fee-toggle .arrow{transition:transform .2s}
+.fee-toggle.open .arrow{transform:rotate(180deg)}
+
+.timer-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;background:var(--orange-bg);color:var(--orange);font-size:13px;font-weight:600;margin:12px 0}
+.timer-pill.expired{background:var(--red-bg);color:var(--red);cursor:pointer}
+
+.status-track{padding:8px 0}
+.status-step{display:flex;align-items:flex-start;gap:14px;position:relative;padding-bottom:24px}
+.status-step:last-child{padding-bottom:0}
+.status-step::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--border)}
+.status-step:last-child::before{display:none}
+.status-step.done::before{background:var(--green)}
+.status-step.active::before{background:linear-gradient(to bottom,var(--green) 50%,var(--border) 50%)}
+.status-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;position:relative;z-index:1}
+.status-dot.done{background:var(--green);color:white}
+.status-dot.active{background:var(--green-bg);color:var(--green);border:2px solid var(--green)}
+.status-dot.pending{background:var(--card);color:var(--text);border:2px solid var(--border)}
+.status-info{flex:1;padding-top:4px}
+.status-info .label{font-size:15px;font-weight:500;color:var(--dark)}
+.status-info .sub{font-size:13px;color:var(--text);margin-top:2px}
+.status-step.done .status-info .label{color:var(--green)}
+
+.bank-card{display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.bank-card:hover{border-color:var(--green)}
+.bank-card.selected{border-color:var(--green);background:var(--green-bg)}
+.bank-icon{width:44px;height:44px;border-radius:12px;background:var(--btn);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.bank-info{flex:1;min-width:0}
+.bank-name{font-size:15px;font-weight:500;color:var(--dark)}
+.bank-detail{font-size:13px;color:var(--text);margin-top:2px}
+.bank-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:50px;background:var(--btn);color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-left:6px;vertical-align:middle}
+.bank-tag.ach{background:var(--green-bg);color:var(--green)}
+.bank-tag.fedwire{background:var(--blue-bg);color:var(--blue)}
+.bank-tag.swift{background:var(--purple-bg);color:var(--purple)}
+.bank-default{font-size:11px;color:var(--green);font-weight:600;background:var(--green-bg);padding:2px 8px;border-radius:50px;flex-shrink:0}
+
+.hist-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.hist-icon.success{background:var(--green-bg);color:var(--green)}
+.hist-icon.pending{background:var(--orange-bg);color:var(--orange)}
+.hist-icon.failed{background:var(--red-bg);color:var(--red)}
+.hist-info{flex:1}
+.hist-date{font-size:13px;color:var(--text)}
+.hist-amount{font-size:15px;font-weight:500;color:var(--dark)}
+.hist-right{text-align:right}
+.hist-fiat{font-size:15px;font-weight:500;color:var(--green)}
+.hist-status{font-size:12px;font-weight:500;margin-top:2px}
+.hist-status.success{color:var(--green)}
+.hist-status.pending{color:var(--orange)}
+.hist-status.failed{color:var(--red)}
+
+.alert-box{border-radius:16px;padding:16px;margin-bottom:16px}
+.alert-box.warn{background:var(--orange-bg);border:1px solid rgba(245,166,35,.2)}
+.alert-box.error{background:var(--red-bg);border:1px solid rgba(229,72,77,.15)}
+.alert-box.info{background:var(--blue-bg);border:1px solid rgba(39,117,202,.15)}
+.alert-box.success{background:var(--green-bg);border:1px solid rgba(0,152,89,.15)}
+.alert-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.alert-box.warn .alert-title{color:#B8860B}
+.alert-box.error .alert-title{color:var(--red)}
+.alert-box.info .alert-title{color:var(--blue)}
+.alert-box.success .alert-title{color:var(--green)}
+.alert-text{font-size:13px;line-height:1.6}
+.alert-box.warn .alert-text{color:#8B6914}
+.alert-box.error .alert-text{color:#9B2C2C}
+.alert-box.info .alert-text{color:#1A5276}
+.alert-box.success .alert-text{color:#0C5132}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.sheet-overlay.open{opacity:1;pointer-events:all}
+.sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--white);border-radius:24px 24px 0 0;padding:0;z-index:201;transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:85vh;overflow-y:auto}
+.sheet.open{transform:translateX(-50%) translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0}
+.sheet-header{padding:20px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.sheet-title{font-size:22px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.sheet-close{width:32px;height:32px;border-radius:50%;background:var(--btn);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dark);flex-shrink:0}
+.sheet-close:hover{background:var(--border)}
+.sheet-body{padding:0 20px 24px}
+
+.coin-icon{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0}
+.coin-icon.usdt{background:var(--usdt)}
+.coin-icon.usdc{background:var(--usdc)}
+.coin-icon.lg{width:36px;height:36px;font-size:14px}
+
+.completion{text-align:center;padding:16px 0}
+.completion-icon{width:72px;height:72px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.completion-icon.success{background:var(--green-bg);color:var(--green)}
+.completion-icon.failed{background:var(--red-bg);color:var(--red)}
+.completion-icon.warn{background:var(--orange-bg);color:var(--orange)}
+.completion-icon.pending{background:var(--blue-bg);color:var(--blue)}
+.completion-title{font-size:22px;font-weight:600;margin-bottom:6px}
+.completion-sub{font-size:14px;color:var(--text);line-height:1.6;max-width:320px;margin:0 auto}
+
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .9s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.dev-note{font-size:11px;color:var(--text);text-align:center;margin-top:12px;padding:8px;background:var(--card);border-radius:10px;line-height:1.5}
+.dev-note strong{color:var(--dark)}
+
+@media(max-width:520px){.container{padding:12px}.card{padding:20px 16px;border-radius:22px}.pg-title{font-size:24px}.rev-balance{font-size:36px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">AllScale Pay <span>Off-Ramp Demo</span>
+    <div class="topbar-sub">PRD P1 — Fiat Withdrawal (Dakota)</div>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn active" onclick="goScreen('dashboard')">Dashboard</button>
+    <button class="mode-btn" onclick="goScreen('bank-list')">Banks</button>
+    <button class="mode-btn" onclick="goScreen('withdraw-start')">Withdraw</button>
+    <button class="mode-btn" onclick="goScreen('status-tracking')">Status</button>
+  </div>
+</div>
+
+<div class="persona-bar">
+  <span class="label">Persona</span>
+  <div class="persona-tabs">
+    <button class="persona-tab active" onclick="setPersona('personal')">Personal</button>
+    <button class="persona-tab" onclick="setPersona('business')">Business</button>
+  </div>
+  <span style="font-size:11px;color:var(--text);margin-left:auto">Dakota account:
+    <span style="color:var(--green);cursor:pointer;text-decoration:underline;font-weight:500" onclick="toggleDakota()" id="dakota-toggle">Connected</span>
+  </span>
+</div>
+
+<div class="container" id="app">
+
+  <!-- ═══════════ SCREEN: Dashboard ═══════════ -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="section-title" id="dash-section-title">Wallet Overview</div>
+    <div class="card">
+      <div class="rev-label" id="dash-balance-label">Available Balance</div>
+      <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div>
+          <div class="rev-balance"><span id="usdc-int">12,530</span><span class="dec">.<span id="usdc-dec">00</span></span></div>
+          <div class="rev-sub"><span class="coin-dot" style="background:var(--usdc)"></span> <span id="usdc-bal">12,530.00</span> USDC</div>
+        </div>
+        <div>
+          <div style="font-size:28px;font-weight:600;color:var(--dark);letter-spacing:-0.03em"><span id="usdt-int">3,200</span><span style="font-size:16px;color:var(--text)">.00</span></div>
+          <div class="rev-sub"><span class="coin-dot" style="background:var(--usdt)"></span> <span id="usdt-bal">3,200.00</span> USDT</div>
+        </div>
+      </div>
+      <div style="margin-top:6px;font-size:13px;color:var(--text)" id="dash-sub-line">Pending Settlement: 0.00 USDC</div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="kyc-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--text);font-weight:500">Settlement Partner</div>
+          <div style="font-size:15px;color:var(--dark);font-weight:500;margin-top:2px" id="kyc-status-text">Connected to Dakota <span style="color:var(--text);font-weight:400">· limits managed by partner</span></div>
+        </div>
+        <span style="font-size:11px;color:var(--text);font-weight:500;cursor:pointer;text-decoration:underline" onclick="toggleDakota()">Toggle</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="dash-withdraw-btn" onclick="handleWithdrawClick()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+          <span id="dash-withdraw-label">Withdraw to Bank</span>
+        </button>
+        <button class="btn-secondary" onclick="goScreen('bank-list')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>
+          Bank Accounts
+        </button>
+      </div>
+
+      <div id="kyc-prompt" style="display:none;margin-top:12px">
+        <div class="alert-box warn" style="margin-bottom:0">
+          <div class="alert-title">One-time setup required</div>
+          <div class="alert-text" id="kyc-prompt-text">Set up your Dakota settlement account to enable fiat withdrawals. Takes about 3 minutes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+    <div class="section-title">Recent Withdrawals</div>
+    <div class="card">
+      <div class="hist-item" onclick="resumeWithdrawal('completed')" style="cursor:pointer">
+        <div class="hist-icon success">&#x2713;</div>
+        <div class="hist-info">
+          <div class="hist-date">Apr 28, 2026 · ACH</div>
+          <div class="hist-amount">-5,000.00 USDC</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-fiat">$4,985.00</div>
+          <div class="hist-status success">Arrived</div>
+        </div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-icon success">&#x2713;</div>
+        <div class="hist-info">
+          <div class="hist-date">Apr 22, 2026 · Fedwire</div>
+          <div class="hist-amount">-12,000.00 USDC</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-fiat">$11,975.00</div>
+          <div class="hist-status success">Arrived</div>
+        </div>
+      </div>
+      <div class="hist-item" onclick="resumeWithdrawal('processing')" style="cursor:pointer">
+        <div class="hist-icon pending">&#x25CF;</div>
+        <div class="hist-info">
+          <div class="hist-date">May 4, 2026 · ACH</div>
+          <div class="hist-amount">-1,000.00 USDC</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-fiat">$997.50</div>
+          <div class="hist-status pending">In progress</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:20px"></div>
+    <div class="section-title">Edge Case Demos</div>
+    <div class="card">
+      <button class="btn-outline" onclick="goScreen('error-kyt')" style="margin-bottom:8px">Compliance check rejected</button>
+      <button class="btn-outline" onclick="goScreen('error-limit')" style="margin-bottom:8px">Amount exceeds limit</button>
+      <button class="btn-outline" onclick="goScreen('error-quote')" style="margin-bottom:8px">Quote expired</button>
+      <button class="btn-outline" onclick="goScreen('error-nacha')" style="margin-bottom:8px">Bank rejected (NACHA R01)</button>
+      <button class="btn-outline" onclick="goScreen('error-frozen')" style="margin-bottom:8px">Withdrawal under review (Frozen)</button>
+      <button class="btn-outline" onclick="goScreen('error-route')">Unsupported route (Tron / SEPA)</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Bank Account List ═══════════ -->
+  <div class="screen" id="screen-bank-list">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="pg-title" id="bank-list-title">Bank Accounts</div>
+    <div class="pg-subtitle" id="bank-list-subtitle">Manage USD bank accounts for fiat withdrawals.</div>
+
+    <div id="bank-accounts-list"></div>
+
+    <button class="btn-outline" onclick="goScreen('bank-add')" style="margin-top:8px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Bank Account
+    </button>
+    <div style="font-size:12px;color:var(--text);text-align:center;margin-top:8px" id="bank-count-hint"></div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Add Bank Account ═══════════ -->
+  <div class="screen" id="screen-bank-add">
+    <button class="back-btn" onclick="goScreen('bank-list')">&larr; Back</button>
+    <div class="pg-title">Add Bank Account</div>
+    <div class="pg-subtitle">USD only at launch. More currencies coming as our partner expands coverage.</div>
+
+    <div class="card">
+      <div class="form-label">Account type <span class="req">*</span></div>
+      <div class="type-grid">
+        <div class="type-card selected" data-type="ach" onclick="selectBankType('ach')">
+          <div class="name">US Bank · ACH</div>
+          <div class="desc">T+1 business day · Free</div>
+        </div>
+        <div class="type-card" data-type="fedwire" onclick="selectBankType('fedwire')">
+          <div class="name">US Bank · Fedwire</div>
+          <div class="desc">Same-day · Higher fee</div>
+        </div>
+        <div class="type-card" data-type="swift" onclick="selectBankType('swift')" style="grid-column:span 2">
+          <div class="name">International · SWIFT</div>
+          <div class="desc">Cross-border · 2–5 business days</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Account holder name <span class="req">*</span></div>
+        <input class="form-input" id="bank-holder" placeholder="Must match verified name" value="John Doe">
+        <div class="form-hint">Must match the name on your verified ID. Mismatch will block the account from being added.</div>
+      </div>
+
+      <!-- ACH fields -->
+      <div id="fields-ach">
+        <div class="form-group">
+          <div class="form-label">Bank name <span class="req">*</span></div>
+          <input class="form-input" placeholder="Chase Bank" value="Chase Bank">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Routing number (ACH) <span class="req">*</span></div>
+          <input class="form-input" placeholder="9 digits" value="021000021" maxlength="9">
+          <div class="form-hint">9-digit ABA routing number.</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Account number <span class="req">*</span></div>
+          <input class="form-input" placeholder="Account number" value="123456789">
+        </div>
+      </div>
+
+      <!-- Fedwire fields -->
+      <div id="fields-fedwire" style="display:none">
+        <div class="form-group"><div class="form-label">Bank name <span class="req">*</span></div><input class="form-input" placeholder="Chase Bank"></div>
+        <div class="form-group"><div class="form-label">Wire routing number <span class="req">*</span></div><input class="form-input" placeholder="9 digits" maxlength="9"></div>
+        <div class="form-group"><div class="form-label">Account number <span class="req">*</span></div><input class="form-input" placeholder="Account number"></div>
+      </div>
+
+      <!-- SWIFT fields -->
+      <div id="fields-swift" style="display:none">
+        <div class="form-group"><div class="form-label">Bank name <span class="req">*</span></div><input class="form-input" placeholder="HSBC UK"></div>
+        <div class="form-group"><div class="form-label">SWIFT / BIC code <span class="req">*</span></div><input class="form-input" placeholder="HBUKGB4B" maxlength="11"></div>
+        <div class="form-group"><div class="form-label">IBAN or account number <span class="req">*</span></div><input class="form-input" placeholder="GB29NWBK60161331926819"></div>
+        <div class="form-group"><div class="form-label">Bank address <span class="req">*</span></div><input class="form-input" placeholder="8 Canada Square, London"></div>
+        <div class="form-group"><div class="form-label">Beneficiary address <span class="req">*</span></div><input class="form-input" placeholder="Your registered address"></div>
+      </div>
+
+      <div class="alert-box info" style="margin-bottom:0;margin-top:8px">
+        <div class="alert-text">After adding, your account is prepared for withdrawals in the background. This usually completes within seconds.</div>
+      </div>
+
+      <div style="height:8px"></div>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goScreen('bank-list')">Cancel</button>
+        <button class="btn-primary" onclick="addBankAccount()">Add account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Withdraw Start ═══════════ -->
+  <div class="screen" id="screen-withdraw-start">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="pg-title" id="withdraw-start-title">Withdraw to Bank</div>
+
+    <div class="card">
+      <div class="info-section">
+        <div class="info-label">From</div>
+        <div class="info-row" onclick="openSheet('token-sheet')">
+          <span class="coin-icon usdc lg" id="wd-coin-icon">U</span>
+          <div style="flex:1">
+            <div class="info-row-text" id="wd-coin-name">USDC</div>
+            <div class="info-row-sub" id="wd-coin-balance">Balance: 12,530.00</div>
+          </div>
+          <span class="chevron">&rsaquo;</span>
+        </div>
+      </div>
+
+      <div class="amount-section">
+        <div class="info-label">Amount</div>
+        <div class="amount-row">
+          <div class="amount-inner">
+            <input class="amount-input" id="wd-amount" type="text" inputmode="decimal" placeholder="0" oninput="onAmountInput()">
+            <span class="amount-unit" id="wd-unit">USDC</span>
+          </div>
+          <button class="max-btn" onclick="setMaxAmount()">MAX</button>
+        </div>
+        <div class="avail" id="wd-avail">Available: 12,530.00 USDC</div>
+        <div style="font-size:12px;color:var(--text);margin-top:6px">Withdrawal limits are set by your settlement partner.</div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">To</div>
+        <div class="info-row" onclick="openSheet('bank-select-sheet')" id="wd-bank-row">
+          <div style="font-size:22px;flex-shrink:0">&#x1F3E6;</div>
+          <div style="flex:1">
+            <div class="info-row-text" id="wd-bank-name">Select bank account</div>
+            <div class="info-row-sub" id="wd-bank-detail"></div>
+          </div>
+          <span class="chevron">&rsaquo;</span>
+        </div>
+      </div>
+
+      <div id="route-warning" style="display:none">
+        <div class="alert-box warn" style="margin-bottom:12px">
+          <div class="alert-title">This route isn't supported yet</div>
+          <div class="alert-text" id="route-warning-text"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="wd-quote-btn" onclick="getQuote()">Get quote</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Quote Confirmation ═══════════ -->
+  <div class="screen" id="screen-quote">
+    <button class="back-btn" onclick="goScreen('withdraw-start')">&larr; Back</button>
+    <div class="pg-title">Review withdrawal</div>
+
+    <div class="card">
+      <div class="fee-row"><span class="fee-label">You send</span><span class="fee-value" id="q-send">1,000.00 USDC</span></div>
+      <div class="fee-row"><span class="fee-label">Exchange rate</span><span class="fee-value" id="q-rate">1 USDC = 1.0000 USD</span></div>
+
+      <div class="divider"></div>
+
+      <div class="fee-toggle" id="fee-toggle" onclick="toggleFees()">
+        <span>Fee breakdown</span>
+        <span class="arrow">▾</span>
+      </div>
+      <div id="fee-detail" style="display:none">
+        <div class="fee-row"><span class="fee-label">Conversion fee</span><span class="fee-value" id="q-exchange-fee">-1.00 USDC</span></div>
+        <div class="fee-row"><span class="fee-label" id="q-rail-label">ACH transfer fee</span><span class="fee-value" id="q-transfer-fee">$0.00</span></div>
+        <div class="fee-row"><span class="fee-label">AllScale service fee</span><span class="fee-value" id="q-service-fee">-1.50 USDC</span></div>
+        <div class="fee-row"><span class="fee-label">Network fee (est.)</span><span class="fee-value" id="q-network-fee">-0.30 USDC</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="fee-row receive"><span class="fee-label">You receive</span><span class="fee-value" id="q-receive">$997.20</span></div>
+      <div style="font-size:14px;color:var(--text);margin-top:4px"><span id="q-bank-target">→ Chase Bank ****6789</span></div>
+      <div style="font-size:13px;color:var(--text);margin-top:4px"><span id="q-method">via ACH · Estimated arrival: T+1 business day</span></div>
+
+      <div style="text-align:center;margin-top:12px">
+        <div class="timer-pill" id="quote-timer" onclick="handleTimerClick()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          <span id="timer-text">Quote expires in 00:60</span>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goScreen('withdraw-start')">Cancel</button>
+        <button class="btn-primary" onclick="confirmWithdraw()">Confirm &amp; send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: 2FA Verification ═══════════ -->
+  <div class="screen" id="screen-2fa">
+    <div class="pg-title">Confirm withdrawal</div>
+    <div class="pg-subtitle">Enter the verification code sent to your email.</div>
+
+    <div class="card">
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:48px;margin-bottom:16px">&#x1F4E7;</div>
+        <div style="font-size:16px;font-weight:500;color:var(--dark);margin-bottom:4px">Verification code sent</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:24px">We sent a code to y***@allscale.io</div>
+
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px">
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="4" readonly>
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="8" readonly>
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="2" readonly>
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="6" readonly>
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="1" readonly>
+          <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="9" readonly>
+        </div>
+
+        <button class="btn-primary" onclick="submit2FA()">Verify &amp; submit</button>
+        <div style="margin-top:12px;font-size:13px;color:var(--text)">Didn't receive? <span style="color:var(--green);cursor:pointer;font-weight:500">Resend code</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Dakota Onboarding (one-time, hosted by partner) ═══════════ -->
+  <div class="screen" id="screen-dakota-onboarding">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="pg-title">Set up your settlement account</div>
+    <div class="pg-subtitle">A one-time setup with our partner Dakota. We'll redirect you to their secure flow.</div>
+
+    <div class="card" style="border:1.5px dashed var(--border);background:#FCFCFD">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:8px;background:#111;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">D</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--dark)">Dakota</div>
+          <div style="font-size:11px;color:var(--text)">Settlement partner · Hosted onboarding</div>
+        </div>
+        <span style="margin-left:auto;font-size:11px;color:var(--text);background:var(--btn);padding:3px 8px;border-radius:50px">Simulated</span>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:10px">What you'll do at Dakota</div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">1</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:500;color:var(--dark)">Verify your identity</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">Government-issued ID + selfie</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">2</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:500;color:var(--dark)">Confirm address & tax info</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">Required for compliance</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">3</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:500;color:var(--dark)" id="dakota-step3">Review and accept Dakota's terms</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">Limits and fees set by Dakota apply</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-box info" style="margin-bottom:16px">
+        <div class="alert-text">Typical setup time: about 3 minutes. Your AllScale wallet stays signed in. We'll notify you when Dakota approves your account.</div>
+      </div>
+
+      <button class="btn-primary" onclick="completeDakotaOnboarding()">Continue to Dakota</button>
+      <button class="btn-outline" onclick="goScreen('dashboard')" style="margin-top:8px">Not now</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Status Tracking ═══════════ -->
+  <div class="screen" id="screen-status-tracking">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="pg-title">Withdrawal status</div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;color:var(--text)">Reference</span>
+        <span style="font-size:13px;font-weight:500;color:var(--dark)" id="status-ref">W-20260504-001</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span style="font-size:13px;color:var(--text)">Amount</span>
+        <span style="font-size:13px;font-weight:500;color:var(--dark)" id="status-amount">1,000.00 USDC → $997.20</span>
+      </div>
+
+      <div class="status-track" id="status-track"></div>
+
+      <div style="height:8px"></div>
+      <button class="btn-outline" onclick="advanceStatus()">Simulate next step</button>
+      <div class="dev-note">
+        <strong>Demo control:</strong> tap above to walk through the live state machine.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Withdrawal Complete ═══════════ -->
+  <div class="screen" id="screen-withdraw-complete">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="completion">
+        <div class="completion-icon success">&#x2713;</div>
+        <div class="completion-title" style="color:var(--green)">Withdrawal completed</div>
+        <div class="completion-sub" id="complete-sub">$997.20 has been sent to your bank account.</div>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div class="fee-row"><span class="fee-label">Bank</span><span class="fee-value" id="complete-bank">Chase Bank ****6789</span></div>
+        <div class="fee-row"><span class="fee-label">Method</span><span class="fee-value" id="complete-method">ACH</span></div>
+        <div class="fee-row"><span class="fee-label">Reference</span><span class="fee-value">W-20260504-001</span></div>
+        <div class="fee-row"><span class="fee-label">Completed</span><span class="fee-value">May 5, 2026 09:14 UTC</span></div>
+      </div>
+
+      <button class="btn-primary" onclick="goScreen('dashboard')">Back to dashboard</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — KYT Rejected ═══════════ -->
+  <div class="screen" id="screen-error-kyt">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="completion">
+        <div class="completion-icon failed">&#x26A0;</div>
+        <div class="completion-title" style="color:var(--red)">Withdrawal declined</div>
+        <div class="completion-sub">Your withdrawal didn't pass our compliance check. Funds have been returned to your AllScale wallet.</div>
+      </div>
+      <div class="alert-box info">
+        <div class="alert-text">If you think this is a mistake, you can try again or use a different source of funds. Repeated declines may require additional verification.</div>
+      </div>
+      <button class="btn-primary" onclick="goScreen('dashboard')">Back to dashboard</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — Quote Expired ═══════════ -->
+  <div class="screen" id="screen-error-quote">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="alert-box warn">
+        <div class="alert-title">Quote expired</div>
+        <div class="alert-text">Exchange rates change quickly. Tap below to get a fresh quote — your funds were not held.</div>
+      </div>
+      <button class="btn-primary" onclick="goScreen('withdraw-start')">Get a new quote</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — Amount above partner limit ═══════════ -->
+  <div class="screen" id="screen-error-limit">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="alert-box warn">
+        <div class="alert-title">Amount above your partner limit</div>
+        <div class="alert-text">Dakota declined this withdrawal because the amount is above the limit set on your account. To raise it, upgrade verification with Dakota directly.</div>
+      </div>
+      <div style="font-size:14px;color:var(--text);margin-bottom:16px">You can adjust the amount, or open Dakota to request a higher limit.</div>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="goScreen('withdraw-start')">Adjust amount</button>
+        <button class="btn-primary" onclick="goScreen('dakota-onboarding')">Open Dakota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — NACHA R01 (bank rejected) ═══════════ -->
+  <div class="screen" id="screen-error-nacha">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="completion">
+        <div class="completion-icon failed">&#x26A0;</div>
+        <div class="completion-title" style="color:var(--red)">Bank couldn't accept the transfer</div>
+        <div class="completion-sub">The receiving bank returned this transfer. This usually means the account or routing number is incorrect, or the account is closed.</div>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div class="fee-row"><span class="fee-label">Returned amount</span><span class="fee-value" style="color:var(--red)">$997.20</span></div>
+        <div class="fee-row"><span class="fee-label">Refunded to wallet</span><span class="fee-value">1,000.00 USDC</span></div>
+        <div class="fee-row"><span class="fee-label">Reason</span><span class="fee-value">Insufficient account info</span></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-outline" onclick="goScreen('bank-list')">Update bank details</button>
+        <button class="btn-primary" onclick="goScreen('dashboard')">Back to dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — Frozen / Compliance review ═══════════ -->
+  <div class="screen" id="screen-error-frozen">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="completion">
+        <div class="completion-icon pending">&#x23F1;</div>
+        <div class="completion-title" style="color:var(--blue)">Withdrawal under review</div>
+        <div class="completion-sub">Our settlement partner is conducting an additional compliance check on this transaction. This is typically resolved within 5 business days.</div>
+      </div>
+      <div class="alert-box info">
+        <div class="alert-text">No action is needed from you right now. We'll email you once it's resolved. Your funds remain accounted for.</div>
+      </div>
+      <button class="btn-primary" onclick="goScreen('dashboard')">Back to dashboard</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: Error — Unsupported route (Tron / SEPA) ═══════════ -->
+  <div class="screen" id="screen-error-route">
+    <button class="back-btn" onclick="goScreen('dashboard')">&larr; Back</button>
+    <div class="card">
+      <div class="completion">
+        <div class="completion-icon warn">&#x1F6A7;</div>
+        <div class="completion-title" style="color:var(--orange)">Not yet supported</div>
+        <div class="completion-sub">We're working on coverage for this route. In the meantime, please use a supported option.</div>
+      </div>
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:8px">Supported today</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.8">
+          • USDC on Ethereum, Polygon, Base, Arbitrum, Optimism<br>
+          • USD bank accounts via ACH, Fedwire, or SWIFT
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:8px">Not yet supported</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.8">
+          • USDT on Tron<br>
+          • EUR via SEPA · GBP via FPS
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goScreen('dashboard')">Back to dashboard</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SHEETS ═══════════ -->
+<div class="sheet-overlay" id="token-sheet-overlay" onclick="closeSheet('token-sheet')"></div>
+<div class="sheet" id="token-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Select token</span>
+    <button class="sheet-close" onclick="closeSheet('token-sheet')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="sheet-body">
+    <div class="bank-card" onclick="selectToken('USDC')">
+      <span class="coin-icon usdc lg">U</span>
+      <div class="bank-info">
+        <div class="bank-name">USDC</div>
+        <div class="bank-detail">USD Coin · Balance: 12,530.00</div>
+      </div>
+    </div>
+    <div class="bank-card" style="opacity:.5;cursor:not-allowed" onclick="showRouteWarning('usdt-tron')">
+      <span class="coin-icon usdt lg">T</span>
+      <div class="bank-info">
+        <div class="bank-name">USDT <span class="bank-tag">Coming soon</span></div>
+        <div class="bank-detail">Tron support is in our backlog. EVM USDT awaiting partner enablement.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="bank-select-sheet-overlay" onclick="closeSheet('bank-select-sheet')"></div>
+<div class="sheet" id="bank-select-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Select bank account</span>
+    <button class="sheet-close" onclick="closeSheet('bank-select-sheet')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="sheet-body" id="bank-select-list"></div>
+</div>
+
+<script>
+/* ═══════════ STATE ═══════════ */
+const state = {
+  persona: 'personal',
+  selectedToken: 'USDC',
+  selectedBank: null,
+  amount: '',
+  statusStep: 0,
+  banks: [
+    { id: 1, name: 'Chase Bank', type: 'ach', detail: 'Acct ****6789 · Routing 021000021', isDefault: true },
+    { id: 2, name: 'Bank of America', type: 'fedwire', detail: 'Acct ****1234 · Wire 026009593', isDefault: false },
+    { id: 3, name: 'HSBC UK', type: 'swift', detail: 'IBAN ****6819 · BIC HBUKGB4B', isDefault: false },
+  ],
+  nextBankId: 4,
+  bankFormType: 'ach',
+  dakotaConnected: true // P1: KYC handled fully by Dakota; AllScale tracks only connected/not
+};
+
+const DAKOTA_STATES = {
+  true:  { label: 'Connected to Dakota', sub: 'limits managed by partner',     color: 'var(--green)' },
+  false: { label: 'Not connected',       sub: 'Set up Dakota to enable withdrawals', color: 'var(--red)' },
+};
+
+const TOKENS = {
+  USDC: { letter: 'U', cls: 'usdc', name: 'USD Coin', balance: 12530.00 },
+  USDT: { letter: 'T', cls: 'usdt', name: 'Tether USD', balance: 3200.00 },
+};
+
+const BANK_TYPE_LABEL = {
+  ach: 'ACH',
+  fedwire: 'Fedwire',
+  swift: 'SWIFT'
+};
+
+const BANK_TYPE_DESC = {
+  ach: 'Free · T+1 business day',
+  fedwire: '$25 wire fee · Same-day',
+  swift: '$30 wire fee · 2–5 business days'
+};
+
+const BANK_FEES = { ach: 0, fedwire: 25, swift: 30 };
+const BANK_ETA   = { ach: 'T+1 business day', fedwire: 'same-day', swift: '2–5 business days' };
+
+const BANK_DEFAULT_NAMES = {
+  ach: { name: 'New US Bank', detail: 'ACH · Acct ****0000' },
+  fedwire: { name: 'New US Bank', detail: 'Fedwire · Acct ****0000' },
+  swift: { name: 'New International Bank', detail: 'SWIFT · IBAN ****0000' }
+};
+
+// User-facing status copy. Internal state machine names from PRD §5.2.3 mapped to plain English.
+const STATUS_STEPS = [
+  { label: 'Withdrawal initiated',           sub: 'Reviewing your request' },
+  { label: 'Compliance check passed',        sub: 'Risk screening cleared' },
+  { label: 'Sending USDC to settlement partner', sub: 'On-chain transfer in progress' },
+  { label: 'Converting to USD',              sub: 'Exchanging at locked rate' },
+  { label: 'Bank transfer initiated',        sub: '' },          // sub filled per rail
+  { label: 'Funds arrived',                  sub: 'Delivered to your bank' },
+];
+
+/* ═══════════ NAVIGATION ═══════════ */
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'bank-list') renderBankList();
+  if (id === 'bank-add') resetBankForm();
+  if (id === 'withdraw-start') renderWithdrawStart();
+  if (id === 'status-tracking') renderStatusTrack();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ═══════════ PERSONA SWITCH ═══════════ */
+function setPersona(p) {
+  state.persona = p;
+  document.querySelectorAll('.persona-tab').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderDashboard();
+  if (document.getElementById('screen-withdraw-start').classList.contains('active')) {
+    renderWithdrawStart();
+  }
+  if (document.getElementById('screen-bank-list').classList.contains('active')) {
+    renderBankList();
+  }
+}
+
+function toggleDakota() {
+  state.dakotaConnected = !state.dakotaConnected;
+  document.getElementById('dakota-toggle').textContent = state.dakotaConnected ? 'Connected' : 'Not connected';
+  renderDashboard();
+}
+
+function completeDakotaOnboarding() {
+  state.dakotaConnected = true;
+  document.getElementById('dakota-toggle').textContent = 'Connected';
+  goScreen('withdraw-start');
+}
+
+/* ═══════════ DASHBOARD ═══════════ */
+function renderDashboard() {
+  const isBiz = state.persona === 'business';
+  const s = DAKOTA_STATES[state.dakotaConnected];
+
+  document.getElementById('dash-section-title').textContent = isBiz ? 'Business Wallet' : 'Wallet Overview';
+  document.getElementById('dash-balance-label').textContent = 'Available Balance';
+  document.getElementById('dash-withdraw-label').textContent = 'Withdraw to bank';
+
+  // Different mock balances for personal vs business — same dashboard, just different scale
+  if (isBiz) {
+    document.getElementById('usdc-int').textContent = '128,450';
+    document.getElementById('usdc-bal').textContent = '128,450.00';
+    document.getElementById('usdt-int').textContent = '34,200';
+    document.getElementById('usdt-bal').textContent = '34,200.00';
+    document.getElementById('dash-sub-line').textContent = 'Pending Settlement: 8,500.00 USDC';
+  } else {
+    document.getElementById('usdc-int').textContent = '12,530';
+    document.getElementById('usdc-bal').textContent = '12,530.00';
+    document.getElementById('usdt-int').textContent = '3,200';
+    document.getElementById('usdt-bal').textContent = '3,200.00';
+    document.getElementById('dash-sub-line').textContent = 'Pending Settlement: 0.00 USDC';
+  }
+  TOKENS.USDC.balance = isBiz ? 128450.00 : 12530.00;
+  TOKENS.USDT.balance = isBiz ? 34200.00 : 3200.00;
+
+  const dot = document.getElementById('kyc-status-dot');
+  const text = document.getElementById('kyc-status-text');
+  const prompt = document.getElementById('kyc-prompt');
+  const btn = document.getElementById('dash-withdraw-btn');
+  dot.style.background = s.color;
+  text.innerHTML = s.label + ' <span style="color:var(--text);font-weight:400">· ' + s.sub + '</span>';
+
+  if (!state.dakotaConnected) {
+    prompt.style.display = 'block';
+    document.getElementById('kyc-prompt-text').textContent = isBiz
+      ? 'Set up your business Dakota settlement account to enable revenue withdrawals.'
+      : 'Set up your Dakota settlement account to enable fiat withdrawals. Takes about 3 minutes.';
+    btn.classList.remove('disabled');
+  } else {
+    prompt.style.display = 'none';
+    btn.classList.remove('disabled');
+  }
+}
+
+function handleWithdrawClick() {
+  if (!state.dakotaConnected) {
+    goScreen('dakota-onboarding');
+    return;
+  }
+  goScreen('withdraw-start');
+}
+
+function resumeWithdrawal(kind) {
+  state.statusStep = kind === 'completed' ? STATUS_STEPS.length - 1 : 2;
+  goScreen('status-tracking');
+}
+
+/* ═══════════ SHEETS ═══════════ */
+function openSheet(id) {
+  document.getElementById(id + '-overlay').classList.add('open');
+  document.getElementById(id).classList.add('open');
+  if (id === 'bank-select-sheet') renderBankSelectSheet();
+}
+function closeSheet(id) {
+  document.getElementById(id + '-overlay').classList.remove('open');
+  document.getElementById(id).classList.remove('open');
+}
+
+function showRouteWarning() {
+  closeSheet('token-sheet');
+  goScreen('error-route');
+}
+
+/* ═══════════ BANK ACCOUNTS ═══════════ */
+function renderBankList() {
+  const isBiz = state.persona === 'business';
+  document.getElementById('bank-list-title').textContent = 'Bank Accounts';
+  document.getElementById('bank-list-subtitle').textContent = isBiz
+    ? 'Company bank accounts (USD) for receiving revenue.'
+    : 'Manage USD bank accounts for fiat withdrawals.';
+
+  const el = document.getElementById('bank-accounts-list');
+  if (state.banks.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text)"><div style="font-size:36px;margin-bottom:12px">&#x1F3E6;</div><div style="font-size:15px;font-weight:500">No bank accounts yet</div><div style="font-size:13px;margin-top:4px">Add an account to start withdrawing.</div></div>';
+  } else {
+    el.innerHTML = state.banks.map(b => `
+      <div class="bank-card">
+        <div class="bank-icon">&#x1F3E6;</div>
+        <div class="bank-info">
+          <div class="bank-name">${b.name} <span class="bank-tag ${b.type}">${BANK_TYPE_LABEL[b.type]}</span></div>
+          <div class="bank-detail">${b.detail}</div>
+        </div>
+        ${b.isDefault ? '<span class="bank-default">Default</span>' : ''}
+      </div>
+    `).join('');
+  }
+  document.getElementById('bank-count-hint').textContent = state.banks.length + ' of 5 accounts used';
+}
+
+function renderBankSelectSheet() {
+  const el = document.getElementById('bank-select-list');
+  if (state.banks.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:24px 0">
+      <div style="font-size:14px;color:var(--text);margin-bottom:12px">No bank accounts yet</div>
+      <button class="btn-primary" onclick="closeSheet('bank-select-sheet'); goScreen('bank-add')">Add bank account</button>
+    </div>`;
+    return;
+  }
+  el.innerHTML = state.banks.map(b => `
+    <div class="bank-card ${state.selectedBank && state.selectedBank.id === b.id ? 'selected' : ''}" onclick="selectBank(${b.id})">
+      <div class="bank-icon">&#x1F3E6;</div>
+      <div class="bank-info">
+        <div class="bank-name">${b.name} <span class="bank-tag ${b.type}">${BANK_TYPE_LABEL[b.type]}</span></div>
+        <div class="bank-detail">${b.detail}</div>
+      </div>
+      ${b.isDefault ? '<span class="bank-default">Default</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function selectBank(id) {
+  state.selectedBank = state.banks.find(b => b.id === id);
+  document.getElementById('wd-bank-name').textContent = state.selectedBank.name;
+  document.getElementById('wd-bank-detail').innerHTML = `${state.selectedBank.detail} <span class="bank-tag ${state.selectedBank.type}">${BANK_TYPE_LABEL[state.selectedBank.type]}</span>`;
+  closeSheet('bank-select-sheet');
+}
+
+function selectBankType(t) {
+  state.bankFormType = t;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.type-card[data-type="${t}"]`).classList.add('selected');
+  document.getElementById('fields-ach').style.display = t === 'ach' ? 'block' : 'none';
+  document.getElementById('fields-fedwire').style.display = t === 'fedwire' ? 'block' : 'none';
+  document.getElementById('fields-swift').style.display = t === 'swift' ? 'block' : 'none';
+}
+
+function resetBankForm() {
+  selectBankType('ach');
+}
+
+function addBankAccount() {
+  if (state.banks.length >= 5) return;
+  const t = state.bankFormType;
+  const def = BANK_DEFAULT_NAMES[t];
+  state.banks.push({
+    id: state.nextBankId++,
+    name: def.name,
+    type: t,
+    detail: def.detail,
+    isDefault: state.banks.length === 0
+  });
+  goScreen('bank-list');
+}
+
+/* ═══════════ WITHDRAW START ═══════════ */
+function renderWithdrawStart() {
+  document.getElementById('withdraw-start-title').textContent = 'Withdraw to bank';
+  updateTokenUI();
+  if (!state.selectedBank && state.banks.length > 0) {
+    const def = state.banks.find(b => b.isDefault) || state.banks[0];
+    selectBank(def.id);
+  }
+}
+
+function selectToken(sym) {
+  if (sym === 'USDT') return;
+  state.selectedToken = sym;
+  updateTokenUI();
+  closeSheet('token-sheet');
+}
+
+function updateTokenUI() {
+  const t = TOKENS[state.selectedToken];
+  document.getElementById('wd-coin-icon').className = 'coin-icon ' + t.cls + ' lg';
+  document.getElementById('wd-coin-icon').textContent = t.letter;
+  document.getElementById('wd-coin-name').textContent = state.selectedToken;
+  document.getElementById('wd-coin-balance').textContent = 'Balance: ' + fmt(t.balance);
+  document.getElementById('wd-unit').textContent = state.selectedToken;
+  document.getElementById('wd-avail').textContent = 'Available: ' + fmt(t.balance) + ' ' + state.selectedToken;
+}
+
+function onAmountInput() {
+  state.amount = document.getElementById('wd-amount').value;
+}
+
+function setMaxAmount() {
+  const t = TOKENS[state.selectedToken];
+  document.getElementById('wd-amount').value = fmt(t.balance);
+  state.amount = fmt(t.balance);
+}
+
+function fmt(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+/* ═══════════ QUOTE ═══════════ */
+let quoteTimer = null;
+let quoteSeconds = 60;
+
+function getQuote() {
+  const amt = parseFloat((state.amount || '0').replace(/,/g, ''));
+  if (amt <= 0) { document.getElementById('wd-amount').focus(); return; }
+  if (!state.selectedBank) { openSheet('bank-select-sheet'); return; }
+
+  const rail = state.selectedBank.type;
+  const railFee = BANK_FEES[rail];
+  const eta = BANK_ETA[rail];
+  const exchangeFee = Math.round(amt * 0.001 * 100) / 100;   // 0.1%
+  const serviceFee = Math.round(amt * 0.0015 * 100) / 100;   // 0.15%
+  const networkFee = 0.30;
+  const usdcDeducted = amt - exchangeFee - serviceFee - networkFee;
+  const usdReceived = Math.max(0, usdcDeducted - railFee);
+
+  document.getElementById('q-send').textContent = fmt(amt) + ' ' + state.selectedToken;
+  document.getElementById('q-rate').textContent = '1 ' + state.selectedToken + ' = 1.0000 USD';
+  document.getElementById('q-exchange-fee').textContent = '-' + fmt(exchangeFee) + ' ' + state.selectedToken;
+  document.getElementById('q-rail-label').textContent = BANK_TYPE_LABEL[rail] + ' transfer fee';
+  document.getElementById('q-transfer-fee').textContent = railFee === 0 ? 'Free' : '-$' + fmt(railFee);
+  document.getElementById('q-service-fee').textContent = '-' + fmt(serviceFee) + ' ' + state.selectedToken;
+  document.getElementById('q-network-fee').textContent = '-' + fmt(networkFee) + ' ' + state.selectedToken;
+  document.getElementById('q-receive').textContent = '$' + fmt(usdReceived);
+  document.getElementById('q-bank-target').textContent = '→ ' + state.selectedBank.name + ' · ' + state.selectedBank.detail.split(' · ')[0];
+  document.getElementById('q-method').textContent = 'via ' + BANK_TYPE_LABEL[rail] + ' · Estimated arrival: ' + eta;
+
+  // Reset fee toggle to closed
+  document.getElementById('fee-detail').style.display = 'none';
+  document.getElementById('fee-toggle').classList.remove('open');
+
+  quoteSeconds = 60;
+  startQuoteTimer();
+
+  // Stash for completion screen
+  state._lastQuote = {
+    sendAmt: amt, receiveAmt: usdReceived,
+    bank: state.selectedBank, rail: rail, eta: eta
+  };
+
+  goScreen('quote');
+}
+
+function toggleFees() {
+  const detail = document.getElementById('fee-detail');
+  const toggle = document.getElementById('fee-toggle');
+  if (detail.style.display === 'none') {
+    detail.style.display = 'block';
+    toggle.classList.add('open');
+  } else {
+    detail.style.display = 'none';
+    toggle.classList.remove('open');
+  }
+}
+
+function startQuoteTimer() {
+  clearInterval(quoteTimer);
+  const pill = document.getElementById('quote-timer');
+  const text = document.getElementById('timer-text');
+  pill.classList.remove('expired');
+  quoteTimer = setInterval(() => {
+    quoteSeconds--;
+    if (quoteSeconds <= 0) {
+      clearInterval(quoteTimer);
+      pill.classList.add('expired');
+      text.textContent = 'Quote expired — tap to refresh';
+      return;
+    }
+    const ss = String(quoteSeconds).padStart(2, '0');
+    text.textContent = 'Quote refreshes in 00:' + ss;
+  }, 1000);
+}
+
+function handleTimerClick() {
+  if (quoteSeconds <= 0) getQuote();
+}
+
+function confirmWithdraw() {
+  clearInterval(quoteTimer);
+  goScreen('2fa');
+}
+
+function submit2FA() {
+  state.statusStep = 0;
+  goScreen('status-tracking');
+}
+
+/* ═══════════ STATUS TRACKING ═══════════ */
+function renderStatusTrack() {
+  const el = document.getElementById('status-track');
+  const q = state._lastQuote;
+
+  // Patch status step 4 sub copy with rail name
+  const steps = STATUS_STEPS.map(s => ({ ...s }));
+  if (q) {
+    steps[4].sub = `Sending via ${BANK_TYPE_LABEL[q.rail]} · ETA ${q.eta}`;
+    document.getElementById('status-amount').textContent = fmt(q.sendAmt) + ' ' + state.selectedToken + ' → $' + fmt(q.receiveAmt);
+  }
+
+  el.innerHTML = steps.map((s, i) => {
+    let dotClass = 'pending';
+    let stepClass = '';
+    if (i < state.statusStep) { dotClass = 'done'; stepClass = 'done'; }
+    else if (i === state.statusStep) { dotClass = 'active'; stepClass = 'active'; }
+    const icon = i < state.statusStep ? '&#x2713;' : (i === state.statusStep ? '&#x25CF;' : '&#x25CB;');
+    return `<div class="status-step ${stepClass}">
+      <div class="status-dot ${dotClass}">${icon}</div>
+      <div class="status-info"><div class="label">${s.label}</div><div class="sub">${s.sub}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function advanceStatus() {
+  if (state.statusStep < STATUS_STEPS.length - 1) {
+    state.statusStep++;
+    renderStatusTrack();
+  } else {
+    // Patch completion screen
+    const q = state._lastQuote;
+    if (q) {
+      document.getElementById('complete-sub').textContent = '$' + fmt(q.receiveAmt) + ' has been sent to your bank account.';
+      document.getElementById('complete-bank').textContent = q.bank.name + ' · ' + q.bank.detail.split(' · ')[0];
+      document.getElementById('complete-method').textContent = BANK_TYPE_LABEL[q.rail];
+    }
+    goScreen('withdraw-complete');
+  }
+}
+
+/* ═══════════ INIT ═══════════ */
+renderDashboard();
+</script>
+</body>
+</html>

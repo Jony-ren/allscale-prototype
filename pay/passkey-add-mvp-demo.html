@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Pay — Add Passkey (MVP) Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#009859;--green-hover:#0CAA67;--green-bg:#EAF6EF;
+  --card:#F7F9F8;--btn:#EEF2F0;--border:#E5EEEA;
+  --dark:#0C3124;--text:#83968F;--text-3:#B0C4BB;--white:#FFFFFF;--surface:#E9EDEB;
+  --red:#E5484D;--red-bg:rgba(229,72,77,.08);--orange:#F5A623;--orange-bg:rgba(245,166,35,.12);--warning-text:#B45309;--info:#3B82F6
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar-logo{width:26px;height:26px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0}
+.topbar-title{font-size:14px;font-weight:600;color:var(--dark);flex:1;min-width:160px}
+.topbar-title span{color:var(--text);font-weight:400;font-size:13px;margin-left:6px}
+.mode-btn{padding:7px 15px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;font-family:'Archivo',sans-serif}
+.mode-btn:hover{border-color:var(--green);color:var(--dark)}
+
+/* ── Security modal (matches real Authentication method) ── */
+.stage{display:flex;justify-content:center;padding:36px 16px 60px}
+.modal{width:100%;max-width:460px;background:var(--white);border-radius:26px;padding:30px 26px 24px;box-shadow:0 12px 50px rgba(12,49,36,.14)}
+.modal-title{font-size:28px;font-weight:600;color:var(--dark);letter-spacing:-0.02em;line-height:1}
+.auth-label{font-size:13px;font-weight:500;color:var(--text);margin:22px 2px 12px}
+.auth-card{background:var(--card);border-radius:20px;overflow:hidden}
+.auth-row{display:flex;align-items:center;gap:14px;padding:18px 18px}
+.auth-row+.auth-row{border-top:1px solid var(--border)}
+.auth-ico{color:var(--dark);flex-shrink:0;display:flex}
+.auth-main{flex:1;min-width:0}
+.auth-name{font-size:17px;font-weight:600;color:var(--dark);line-height:1.2}
+.auth-sub{font-size:13px;color:var(--text);margin-top:4px;line-height:1.2;word-break:break-all}
+.auth-right{flex-shrink:0;display:flex;align-items:center}
+.add-pk-btn{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);color:var(--green);border:none;border-radius:50px;padding:11px 18px;font-family:'Archivo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:-0.02em}
+.add-pk-btn:hover{background:#dcefe4}
+.add-pk-btn.disabled{background:var(--btn);color:var(--text-3);cursor:default;pointer-events:none}
+.added{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-size:15px;font-weight:500}
+.coming{color:var(--text-3);font-size:14px;font-weight:400}
+.auth-row.dim .auth-name,.auth-row.dim .auth-sub,.auth-row.dim .auth-ico{color:var(--text-3)}
+/* passkey sublist under Passkey row */
+.pk-sublist{padding:0 0 6px 0;background:var(--card)}
+.pk-row{display:flex;align-items:flex-start;gap:12px;padding:12px 18px 12px 52px;position:relative}
+.pk-mini{width:30px;height:30px;border-radius:8px;background:#0C3124;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;margin-left:-2px}
+.pk-info{flex:1;min-width:0}
+.pk-name{font-size:15px;font-weight:500;color:var(--dark);line-height:1.25;word-break:break-word}
+.pk-prov{font-size:13px;color:var(--text);margin-top:2px;line-height:1.2}
+.pk-prov .cur{color:var(--green)}
+.pk-dots{background:none;border:none;color:var(--text);cursor:pointer;padding:2px;flex-shrink:0}
+.pk-menu{position:absolute;right:14px;top:34px;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;z-index:5;min-width:150px;display:none}
+.pk-menu.open{display:block}
+.pk-menu div{padding:13px 18px;font-size:15px;font-weight:500;color:var(--dark);cursor:pointer}
+.pk-menu div:hover{background:var(--btn)}
+.pk-menu div.danger{color:var(--red)}
+.pk-warn{margin:2px 14px 10px 52px;display:flex;gap:8px;background:var(--orange-bg);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--warning-text);line-height:1.45}
+.pk-warn .ni{flex-shrink:0;margin-top:1px}
+.logout{display:flex;align-items:center;gap:12px;padding:20px 6px 8px;color:var(--red);font-size:17px;font-weight:600;cursor:pointer}
+.done-btn{width:100%;height:54px;border-radius:50px;border:none;background:var(--btn);color:var(--dark);font-family:'Archivo',sans-serif;font-size:17px;font-weight:600;cursor:pointer;letter-spacing:-0.02em;margin-top:10px}
+.done-btn:hover{background:#e3e9e6}
+.cap-hint{font-size:12px;color:var(--text);text-align:center;margin-top:16px}
+.prd-tag{font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;margin-top:4px}
+
+/* ── Bottom sheets (add / detail) ── */
+.btn-primary{width:100%;height:52px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--green-hover)}
+.btn-primary.disabled{background:var(--border);color:var(--text);cursor:default;pointer-events:none}
+.btn-secondary{width:100%;height:52px;border-radius:50px;border:none;background:var(--card);color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em}
+.btn-secondary:hover{background:var(--btn)}
+.btn-danger{width:100%;height:48px;border-radius:50px;border:1.5px solid var(--red);background:var(--white);color:var(--red);font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em}
+.btn-danger:hover{background:var(--red-bg)}
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.sheet-overlay.open{opacity:1;pointer-events:all}
+/* Desktop: centered independent dialog (mobile would use a bottom sheet) */
+.sheet{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);opacity:0;pointer-events:none;width:calc(100% - 40px);max-width:420px;background:var(--white);border-radius:24px;z-index:201;transition:transform .25s ease,opacity .25s ease;max-height:88vh;overflow-y:auto;box-shadow:0 16px 60px rgba(12,49,36,.22)}
+.sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
+.sheet-handle{display:none}
+.sheet-header{padding:14px 20px 6px;display:flex;align-items:center;gap:10px}
+.sheet-back,.sheet-close{width:34px;height:34px;border-radius:50%;background:var(--btn);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dark);flex-shrink:0}
+.sheet-back:hover,.sheet-close:hover{background:var(--border)}
+.sheet-header .sp{flex:1}
+.sheet-body{padding:6px 20px 28px;text-align:center}
+.sheet-body.left{text-align:left}
+.sheet-emoji{width:56px;height:56px;border-radius:16px;background:var(--btn);display:flex;align-items:center;justify-content:center;margin:6px auto 14px;color:var(--dark)}
+.sheet-title{font-size:24px;font-weight:600;color:var(--dark);letter-spacing:-0.02em;line-height:1.2;margin-bottom:10px}
+.sheet-sub{font-size:15px;color:var(--text);margin-bottom:20px;line-height:1.5}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{border:1.5px solid var(--border);border-radius:18px;padding:22px 12px;cursor:pointer;background:var(--white);display:flex;flex-direction:column;align-items:center;gap:12px}
+.tile:hover{border-color:var(--green);background:var(--green-bg)}
+.tile-t{font-size:16px;font-weight:500;color:var(--dark);line-height:1.25}
+.input{width:100%;background:#FAFBFA;border:1.5px solid #E5EEEA;border-radius:12px;font-size:16px;color:#0C3124;font-family:'Archivo',sans-serif;padding:14px 16px;outline:none;letter-spacing:-0.02em;text-align:left}
+.input:focus{background:#F2F8F5;border-color:var(--green)}
+.err{color:var(--red);font-size:13px;text-align:left;margin:8px 4px 0;min-height:16px}
+.qr-box{width:200px;height:200px;border-radius:14px;background:#fff;border:1px solid var(--border);display:grid;grid-template-columns:repeat(13,1fr);grid-template-rows:repeat(13,1fr);padding:14px;gap:2px;margin:0 auto}
+.qr-box i{background:var(--dark);border-radius:1px}.qr-box i.off{background:transparent}
+.qr-row{display:flex;align-items:flex-start;gap:12px;text-align:left;padding:14px 0;font-size:14px;color:var(--text)}
+.qr-row .qt{font-weight:600;color:var(--dark);margin-bottom:2px}
+.hr{height:1px;background:var(--border);margin:16px 0}
+#toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 18px;font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;box-shadow:0 8px 40px rgba(0,0,0,.10);display:flex;align-items:center;gap:10px;pointer-events:auto;max-width:92vw}
+.toast.mail{color:var(--info)}
+.spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;display:inline-block}
+@keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">AllScale Pay <span>Add Passkey (MVP) · Prototype</span></div>
+  <button class="mode-btn" onclick="resetData()">Reset</button>
+</div>
+
+<div class="stage">
+  <div class="modal">
+    <div class="modal-title">Security</div>
+    <div class="auth-label">Authentication method</div>
+    <div class="auth-card">
+
+      <!-- Passkey row + inline passkey list -->
+      <div class="auth-row">
+        <span class="auth-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+        <div class="auth-main"><div class="auth-name">Passkey</div><div class="auth-sub">Fastest secure sign in</div></div>
+        <span class="auth-right"><button class="add-pk-btn" id="btn-add" onclick="startAdd()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Passkey</button></span>
+      </div>
+      <div class="pk-sublist" id="pk-list"></div>
+      <div id="pk-warn"></div>
+
+      <!-- Email row (static) -->
+      <div class="auth-row">
+        <span class="auth-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+        <div class="auth-main"><div class="auth-name">Email</div><div class="auth-sub">yao.wang.yg+0415@gmail.com</div></div>
+        <span class="auth-right"><span class="added"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Added</span></span>
+      </div>
+
+      <!-- Phone row (coming soon) -->
+      <div class="auth-row dim">
+        <span class="auth-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span>
+        <div class="auth-main"><div class="auth-name">Phone Number</div><div class="auth-sub">Add your phone</div></div>
+        <span class="auth-right"><span class="coming">Coming Soon</span></span>
+      </div>
+    </div>
+
+    <div class="logout" onclick="toast('Demo — log out')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log out</div>
+    <button class="done-btn" onclick="toast('Demo — done')">Done</button>
+    <div class="cap-hint">Authentication method modal · passkeys inline · no cooldown<span class="prd-tag">PRD (MVP) §4</span></div>
+  </div>
+</div>
+
+<!-- SHEET: Add -->
+<div class="sheet-overlay" id="ov-add" onclick="closeSheet('add')"></div>
+<div class="sheet" id="sheet-add">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <button class="sheet-back" id="add-back" onclick="addBack()" style="visibility:hidden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span class="sp"></span>
+    <button class="sheet-close" onclick="closeSheet('add')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="sheet-body" id="add-body"></div>
+</div>
+
+<!-- SHEET: Detail (rename/delete) -->
+<div class="sheet-overlay" id="ov-detail" onclick="closeSheet('detail')"></div>
+<div class="sheet" id="sheet-detail">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><span class="sp"></span><button class="sheet-close" onclick="closeSheet('detail')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sheet-body left" id="detail-body"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+const ICON={
+  apple:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.2 1.8-3.3 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.5 0-2.8.8-3.6 2.2-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.1 1.1 0 1.5-.7 2.8-.7s1.7.7 2.8.7c1.2 0 1.9-1 2.6-2 .8-1.2 1.2-2.3 1.2-2.4-.1 0-2.3-.9-2.3-3.5zM14.2 6.3c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2z"/></svg>',
+  google:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+};
+const FACE='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9h.01M15 9h.01M9.5 14a3.5 3.5 0 0 0 5 0"/></svg>';
+const PERSONKEY='<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 9.5-3.8"/><circle cx="17.5" cy="14.5" r="2.5"/><path d="m19.3 16.3 2.2 2.2M16 17l-2 3"/></svg>';
+const DOTS='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+const WARNICO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
+
+const SEED=[{id:1,name:'Original Passkey',provider:'iCloud Keychain',icon:'apple',current:true}];
+const CAP=3, NAME_MAX=32;
+let passkeys=[], uid=100, currentId=null;
+let flow={dest:null,deviceType:null,name:''}, backStack=[];
+
+function loadData(){ passkeys=JSON.parse(JSON.stringify(SEED)); }
+function resetData(){ loadData(); renderPasskeys(); closeSheet('add'); closeSheet('detail'); toast('Demo reset'); }
+function openSheet(n){ document.getElementById('ov-'+n).classList.add('open'); document.getElementById('sheet-'+n).classList.add('open'); }
+function closeSheet(n){ document.getElementById('ov-'+n).classList.remove('open'); document.getElementById('sheet-'+n).classList.remove('open'); }
+function closeMenus(){ document.querySelectorAll('.pk-menu.open').forEach(m=>m.classList.remove('open')); }
+document.addEventListener('click',closeMenus);
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderPasskeys(){
+  document.getElementById('pk-list').innerHTML = passkeys.map(p=>`
+    <div class="pk-row">
+      <div class="pk-mini">${ICON[p.icon]}</div>
+      <div class="pk-info">
+        <div class="pk-name">${esc(p.name)}</div>
+        <div class="pk-prov">Stored on ${p.provider}</div>
+      </div>
+      <button class="pk-dots" onclick="toggleMenu(event,${p.id})">${DOTS}</button>
+      <div class="pk-menu" id="menu-${p.id}">
+        <div onclick="startRename(${p.id})">Rename</div>
+        <div class="danger" onclick="startDelete(${p.id})">Delete</div>
+      </div>
+    </div>`).join('');
+  const n=passkeys.length;
+  const add=document.getElementById('btn-add');
+  if(n>=CAP) add.classList.add('disabled'); else add.classList.remove('disabled');
+  document.getElementById('pk-warn').innerHTML = n===1
+    ? `<div class="pk-warn"><span class="ni">${WARNICO}</span><span>You only have one passkey. Add another so you won't be locked out if you lose this device.</span></div>`
+    : '';
+}
+function toggleMenu(e,id){ e.stopPropagation(); const m=document.getElementById('menu-'+id); const o=m.classList.contains('open'); closeMenus(); if(!o)m.classList.add('open'); }
+
+function nameError(name, exceptId){
+  if(!name) return 'Enter a name.';
+  if(name.length>NAME_MAX) return `Name is too long (max ${NAME_MAX}).`;
+  if(passkeys.some(p=>p.id!==exceptId && p.name.toLowerCase()===name.toLowerCase())) return 'That name is already in use.';
+  return '';
+}
+
+/* ADD flow */
+function defaultName(){
+  const d=new Date(); const date=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+  let h=d.getHours(); const ap=h>=12?'PM':'AM'; h=h%12||12;
+  return `yao ${date} at ${String(h).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} ${ap}`;
+}
+function setBack(s){ document.getElementById('add-back').style.visibility=s?'visible':'hidden'; }
+function gotoStep(fn){ backStack.push(fn); render(); }
+function render(){ setBack(backStack.length>1); backStack[backStack.length-1](); }
+function addBack(){ if(backStack.length>1){ backStack.pop(); render(); } }
+function startAdd(){
+  if(passkeys.length>=CAP){ toast(`You already have ${CAP} passkeys`); return; }
+  flow={dest:null,deviceType:null,name:''}; backStack=[];
+  gotoStep(stepVerify); openSheet('add');
+}
+function stepVerify(){
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-emoji">${FACE}</div>
+    <div class="sheet-title">Verify it's you</div>
+    <div class="sheet-sub">For your security, verify with an existing passkey before adding a new one.</div>
+    <button class="btn-primary" id="vbtn" onclick="runVerify()">Verify with passkey</button>`;
+}
+function runVerify(){ const b=document.getElementById('vbtn'); b.classList.add('disabled'); b.innerHTML='<span class="spin"></span> Verifying…'; setTimeout(()=>gotoStep(stepChoose),1000); }
+function stepChoose(){
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-title">Choose where to save<br>your new passkey</div>
+    <div class="sheet-sub">Where is the password manager that you want to save this passkey to?</div>
+    <div class="tiles">
+      <div class="tile" onclick="chooseDest('this')"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M2 20h20"/></svg><div class="tile-t">This device</div></div>
+      <div class="tile" onclick="chooseDest('other')"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="12" height="9" rx="1.5"/><rect x="16" y="8" width="6" height="11" rx="1.5"/></svg><div class="tile-t">Another device</div></div>
+    </div>`;
+}
+function chooseDest(d){ flow.dest=d; d==='this'?gotoStep(stepAvoid):gotoStep(stepDeviceType); }
+function stepDeviceType(){
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-title">Choose the type of device</div>
+    <div class="sheet-sub">What type of device is the password manager on that you want to save this passkey to?</div>
+    <div class="tiles">
+      <div class="tile" onclick="chooseType('mobile')"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="12" height="9" rx="1.5"/><rect x="16" y="8" width="6" height="11" rx="1.5"/></svg><div class="tile-t">Phone, tablet, or security key</div></div>
+      <div class="tile" onclick="chooseType('desktop')"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0C3124" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M2 20h20"/></svg><div class="tile-t">Desktop computer</div></div>
+    </div>`;
+}
+function chooseType(t){ flow.deviceType=t; gotoStep(stepSaveTo); }
+function stepSaveTo(){
+  const m=flow.deviceType==='mobile';
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-emoji"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="12" height="9" rx="1.5"/><rect x="16" y="8" width="6" height="11" rx="1.5"/></svg></div>
+    <div class="sheet-title">${m?'Save to a phone, tablet or security key':'Save to a desktop computer'}</div>
+    <div class="sheet-sub">When the system prompt appears, select the device you want to add the passkey to and follow the instructions.</div>
+    <button class="btn-primary" onclick="gotoStep(stepAvoid)">Continue</button>`;
+}
+function stepAvoid(){
+  const provs=[...new Set(passkeys.map(p=>p.provider))];
+  const mgr=provs.length>1?provs.slice(0,2).join(' and '):(provs[0]||'iCloud Keychain');
+  const plural=provs.length>1;
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-emoji"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+    <div class="sheet-title">Avoid multiple passkeys per<br>password manager</div>
+    <div class="sheet-sub">As you already have ${plural?'passkeys':'a passkey'} saved in ${mgr}, we recommend saving this one in a different password manager so losing one provider won't lock you out.</div>
+    <button class="btn-primary" onclick="${flow.dest==='other'?'gotoStep(stepQR)':'gotoStep(stepName)'}">Continue</button>
+    <div class="cap-hint">Guidance only — you can still continue to the same manager.</div>`;
+}
+function stepQR(){
+  let c=''; for(let i=0;i<169;i++){ const on=((i*7+(i%13)*3+Math.floor(i/13)*5)%3===0); c+=`<i class="${on?'':'off'}"></i>`; }
+  document.getElementById('add-body').innerHTML=`
+    <div style="text-align:left"><div class="sheet-title" style="font-size:20px;margin-bottom:12px">Passkeys &amp; Security Keys</div>
+    <div class="qr-row"><span style="flex-shrink:0;margin-top:1px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span><div><div class="qt">Use your phone or tablet</div>Scan this QR code with the camera on the device where you want to create and save your passkey for allscale.io</div></div></div>
+    <div class="qr-box" style="margin:12px auto">${c}</div>
+    <div class="hr"></div>
+    <div class="qr-row"><span style="flex-shrink:0;margin-top:1px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="14" rx="3"/><path d="M12 16v6"/></svg></span><div><div class="qt">Use your security key</div>Insert and touch your security key to set it up for allscale.io</div></div>
+    <button class="btn-secondary" style="margin-top:14px" onclick="gotoStep(stepName)">(Demo) Done on the other device</button>`;
+}
+function stepName(){
+  flow.name=flow.name||defaultName();
+  document.getElementById('add-body').innerHTML=`
+    <div class="sheet-emoji">${PERSONKEY}</div>
+    <div class="sheet-title">Name your new passkey</div>
+    <div class="sheet-sub">Give your passkey a memorable name to help you identify it later.</div>
+    <input class="input" id="add-name-input" type="text" maxlength="${NAME_MAX}" value="${esc(flow.name).replace(/"/g,'&quot;')}">
+    <div class="err" id="add-name-err"></div>
+    <button class="btn-primary" onclick="confirmAdd()">Add new passkey</button>`;
+  setTimeout(()=>{const el=document.getElementById('add-name-input'); if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},50);
+}
+function confirmAdd(){
+  const el=document.getElementById('add-name-input'); const v=(el.value||'').trim();
+  const err=nameError(v,null);
+  if(err){ document.getElementById('add-name-err').textContent=err; return; }
+  flow.name=v;
+  toast(flow.dest==='this'?'Touch ID to continue…':'Creating passkey on the other device…');
+  setTimeout(()=>{
+    const provider = passkeys.some(p=>p.provider==='iCloud Keychain') ? 'Google Password Manager' : 'iCloud Keychain';
+    passkeys.push({id:++uid,name:flow.name,provider,icon:provider.indexOf('Google')>=0?'google':'apple',current:false});
+    renderPasskeys(); closeSheet('add');
+    toast('Passkey added'); notifyMail('Notification email sent: a passkey was added');
+  },800);
+}
+
+/* RENAME / DELETE */
+function startRename(id){
+  closeMenus(); currentId=id; const p=passkeys.find(x=>x.id===id); if(!p)return;
+  document.getElementById('detail-body').innerHTML=`
+    <div class="sheet-title" style="text-align:left">Rename passkey</div>
+    <div class="sheet-sub" style="text-align:left">The name is only for you to tell passkeys apart — it doesn't affect sign-in. Must be unique, up to ${NAME_MAX} characters.</div>
+    <input class="input" id="rn-input" type="text" maxlength="${NAME_MAX}" value="${esc(p.name).replace(/"/g,'&quot;')}">
+    <div class="err" id="rn-err"></div>
+    <button class="btn-primary" onclick="confirmRename()">Save</button>`;
+  openSheet('detail'); setTimeout(()=>{const el=document.getElementById('rn-input'); if(el)el.focus();},50);
+}
+function confirmRename(){
+  const p=passkeys.find(x=>x.id===currentId); if(!p)return;
+  const v=(document.getElementById('rn-input').value||'').trim();
+  const err=nameError(v,currentId);
+  if(err){ document.getElementById('rn-err').textContent=err; return; }
+  p.name=v; closeSheet('detail'); renderPasskeys(); toast('Renamed');
+}
+function startDelete(id){
+  closeMenus(); currentId=id; const p=passkeys.find(x=>x.id===id); if(!p)return;
+  if(passkeys.length===1){
+    document.getElementById('detail-body').innerHTML=`
+      <div class="sheet-title" style="text-align:left">Can't delete your last passkey</div>
+      <div class="sheet-sub" style="text-align:left">This is the only passkey on your account. Add another passkey before deleting this one.</div>
+      <button class="btn-primary" onclick="closeSheet('detail'); startAdd();">Add a passkey first</button>
+      <button class="btn-secondary" style="margin-top:10px" onclick="closeSheet('detail')">Cancel</button>`;
+    openSheet('detail'); return;
+  }
+  document.getElementById('detail-body').innerHTML=`
+    <div class="sheet-emoji" style="margin:6px auto 14px">${FACE}</div>
+    <div class="sheet-title" style="text-align:center">Verify it's you</div>
+    <div class="sheet-sub" style="text-align:center">For your security, verify with an existing passkey before deleting one.</div>
+    <button class="btn-primary" id="dvbtn" onclick="runDeleteVerify()">Verify with passkey</button>`;
+  openSheet('detail');
+}
+function runDeleteVerify(){ const b=document.getElementById('dvbtn'); b.classList.add('disabled'); b.innerHTML='<span class="spin"></span> Verifying…'; setTimeout(showDeleteConfirm,1000); }
+function showDeleteConfirm(){
+  const p=passkeys.find(x=>x.id===currentId); if(!p)return;
+  document.getElementById('detail-body').innerHTML=`
+    <div class="sheet-title" style="text-align:left">Delete this passkey?</div>
+    <div class="sheet-sub" style="text-align:left">Once deleted, "${esc(p.name)}" can no longer be used to sign in. Your other passkeys are unaffected.</div>
+    <button class="btn-danger" onclick="confirmDelete()">Delete passkey</button>
+    <button class="btn-secondary" style="margin-top:10px" onclick="closeSheet('detail')">Cancel</button>`;
+}
+function confirmDelete(){
+  passkeys=passkeys.filter(x=>x.id!==currentId);
+  closeSheet('detail'); renderPasskeys();
+  toast('Passkey deleted'); notifyMail('Notification email sent: a passkey was removed');
+}
+
+const _t=new Map();
+function toast(msg,cls=''){
+  const k=cls+msg; if(_t.has(k))return;
+  const c=document.getElementById('toast-container'); const el=document.createElement('div'); el.className='toast '+cls;
+  const ic=cls==='mail'
+    ?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>'
+    :'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#009859" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  el.innerHTML=ic+'<span>'+msg+'</span>'; c.appendChild(el);
+  const tm=setTimeout(()=>{el.remove();_t.delete(k);},3000); _t.set(k,tm);
+}
+function notifyMail(msg){ setTimeout(()=>toast(msg,'mail'),450); }
+
+loadData(); renderPasskeys();
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AllScale — Org chart</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+    <rect width="400" height="400" fill="#F2F8F5"/>
+    <g transform="translate(200 200)" stroke="#0C3124" stroke-width="6" fill="none" stroke-linecap="round">
+      <circle cx="0" cy="-60" r="28" fill="#0C3124"/>
+      <circle cx="-80" cy="40" r="22" fill="#FFFFFF"/>
+      <circle cx="0" cy="40" r="22" fill="#FFFFFF"/>
+      <circle cx="80" cy="40" r="22" fill="#FFFFFF"/>
+      <path d="M0 -32 L0 0 M0 0 L-80 18 M0 0 L0 18 M0 0 L80 18"/>
+    </g>
+    <text x="200" y="340" text-anchor="middle" font-family="-apple-system,Segoe UI,Inter,sans-serif" font-size="22" font-weight="600" fill="#0C3124">AllScale</text>
+    <text x="200" y="368" text-anchor="middle" font-family="-apple-system,Segoe UI,Inter,sans-serif" font-size="14" fill="#0C3124" opacity="0.6">Org chart</text>
+  </svg>
+</template>
+
+<div id="root"></div>
+
+<script src="org-data.js"></script>
+<script src="github-sync.js"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="modals.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+<script type="text/babel">
+  // Tweak defaults — exposed in the Tweaks panel and persisted by the host.
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "deptStyle": "outlined",
+    "deptAccent": "#000000",
+    "memberDensity": "card",
+    "showSectionLabels": true,
+    "memberIndent": 16,
+    "deptShadow": true
+  }/*EDITMODE-END*/;
+
+  function Root() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+    // Push tweak values into CSS custom properties on <html>
+    React.useEffect(() => {
+      const r = document.documentElement;
+      r.style.setProperty("--tw-dept-accent", t.deptAccent);
+      r.style.setProperty("--tw-member-indent", t.memberIndent + "px");
+      r.dataset.deptStyle = t.deptStyle;        // outlined | shaded | filled
+      r.dataset.memberDensity = t.memberDensity; // card | row | bare
+      r.dataset.deptShadow = t.deptShadow ? "on" : "off";
+      r.dataset.showSectionLabels = t.showSectionLabels ? "on" : "off";
+    }, [t]);
+
+    return (
+      <>
+        <App />
+        <TweaksPanel title="Tweaks">
+          <TweakSection label="Department vs. member" />
+          <TweakRadio
+            label="Department style"
+            value={t.deptStyle}
+            options={[
+              { value: "outlined", label: "Outlined" },
+              { value: "shaded",   label: "Shaded"   },
+              { value: "filled",   label: "Filled"   },
+            ]}
+            onChange={(v) => setTweak("deptStyle", v)}
+          />
+          <TweakRadio
+            label="Member density"
+            value={t.memberDensity}
+            options={[
+              { value: "card", label: "Card" },
+              { value: "row",  label: "Row"  },
+              { value: "bare", label: "Bare" },
+            ]}
+            onChange={(v) => setTweak("memberDensity", v)}
+          />
+          <TweakSlider
+            label="Member indent"
+            value={t.memberIndent}
+            min={0} max={32} step={2} unit="px"
+            onChange={(v) => setTweak("memberIndent", v)}
+          />
+          <TweakColor
+            label="Department accent"
+            value={t.deptAccent}
+            onChange={(v) => setTweak("deptAccent", v)}
+          />
+          <TweakToggle
+            label="Department shadow"
+            value={t.deptShadow}
+            onChange={(v) => setTweak("deptShadow", v)}
+          />
+          <TweakToggle
+            label="Section labels (Leads / Team)"
+            value={t.showSectionLabels}
+            onChange={(v) => setTweak("showSectionLabels", v)}
+          />
+        </TweaksPanel>
+      </>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<Root />);
+</script>
+</body>
+</html>

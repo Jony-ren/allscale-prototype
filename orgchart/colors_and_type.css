@@ -1,0 +1,521 @@
+/* ==========================================================================
+   AllScale Design System — Colors & Type
+   Self-custody neobank for micro businesses.
+   Source of truth: Figma "Claude learn.fig" / Richmond-P3 page.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Archivo";
+  src: url("./fonts/Archivo-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-stretch: 62.5% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo";
+  src: url("./fonts/Archivo-Italic-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-stretch: 62.5% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ----- Marketing-site display faces --------------------------------------
+   The consumer marketing surface (Bravo Rewards, allscale.io landing pages)
+   uses a different type stack than the product. Product stays on Archivo;
+   marketing pages compose Manrope + Playfair Display Italic + Red Hat
+   Display Italic. Loaded from Google Fonts to keep the repo light.
+*/
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,400;1,700;1,900&family=Red+Hat+Display:ital,wght@1,500;1,700&display=swap");
+
+/* ----- Raw color scales ---------------------------------------------------
+   Every hex below is traceable to the Figma color frame or top-30 metadata.
+*/
+:root {
+  /* Brand greens */
+  --as-green-900:      #0C3124;   /* AllScale Dark — primary text/brand ink */
+  --as-green-700:      #048E44;   /* Text / small accents */
+  --as-green-600:      #009859;   /* Brand Green — primary CTA / links */
+  --as-green-500:      #12D16B;   /* Brand Light Green — illustration / highlight */
+  --as-green-400:      #15A73A;   /* Dev log success text */
+  --as-green-100:      #E5EEEA;   /* Border Cyan */
+  --as-green-75:       #E8F5EE;   /* Subtle fill */
+  --as-green-50:       #F2F8F5;   /* Button Cyan — soft bg */
+  --as-green-25:       #EFF6F4;   /* Very soft fill */
+  --as-green-15:       #F2F8F5;   /* Tintable pill bg */
+
+  /* Neutrals */
+  --as-ink:            #0B0800;   /* near-pure ink */
+  --as-black:          #000000;
+  --as-off-black:      #0D0D0D;   /* Background-Dark */
+  --as-card-dark:      #1A1A1A;   /* Card-background-Dark */
+  --as-border-dark:    #313131;   /* Border-Dark */
+  --as-paper:          #FFFFFF;   /* Page background — pure white */
+  --as-paper-2:        #FFFFFF;   /* Secondary surface — pure white */
+  --as-white:          #FFFFFF;
+  --as-muted-500:      #83968F;   /* Text Cyan — secondary text */
+  --as-muted-400:      #777777;
+  --as-muted-300:      #DBDBDB;
+  --as-muted-200:      #E4E6E5;
+  --as-muted-150:      #E8E8E8;
+  --as-muted-100:      #F1F1F1;
+
+  /* Accents (status) */
+  --as-red-600:        #FF383C;   /* Failed */
+  --as-red-500:        #DE5B52;   /* Log out / destructive */
+  --as-red-50:         #FDF4F2;   /* Failed pill bg */
+  --as-orange-500:     #EC9418;   /* Overdue */
+  --as-orange-400:     #DB9253;   /* Viewed eye */
+  --as-orange-50:      #FDF1E4;   /* Soft amber surface — Overdue / Test-store / Put pill bg (was yellow-50) */
+  --as-green-01:       #011C00;   /* Deep overlay green */
+  --as-mkt-black:      #0D0D0D;   /* Landing hero bg — same as off-black */
+  --as-mkt-black-2:    #070707;   /* Deepest section bg */
+  --as-mkt-black-3:    #1A1A1A;   /* Section card on near-black */
+  --as-mkt-paper:      #FAF7EF;   /* Warm cream — FAQ / secondary section bg */
+  --as-mkt-paper-2:    #F3EFE3;   /* Deeper cream — dividers */
+  --as-mkt-green:      #12D16B;   /* Bravo editorial numerals (same as --as-green-500) */
+  --as-mkt-promo:      #009859;   /* Bravo promo chip / "Until 4.27" — deeper, calmer green than --as-mkt-green; pairs with white text on dark cards and with green outline pills on cream */
+  --as-mkt-fog-40:     rgba(49,49,49,0.4);   /* Secondary label on cream surfaces (Amount / Max total / fine print) */
+  --as-mkt-line-cream: #E5EEEA;             /* FAQ row hairline on near-white card */
+  --as-mkt-card-cream: #FAFBFA;             /* FAQ row + section card surface (near-white, cooler than --as-mkt-paper) */
+  --as-mkt-fine:       #A9A9A5;             /* Long-form fine print (terms, expanded FAQ body) */
+  --as-mkt-meta:       #83968F;             /* Meta line ("Self-custody • USDT accepted • No hidden fees") */
+  --as-mkt-divider-d:  rgba(249,248,242,0.2);/* Hairline on near-black step cards */
+  --as-mkt-on-dark-40: rgba(255,255,255,0.4);/* Secondary text on near-black */
+  --as-mkt-on-dark-50: rgba(255,255,255,0.5);/* Disabled / past-step label on near-black */
+
+  /* Shadow */
+  --as-shadow-rgb:     0 0 0;
+  --as-shadow-alpha:   .12;
+
+  /* Semantic (light theme) */
+  --bg:                var(--as-paper);
+  --bg-2:              var(--as-paper-2);
+  --surface:           var(--as-white);
+  --surface-soft:      var(--as-green-50);
+  --fg:                var(--as-green-900);
+  --fg-2:              var(--as-muted-500);
+  --fg-3:              #B6C3BE;
+  --fg-on-brand:       var(--as-white);
+  --brand:             var(--as-green-600);
+  --brand-strong:      var(--as-green-900);
+  --brand-accent:      var(--as-green-500);
+  --brand-on:          var(--as-white);
+  --border:            var(--as-green-100);
+  --border-strong:     var(--as-muted-200);
+  --success:           var(--as-green-600);
+  --success-fg:        var(--as-green-400);
+  --danger:            var(--as-red-600);
+  --danger-bg:         var(--as-red-50);
+  --warning:           var(--as-orange-500);
+  --warning-bg:        var(--as-orange-50);
+  --info:              var(--as-orange-400);
+  --focus-ring:        #8CD2B1;
+
+  /* Radii — rounded pills are core to AllScale */
+  --r-xs:    6px;
+  --r-sm:    9px;
+  --r-md:    12px;
+  --r-lg:    16px;
+  --r-xl:    22px;
+  --r-2xl:   28px;
+  --r-pill:  999px;
+
+  /* Spacing */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-7:  28px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+
+  /* Shadow system */
+  --elev-0: none;
+  --elev-1: 0 1px 2px rgb(var(--as-shadow-rgb) / .06);
+  --elev-2: 0 4px 16px rgb(var(--as-shadow-rgb) / .08);
+  --elev-3: 0 12px 32px rgb(var(--as-shadow-rgb) / .12); /* modals/popovers */
+  --elev-ring: 0 0 0 4px color-mix(in oklab, var(--focus-ring) 45%, transparent);
+
+  /* Type family */
+  --font-sans:  "Archivo", "Manrope", ui-sans-serif, system-ui, -apple-system,
+                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:  "Archivo", ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, monospace;
+
+  /* Marketing type stack — Bravo & allscale.io landing pages.
+     `--font-display` is for big editorial headings; `--font-editorial` is
+     the italic serif used for numbered step markers (01 / 02 / 03) and
+     accent phrases; `--font-accent` is the slanted sans used for chip
+     callouts like "Step 01 >". Product UI keeps using --font-sans. */
+  --font-display:   "Manrope", "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: "Playfair Display", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-accent:    "Red Hat Display", "Manrope", ui-sans-serif, sans-serif;
+
+  /* Type tokens — scale from Figma Text frame */
+  --fs-h1:   38px;  --lh-h1: 100%; --tr-h1: -0.04em;
+  --fs-h2:   32px;  --lh-h2: 100%; --tr-h2: -0.02em;
+  --fs-h3:   28px;  --lh-h3: 100%; --tr-h3: -0.02em;
+  --fs-h4:   24px;  --lh-h4: 110%; --tr-h4: -0.02em;
+  --fs-h5:   22px;  --lh-h5: 110%; --tr-h5: -0.02em;
+  --fs-h6:   20px;  --lh-h6: 110%; --tr-h6: -0.02em;
+  --fs-body-l:18px; --lh-body-l:130%; --tr-body-l:-0.02em;
+  --fs-body: 16px;  --lh-body: 140%; --tr-body: -0.02em;
+  --fs-body-s:14px; --lh-body-s:140%; --tr-body-s: 0em;
+  --fs-caption:12px;--lh-caption:130%;--tr-caption:0em;
+  --fs-micro:10px;  --lh-micro:130%; --tr-micro: 0em;
+
+  --fw-reg: 400;
+  --fw-med: 500;
+  --fw-bold: 700;
+}
+
+/* Base element styles ---------------------------------------------------- */
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tr-body);
+  font-weight: var(--fw-reg);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .as-h1 { font-weight: var(--fw-bold); font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--tr-h1); color: var(--fg); }
+h2, .as-h2 { font-weight: var(--fw-med);  font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: var(--tr-h2); color: var(--fg); }
+h3, .as-h3 { font-weight: var(--fw-med);  font-size: var(--fs-h3); line-height: var(--lh-h3); letter-spacing: var(--tr-h3); color: var(--fg); }
+h4, .as-h4 { font-weight: var(--fw-med);  font-size: var(--fs-h4); line-height: var(--lh-h4); letter-spacing: var(--tr-h4); color: var(--fg); }
+h5, .as-h5 { font-weight: var(--fw-med);  font-size: var(--fs-h5); line-height: var(--lh-h5); letter-spacing: var(--tr-h5); color: var(--fg); }
+h6, .as-h6 { font-weight: var(--fw-med);  font-size: var(--fs-h6); line-height: var(--lh-h6); letter-spacing: var(--tr-h6); color: var(--fg); }
+
+.as-body-l  { font-size: var(--fs-body-l);  line-height: var(--lh-body-l);  letter-spacing: var(--tr-body-l); }
+.as-body    { font-size: var(--fs-body);    line-height: var(--lh-body);    letter-spacing: var(--tr-body); }
+.as-body-s  { font-size: var(--fs-body-s);  line-height: var(--lh-body-s);  letter-spacing: var(--tr-body-s); }
+.as-caption { font-size: var(--fs-caption); line-height: var(--lh-caption); letter-spacing: var(--tr-caption); color: var(--fg-2); }
+.as-micro   { font-size: var(--fs-micro);   line-height: var(--lh-micro);   letter-spacing: var(--tr-micro); color: var(--fg-2); }
+
+.as-num     { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.as-mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+a { color: var(--brand); text-decoration: none; }
+a:hover { opacity: .85; }
+
+/* Reusable primitives --------------------------------------------------- */
+.as-surface { background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--elev-2); }
+.as-card    { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); }
+.as-chip    { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--r-pill); font-size: var(--fs-caption); font-weight: var(--fw-med); }
+
+.as-btn-primary {
+  background: var(--brand); color: var(--brand-on);
+  padding: 14px 24px; border-radius: var(--r-pill);
+  font-weight: var(--fw-med); font-size: var(--fs-body);
+  border: 0; cursor: pointer; transition: filter .15s ease, transform .1s ease;
+}
+.as-btn-primary:hover { filter: brightness(0.95); }
+.as-btn-primary:active { transform: scale(0.98); }
+
+.as-btn-ghost {
+  background: transparent; color: var(--fg);
+  padding: 12px 18px; border-radius: var(--r-pill);
+  font-weight: var(--fw-med); border: 1px solid var(--border-strong);
+  cursor: pointer;
+}
+.as-btn-ghost:hover { background: var(--surface-soft); }
+
+/* ===========================================================================
+   Marketing-site primitives (Bravo + allscale.io landing pages)
+   ---------------------------------------------------------------------------
+   Namespaced with `.mkt-*` so they never collide with product classes.
+   Use on public-facing pages only.
+=========================================================================== */
+
+/* Editorial display sizes */
+.mkt-display   { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 7vw, 86px); line-height: 96%; letter-spacing: -0.03em; }
+.mkt-display-s { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 4.5vw, 56px); line-height: 100%; letter-spacing: -0.03em; }
+.mkt-kicker    { font-family: var(--font-accent); font-style: italic; font-weight: 500; font-size: 18px; letter-spacing: 0; }
+
+/* Playfair italic numerals — used for step markers 01 / 02 / 03 */
+.mkt-numeral     { font-family: var(--font-editorial); font-style: italic; font-weight: 700; font-size: clamp(56px, 6vw, 88px); line-height: 100%; letter-spacing: -0.02em; color: var(--as-mkt-green); }
+
+/* Surfaces */
+.mkt-dark     { background: var(--as-mkt-black);   color: var(--as-white); }
+.mkt-dark-2   { background: var(--as-mkt-black-2); color: var(--as-white); }
+.mkt-cream    { background: var(--as-mkt-paper);   color: var(--as-green-900); }
+
+/* Pill CTAs — bigger, no border, warm shadow */
+.mkt-btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--as-green-900); color: var(--as-white);
+  padding: 18px 28px; border-radius: var(--r-pill);
+  font-family: var(--font-display); font-weight: 600; font-size: 17px;
+  border: 0; cursor: pointer; transition: filter .15s ease, transform .1s ease;
+}
+.mkt-btn-primary:hover  { filter: brightness(1.12); }
+.mkt-btn-primary:active { transform: scale(0.98); }
+
+.mkt-btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--as-mkt-black); color: var(--as-white);
+  padding: 18px 28px; border-radius: var(--r-pill);
+  font-family: var(--font-display); font-weight: 600; font-size: 17px;
+  border: 0; cursor: pointer;
+}
+.mkt-btn-secondary:hover { background: var(--as-card-dark); }
+
+/* Chip rows (long pill strips across hero/footer) */
+.mkt-chip-row {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--as-white); color: var(--as-green-900);
+  padding: 10px 18px; border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  font-family: var(--font-display); font-weight: 500; font-size: 14px;
+}
+.mkt-chip-row.is-dark { background: var(--as-mkt-black-3); color: var(--as-white); border-color: transparent; }
+
+/* FAQ row */
+.mkt-faq {
+  background: var(--as-white); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px 22px;
+  font-family: var(--font-display); font-weight: 500; font-size: 17px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--as-green-900);
+}
+
+/* Big wordmark watermark (footer) */
+.mkt-watermark {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(120px, 20vw, 280px); line-height: 80%;
+  letter-spacing: -0.04em;
+  color: color-mix(in oklab, var(--as-white) 8%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Bravo-specific primitives
+   Sourced from the live Bravo promo page + Figma "Home" frame. Use these
+   on the Bravo Rewards microsite, top-up landing pages, referral promos.
+   --------------------------------------------------------------------------- */
+
+/* Section-header rhythm.
+   Cream sections (FAQ, reward table, "Three steps. One dinner away.") use a
+   24px Archivo Medium label sitting on a paragraph. Tight tracking; never
+   uppercase. Pair `.mkt-eyebrow` with `.mkt-eyebrow--muted` for the soft
+   "Amount / Max total / New user bonus" column headers. */
+.mkt-eyebrow {
+  font-family: var(--font-sans); font-weight: 500; font-size: 24px;
+  line-height: 32px; letter-spacing: -0.02em;
+  color: var(--as-green-900);
+}
+.mkt-eyebrow--muted { color: var(--as-mkt-fog-40); }
+.mkt-eyebrow--promo { color: var(--as-mkt-promo); }
+
+/* Hero headline used on Bravo "Whenever you ready" — bigger than .mkt-display,
+   100% line-height (not 96%), forest-ink on cream, white on near-black. */
+.mkt-hero-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(56px, 6.4vw, 86px); line-height: 100%;
+  letter-spacing: -0.03em; color: var(--as-green-900);
+  margin: 0;
+}
+
+/* Promo chip — solid emerald with white label, "Until 4.27" / "Promo" / "New".
+   Smaller and louder than .mkt-chip-row. Use sparingly: one per section. */
+.mkt-chip-promo {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--as-mkt-promo); color: var(--as-white);
+  padding: 4px 12px; border-radius: var(--r-pill);
+  font-family: var(--font-sans); font-weight: 500; font-size: 20px;
+  line-height: 32px; letter-spacing: -0.02em;
+}
+
+/* Outline promo pill — green border + green label, no fill. Used inline next
+   to a value to qualify it: "$50  [Via AllScale wallet]". 32px tall. */
+.mkt-pill-outline {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; color: var(--as-mkt-promo);
+  border: 1px solid var(--as-mkt-promo);
+  padding: 8px 12px; border-radius: var(--r-pill);
+  font-family: var(--font-sans); font-weight: 500; font-size: 16px;
+  line-height: 16px; letter-spacing: -0.02em;
+}
+
+/* Reward-table cells.
+   The Bravo reward grid is a flat 5-column table, not a card per row:
+   Amount / Base reward / Promo (Until 4.27) / New-user bonus / Max total.
+   Each cell is its own primitive so pages can rebuild the table fluidly. */
+.mkt-reward-table {
+  background: var(--as-paper); border: 1px solid var(--as-green-900);
+  border-radius: var(--r-md); padding: 32px;
+}
+.mkt-reward-num {
+  font-family: var(--font-display); font-weight: 700; font-size: 26px;
+  line-height: 30px; letter-spacing: -0.03em; color: var(--as-green-900);
+  font-variant-numeric: tabular-nums;
+}
+.mkt-reward-num--promo { color: var(--as-mkt-promo); }
+.mkt-reward-num--bonus { color: var(--as-green-900); }
+
+/* Numbered-step card (01 / 02 / 03).
+   Black `--as-mkt-black-2` card with a hairline `--as-mkt-divider-d` border
+   and 12px radius. The Playfair italic numeral floats OUTSIDE the card,
+   slightly above and left of the top-left corner — DO NOT place it inside.
+   Phone screenshot lives full-bleed inside; copy stacks below. */
+.mkt-step-card {
+  position: relative;
+  background: var(--as-mkt-black-2); color: var(--as-white);
+  border: 1px solid var(--as-mkt-divider-d);
+  border-radius: 12px; padding: 32px;
+}
+.mkt-step-num {
+  font-family: var(--font-editorial); font-style: italic; font-weight: 700;
+  font-size: 88px; line-height: 88px; letter-spacing: -0.03em;
+  color: var(--as-mkt-green); display: block;
+}
+.mkt-step-title {
+  font-family: var(--font-sans); font-weight: 500; font-size: 24px;
+  line-height: 32px; letter-spacing: -0.02em; color: var(--as-white);
+}
+.mkt-step-body {
+  font-family: var(--font-sans); font-weight: 500; font-size: 24px;
+  line-height: 32px; letter-spacing: -0.02em;
+  color: var(--as-mkt-on-dark-40);
+}
+
+/* Phone-mockup tile — used inside a step card to embed a real screenshot.
+   The bottom of the screenshot fades to `--as-mkt-black-2` so a sticker
+   (QR code, referral chip, currency badge) can sit half-inside, half-out. */
+.mkt-phone-mock {
+  position: relative;
+  width: 246px; height: 324px;
+  border-radius: 20px 20px 17px 17px;
+  background-size: cover; background-position: center;
+  overflow: visible;
+}
+.mkt-phone-mock::after {
+  content: ""; position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 0%, var(--as-mkt-black-2) 100%);
+}
+
+/* Sticker that pokes out of a phone-mockup. Three flavors:
+   - .is-paper  → QR-code holder on step 01 (cream paper, forest ink)
+   - .is-dark   → referral-code chip on step 02 (near-black, white ink)
+   - .is-green  → currency / promo disc on step 03 (forest green) */
+.mkt-sticker {
+  position: absolute; z-index: 1;
+  border-radius: 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.mkt-sticker.is-paper { background: var(--as-mkt-paper);  color: var(--as-green-900); }
+.mkt-sticker.is-dark  { background: var(--as-mkt-black-3); color: var(--as-white); border: 1px solid var(--as-black); }
+.mkt-sticker.is-green { background: var(--as-green-900); color: var(--as-white); }
+
+/* FAQ row — Bravo variant.
+   Cooler near-white card on cream/paper background with a faint emerald
+   hairline. 32px padding (looser than `.mkt-faq`), 32px Archivo Medium
+   question, +/- glyph at the right. Expanded body is `--as-mkt-fine`. */
+.mkt-faq-row {
+  background: var(--as-mkt-card-cream);
+  border: 1px solid var(--as-mkt-line-cream);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.mkt-faq-row__head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 24px;
+}
+.mkt-faq-row__q {
+  font-family: var(--font-sans); font-weight: 500; font-size: 32px;
+  line-height: 32px; letter-spacing: -0.02em; color: var(--as-green-900);
+  margin: 0;
+}
+.mkt-faq-row__icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--as-green-900);
+}
+.mkt-faq-row__body {
+  font-family: var(--font-sans); font-weight: 500; font-size: 24px;
+  line-height: 32px; letter-spacing: -0.02em;
+  color: var(--as-mkt-fine);
+  margin: 0;
+}
+
+/* Marketing nav bar — sits over a near-white or cream surface.
+   Logo on the left, rounded "Get started" pill on the right. 32px gutters,
+   no border, no shadow. The "Get started" pill is visually the same as
+   `.mkt-btn-secondary` but compact (54px tall instead of 68px). */
+.mkt-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 32px;
+}
+.mkt-nav__cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 54px; padding: 0 28px;
+  background: var(--as-green-900); color: var(--as-white);
+  border-radius: var(--r-pill); border: 0;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px;
+  line-height: 28px;
+  cursor: pointer; transition: filter .15s ease;
+}
+.mkt-nav__cta:hover { filter: brightness(1.15); }
+
+/* Hero CTA — Bravo's actual buttons are taller than .mkt-btn-primary.
+   68px tall, 32px horizontal padding, 20px Manrope Bold, 61px radius. */
+.mkt-btn-hero {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 68px; padding: 0 32px;
+  background: var(--as-green-900); color: var(--as-white);
+  border-radius: 61px; border: 0;
+  font-family: var(--font-display); font-weight: 700; font-size: 20px;
+  line-height: 28px; cursor: pointer;
+  transition: filter .15s ease, transform .1s ease;
+}
+.mkt-btn-hero:hover  { filter: brightness(1.12); }
+.mkt-btn-hero:active { transform: scale(0.98); }
+.mkt-btn-hero--ghost {
+  background: transparent; color: var(--as-green-900);
+  border: 1px solid var(--as-green-900);
+}
+.mkt-btn-hero--ghost:hover { background: var(--as-green-50); }
+
+/* Referral code pill — appears under hero CTAs.
+   Pure pill, 76px tall, 24px padding, label is "With referral code: SCALE10".
+   Three flavors so it can read on cream, dark, or as a green callout. */
+.mkt-referral {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 76px; padding: 0 24px;
+  border-radius: 48px;
+  font-family: var(--font-display); font-weight: 500; font-size: 20px;
+  line-height: 28px; letter-spacing: -0.03em;
+}
+.mkt-referral.is-quiet  { color: var(--as-green-900); background: transparent; }
+.mkt-referral.is-promo  { color: var(--as-mkt-promo); background: transparent; }
+.mkt-referral.is-onpaper { color: var(--as-green-900); background: var(--as-mkt-paper); }
+
+/* Meta strip — small line under the hero phone mock.
+   "Self-custody • USDT accepted • No hidden fees" — 20px Archivo Medium,
+   center-aligned, in `--as-mkt-meta`. */
+.mkt-meta-strip {
+  font-family: var(--font-sans); font-weight: 500; font-size: 20px;
+  line-height: 32px; letter-spacing: -0.02em;
+  color: var(--as-mkt-meta); text-align: center;
+}
+
+/* Footer wordmark plate — the giant inset-shadow surface that holds the
+   AllScale watermark. Subtle inset shadow at the top, no other chrome. */
+.mkt-watermark-plate {
+  background: var(--bg-2);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+  overflow: hidden;
+}

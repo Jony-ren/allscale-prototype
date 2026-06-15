@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale — KYB MVP Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#009859;--green-hover:#0CAA67;--green-bg:#EAF9F1;
+  --card:#FAFBFA;--btn:#F2F8F5;--border:#E5EEEA;--dark:#0C3124;--text:#83968F;
+  --white:#FFFFFF;--surface:#F0F4F2;
+  --orange:#F5A623;--orange-bg:rgba(245,166,35,.10);
+  --red:#E5484D;--red-bg:rgba(229,72,77,.08);
+  --blue:#2775CA;--blue-bg:rgba(39,117,202,.08);
+  --sumsub:#0D2D5C;--sumsub-accent:#3D7DFF;--sumsub-bg:#F4F7FB;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(12,49,36,.04);flex-wrap:wrap}
+.topbar-logo{width:28px;height:28px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--dark);min-width:200px}
+.topbar-title span{color:var(--text);font-weight:400;font-size:13px;margin-left:6px}
+.topbar-sub{font-size:12px;font-weight:400;color:var(--text);margin-top:2px;letter-spacing:0}
+.mode-btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.mode-btn{padding:8px 14px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Archivo',sans-serif}
+.mode-btn:hover{border-color:var(--green);color:var(--dark)}
+.mode-btn.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+
+.stage-strip{background:var(--white);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;justify-content:center;gap:0;font-size:12px;color:var(--text);overflow-x:auto}
+.stage-strip span{padding:0 10px;white-space:nowrap}
+.stage-strip span.on{color:var(--green);font-weight:600}
+.stage-strip i{color:var(--border);font-style:normal}
+
+.container{max-width:480px;margin:0 auto;padding:24px 20px}
+.container-wide{max-width:1080px;margin:0 auto;padding:24px 20px}
+#screen-landing .container-wide{max-width:1240px}
+.section-title{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-left:4px}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:24px;padding:24px 20px;position:relative;overflow:hidden;margin-bottom:16px}
+
+.screen{display:none;animation:fadeIn .25s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.pg-title{font-size:26px;font-weight:500;color:var(--dark);margin-bottom:6px;letter-spacing:-0.02em}
+.pg-subtitle{font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.55}
+
+.btn-primary{height:48px;padding:0 22px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--green-hover)}
+.btn-secondary{height:48px;padding:0 22px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--dark);font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-secondary:hover{border-color:var(--green);color:var(--green)}
+.btn-sm{height:32px;padding:0 12px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:500;color:var(--dark);cursor:pointer;font-family:'Archivo',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.btn-sm:hover{border-color:var(--green);color:var(--green)}
+.btn-sm.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn-sm.primary:hover{background:var(--green-hover);color:#fff}
+
+/* ═════════ Stage 1: BD share ═════════ */
+.bd-chat{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-top:12px}
+.bd-msg{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.bd-msg:last-child{margin-bottom:0}
+.bd-avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+.bd-avatar.merchant{background:#9F7AEA}
+.bd-bubble{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--dark);max-width:280px}
+.bd-bubble .name{font-size:11px;color:var(--text);font-weight:600;margin-bottom:4px}
+.link-pill{display:flex;align-items:center;gap:8px;background:var(--btn);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-top:14px}
+.link-pill svg{flex-shrink:0;color:var(--green)}
+.link-pill .url{flex:1;font-family:ui-monospace,monospace;font-size:12px;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:50px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:300}
+.copy-toast.show{opacity:1}
+
+/* ═════════ Stage 2: AllScale Landing — Desktop + Mobile ═════════ */
+.landing-row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.desktop-mock{flex:1 1 720px;min-width:0;max-width:880px;background:#fff;border-radius:18px;border:1px solid var(--border);overflow:hidden;box-shadow:0 12px 40px rgba(12,49,36,.10)}
+.mobile-mock{flex:0 0 320px}
+
+.chrome-bar{padding:10px 14px;background:#EEF2EF;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.chrome-dots{display:flex;gap:6px;flex-shrink:0}
+.chrome-dot{width:11px;height:11px;border-radius:50%;background:#D5DCD8}
+.chrome-dot.r{background:#FF5F57}.chrome-dot.y{background:#FEBC2E}.chrome-dot.g{background:#28C840}
+.chrome-url{flex:1;background:#fff;border:1px solid var(--border);border-radius:50px;padding:5px 14px;font-size:11px;color:var(--text);font-family:ui-monospace,monospace;text-align:center}
+.lang-switch{display:flex;background:#fff;border:1px solid var(--border);border-radius:50px;padding:2px;font-family:'Archivo',sans-serif;flex-shrink:0}
+.lang-btn{border:none;background:transparent;padding:4px 10px;font-size:11px;font-weight:600;color:var(--text);border-radius:50px;cursor:pointer;font-family:inherit;letter-spacing:0}
+.lang-btn.active{background:var(--green);color:#fff}
+
+.desktop-body{position:relative;padding:44px 48px 36px;background:radial-gradient(900px 460px at -10% -30%,rgba(0,152,89,.10),transparent 60%),radial-gradient(700px 400px at 110% 110%,rgba(13,45,92,.05),transparent 60%),#fff;overflow:hidden}
+.desktop-nav{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.desktop-nav .logo-mark{width:32px;height:32px;background:var(--green);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.desktop-nav .logo-text{font-size:15px;font-weight:600;color:var(--dark)}
+.desktop-nav-right{margin-left:auto;font-size:12px;color:var(--text);display:flex;align-items:center;gap:14px}
+
+.desktop-hero{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;align-items:center}
+@media(max-width:760px){.desktop-hero{grid-template-columns:1fr;gap:28px}}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;border-radius:50px;margin-bottom:16px;letter-spacing:0.02em;text-transform:uppercase}
+.eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(0,152,89,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,152,89,.5)}70%{box-shadow:0 0 0 8px rgba(0,152,89,0)}100%{box-shadow:0 0 0 0 rgba(0,152,89,0)}}
+.hero-h{font-size:42px;font-weight:600;color:var(--dark);line-height:1.12;letter-spacing:-0.025em;margin-bottom:14px}
+.hero-h .accent{color:var(--green)}
+.hero-sub{font-size:15px;color:var(--text);line-height:1.65;margin-bottom:24px;max-width:480px}
+.hero-cta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.hero-cta{height:54px;padding:0 30px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,152,89,.28);transition:all .2s;letter-spacing:-0.01em}
+.hero-cta:hover{background:var(--green-hover);transform:translateY(-1px);box-shadow:0 12px 30px rgba(0,152,89,.36)}
+.hero-meta{font-size:12px;color:var(--text)}
+
+.hero-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 6px 24px rgba(12,49,36,.07)}
+.hero-card-title{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:0.01em;text-transform:uppercase}
+.hero-card-title svg{color:var(--green)}
+.timeline{display:flex;flex-direction:column;gap:16px}
+.tl-step{display:flex;gap:12px;align-items:flex-start}
+.tl-num{width:26px;height:26px;border-radius:50%;background:var(--green-bg);color:var(--green);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tl-text{font-size:13px;color:var(--dark);line-height:1.5}
+.tl-text b{font-weight:600;display:block}
+.tl-text small{display:block;color:var(--text);font-weight:400;margin-top:2px;font-size:12px}
+
+.feature-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
+@media(max-width:760px){.feature-row{grid-template-columns:1fr}}
+.feature-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}
+.feature-card:hover{border-color:rgba(0,152,89,.3);transform:translateY(-1px);box-shadow:0 6px 20px rgba(12,49,36,.06)}
+.feature-icon{width:40px;height:40px;background:var(--green-bg);color:var(--green);border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.feature-h{font-size:14px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.feature-p{font-size:12px;color:var(--text);line-height:1.55}
+
+.desktop-foot{margin-top:32px;padding-top:18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text)}
+.desktop-foot .trust{display:inline-flex;align-items:center;gap:8px}
+.desktop-foot .trust svg{color:var(--green)}
+.desktop-foot .trust b{color:var(--dark);font-weight:600}
+.desktop-foot a{color:var(--green);text-decoration:none}
+
+/* ── Mobile phone frame ── */
+.mobile-mock{width:320px;background:#0E1A14;padding:8px;border-radius:42px;box-shadow:0 20px 50px rgba(12,49,36,.20),0 0 0 2px #2A3A32 inset;position:relative}
+.mobile-screen{background:#fff;border-radius:34px;overflow:hidden;position:relative;height:680px;display:flex;flex-direction:column}
+.mobile-notch{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:96px;height:24px;background:#0E1A14;border-radius:0 0 16px 16px;z-index:5}
+.mobile-status-bar{height:42px;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 0;font-size:13px;font-weight:600;color:var(--dark);flex-shrink:0}
+.m-status-icons{display:flex;align-items:center;gap:5px;font-size:11px}
+.m-bat{display:inline-block;width:22px;height:11px;border:1px solid var(--dark);border-radius:3px;position:relative;padding:1px}
+.m-bat::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:5px;background:var(--dark);border-radius:0 1px 1px 0}
+.m-bat span{display:block;width:80%;height:100%;background:var(--dark);border-radius:1px}
+.mobile-chrome{padding:6px 12px 8px;background:#EEF2EF;font-size:10px;color:var(--text);font-family:ui-monospace,monospace;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.mobile-chrome .url-mini{flex:1;background:#fff;border-radius:50px;padding:4px 12px;text-align:center}
+.mobile-content{flex:1;overflow-y:auto;padding:22px 20px 24px;background:radial-gradient(400px 200px at 50% 0%,rgba(0,152,89,.08),transparent 70%),linear-gradient(180deg,#FFFFFF 0%,#F4FAF6 100%)}
+.mobile-content::-webkit-scrollbar{display:none}
+.m-logo{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.m-lang{margin-left:auto;padding:1px}
+.m-lang .lang-btn{padding:3px 7px;font-size:10px}
+.m-logo-mark{width:30px;height:30px;background:var(--green);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.m-logo-text{font-size:14px;font-weight:600;color:var(--dark)}
+.m-eyebrow{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:var(--green-bg);color:var(--green);font-size:9px;font-weight:600;border-radius:50px;margin-bottom:10px;letter-spacing:0.04em;text-transform:uppercase}
+.m-h{font-size:22px;font-weight:600;color:var(--dark);line-height:1.18;letter-spacing:-0.02em;margin-bottom:8px}
+.m-h .accent{color:var(--green)}
+.m-sub{font-size:12px;color:var(--text);line-height:1.55;margin-bottom:14px}
+.m-points{list-style:none;padding:0;margin:0 0 14px 0}
+.m-points li{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--dark);line-height:1.5;padding:5px 0}
+.m-points .dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:7px}
+.m-next{padding:11px 13px;background:var(--green-bg);border:1px solid rgba(0,152,89,.18);border-radius:11px;font-size:11px;color:#1F4D3A;line-height:1.55;margin-bottom:14px}
+.m-next b{color:var(--green);font-weight:600;display:block;margin-bottom:3px;font-size:11px}
+.m-cta{width:100%;height:46px;background:var(--green);color:#fff;border:none;border-radius:50px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 6px 18px rgba(0,152,89,.28)}
+.m-trust{margin-top:12px;padding:9px 11px;background:var(--btn);border:1px solid var(--border);border-radius:10px;font-size:10px;color:var(--text);line-height:1.5;display:flex;align-items:flex-start;gap:7px}
+.m-trust svg{color:var(--green);flex-shrink:0;margin-top:1px}
+.m-trust b{color:var(--dark);font-weight:600}
+.m-foot{margin-top:12px;text-align:center;font-size:10px;color:var(--text);line-height:1.5}
+.m-foot a{color:var(--green);text-decoration:none}
+
+.viewport-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;padding-left:4px}
+.viewport-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.mobile-mock-wrap{display:flex;flex-direction:column;align-items:center}
+.mobile-mock-wrap .viewport-tag{margin-bottom:10px}
+
+/* ═════════ Stage 3: Sumsub hosted ═════════ */
+.sumsub-frame{background:#fff;border-radius:24px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 24px rgba(13,45,92,.06)}
+.sumsub-bar{background:var(--sumsub);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:14px}
+.sumsub-bar-logo{width:24px;height:24px;background:#fff;color:var(--sumsub);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.sumsub-bar-title{font-weight:600}
+.sumsub-bar-host{margin-left:auto;font-size:11px;opacity:.7;font-family:ui-monospace,monospace}
+.sumsub-body{padding:24px 22px;background:var(--sumsub-bg)}
+.sumsub-step-tabs{display:flex;gap:0;background:var(--white);border-radius:50px;padding:4px;margin-bottom:20px;border:1px solid var(--border)}
+.sumsub-step{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;color:var(--text);border-radius:50px;cursor:pointer;transition:all .15s}
+.sumsub-step.on{background:var(--sumsub-accent);color:#fff}
+.sumsub-step.done{color:var(--sumsub)}
+.sumsub-h{font-size:20px;font-weight:600;color:var(--sumsub);margin-bottom:6px}
+.sumsub-sub{font-size:13px;color:var(--text);margin-bottom:20px}
+.sumsub-field{margin-bottom:14px}
+.sumsub-label{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;display:block}
+.sumsub-input{width:100%;height:44px;border:1.5px solid var(--border);border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;color:var(--dark);background:#fff;outline:none}
+.sumsub-input:focus{border-color:var(--sumsub-accent)}
+.sumsub-upload{border:1.5px dashed #B5C4D6;border-radius:14px;padding:24px;text-align:center;background:#fff;cursor:pointer}
+.sumsub-upload:hover{border-color:var(--sumsub-accent);background:#FAFCFE}
+.sumsub-upload .ic{width:40px;height:40px;background:var(--sumsub-bg);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--sumsub-accent);margin-bottom:8px}
+.sumsub-upload .t{font-size:14px;font-weight:500;color:var(--dark)}
+.sumsub-upload .h{font-size:12px;color:var(--text);margin-top:4px}
+.sumsub-btn{width:100%;height:48px;background:var(--sumsub-accent);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.sumsub-btn:hover{filter:brightness(1.05)}
+.sumsub-btn.outline{background:#fff;color:var(--sumsub);border:1.5px solid var(--border)}
+.sumsub-success{text-align:center;padding:20px 0}
+.sumsub-success .ic{width:72px;height:72px;background:#E8F4EC;color:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px}
+.sumsub-success h3{font-size:22px;font-weight:600;color:var(--sumsub);margin-bottom:8px}
+.sumsub-success p{font-size:14px;color:var(--text);line-height:1.6}
+
+/* ═════════ Stage 3: Emails ═════════ */
+.email-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:820px){.email-grid{grid-template-columns:1fr 1fr}}
+.email-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:50px;margin-bottom:10px}
+.email-tag.merchant{background:#F3EEFF;color:#6E48C9}
+.email-tag.compliance{background:var(--green-bg);color:var(--green)}
+.email{background:var(--white);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.email-head{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--card)}
+.email-from{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.email-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.email-avatar.sumsub{background:var(--sumsub)}
+.email-avatar.allscale{background:var(--green)}
+.email-from .who{font-size:13px;font-weight:500;color:var(--dark)}
+.email-from .who small{display:block;color:var(--text);font-weight:400;font-size:12px;margin-top:1px}
+.email-subject{font-size:15px;font-weight:600;color:var(--dark);line-height:1.4}
+.email-meta{font-size:12px;color:var(--text);margin-top:4px}
+.email-body{padding:18px;font-size:13px;color:var(--dark);line-height:1.7}
+.email-body p{margin-bottom:10px}
+.email-body .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--btn);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:block;white-space:pre;overflow-x:auto;line-height:1.7}
+.email-body a{color:var(--green);text-decoration:none}
+.email-cta{display:inline-block;margin-top:12px;padding:10px 18px;background:var(--sumsub-accent);color:#fff !important;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none !important}
+
+/* ═════════ Misc ═════════ */
+.callout{background:var(--green-bg);border:1px solid rgba(0,152,89,.18);border-radius:14px;padding:14px 16px;font-size:13px;color:#1F4D3A;line-height:1.6}
+.callout b{color:var(--green)}
+.callout-warn{background:var(--orange-bg);border-color:rgba(245,166,35,.2);color:#8B6914}
+.callout-warn b{color:#B8860B}
+
+@media(max-width:520px){.container{padding:16px 12px}.card{padding:18px 14px}.pg-title{font-size:22px}.topbar-title{font-size:14px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">AllScale Pay <span>KYB MVP</span>
+    <div class="topbar-sub">Sumsub Direct Link · 极简版 Demo</div>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn active" onclick="goScreen('bd')">① BD 转链接</button>
+    <button class="mode-btn" onclick="goScreen('landing')">② 落地页</button>
+    <button class="mode-btn" onclick="goScreen('sumsub')">③ 商家 KYB</button>
+    <button class="mode-btn" onclick="goScreen('emails')">④ 邮件</button>
+  </div>
+</div>
+
+<div class="stage-strip" id="stageStrip">
+  <span class="on">BD 转链接</span><i>›</i>
+  <span>AllScale 落地页</span><i>›</i>
+  <span>商家在 Sumsub 自助</span><i>›</i>
+  <span>Sumsub 邮件 + 合规组邮件</span>
+</div>
+
+<!-- ═══════════ ① BD ═══════════ -->
+<div class="screen active" id="screen-bd">
+  <div class="container">
+    <div class="section-title">BD 视角</div>
+
+    <div class="card">
+      <div class="pg-title">把 Sumsub KYB 链接发给商家</div>
+      <div class="pg-subtitle">所有 BD 共用同一条 permanent link，复制后用 IM / 邮件发给需要解锁 Off-Ramp / Payroll 的商家。</div>
+
+      <div class="link-pill">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>
+        <span class="url">https://pay.allscale.io/kyb</span>
+        <button class="btn-sm primary" onclick="copyLink()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          复制
+        </button>
+      </div>
+
+      <div class="bd-chat">
+        <div class="bd-msg">
+          <div class="bd-avatar">B</div>
+          <div class="bd-bubble">
+            <div class="name">BD · Cindy</div>
+            Hi 张总，下面是 KYB 自助验证链接，公司信息和负责人证件按页面引导提交即可，通过后我会同步开通 Off-Ramp。<br><br>
+            <a href="#" style="color:var(--green);text-decoration:none">→ pay.allscale.io/kyb</a>
+          </div>
+        </div>
+        <div class="bd-msg">
+          <div class="bd-avatar merchant">张</div>
+          <div class="bd-bubble">
+            <div class="name">商家 · 张总</div>
+            收到，这就去填～
+          </div>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:18px">
+        <b>本期商家不需要在 AllScale 注册账号。</b>BD 只负责发链接、跟进进度；填写、上传、邮件通知都在 Sumsub 完成；AllScale 落地页只做品牌引导和跳转，不收集任何字段。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ② AllScale 落地页 ═══════════ -->
+<div class="screen" id="screen-landing">
+  <div class="container-wide">
+    <div class="section-title">商家点开链接看到的第一屏 · pay.allscale.io/kyb · 桌面 + 手机</div>
+
+    <div class="landing-row">
+
+      <!-- ══ DESKTOP MOCKUP ══ -->
+      <div>
+        <div class="viewport-tag"><span class="dot"></span>Desktop · 1280px</div>
+        <div class="desktop-mock">
+          <div class="chrome-bar">
+            <div class="chrome-dots"><span class="chrome-dot r"></span><span class="chrome-dot y"></span><span class="chrome-dot g"></span></div>
+            <div class="chrome-url">🔒  pay.allscale.io/kyb</div>
+          </div>
+          <div class="desktop-body">
+            <div class="desktop-nav">
+              <div class="logo-mark">A</div>
+              <div class="logo-text">AllScale Pay</div>
+              <div class="desktop-nav-right">
+                <span data-i18n="nav_help"></span>
+                <div class="lang-switch">
+                  <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+                  <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="desktop-hero">
+              <div>
+                <div class="eyebrow"><span class="pulse"></span><span data-i18n="eyebrow"></span></div>
+                <h1 class="hero-h" data-i18n-html="title_d"></h1>
+                <p class="hero-sub" data-i18n="sub"></p>
+                <div class="hero-cta-row">
+                  <button class="hero-cta" onclick="goScreen('sumsub')">
+                    <span data-i18n="cta"></span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                  </button>
+                  <span class="hero-meta" data-i18n="meta"></span>
+                </div>
+              </div>
+              <div>
+                <div class="hero-card">
+                  <div class="hero-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <span data-i18n="next_h"></span>
+                  </div>
+                  <div class="timeline">
+                    <div class="tl-step"><div class="tl-num">1</div><div class="tl-text" data-i18n-html="step1"></div></div>
+                    <div class="tl-step"><div class="tl-num">2</div><div class="tl-text" data-i18n-html="step2"></div></div>
+                    <div class="tl-step"><div class="tl-num">3</div><div class="tl-text" data-i18n-html="step3"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-row">
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div class="feature-h" data-i18n="f1_h"></div>
+                <div class="feature-p" data-i18n="f1_p"></div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                <div class="feature-h" data-i18n="f2_h"></div>
+                <div class="feature-p" data-i18n="f2_p"></div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg></div>
+                <div class="feature-h" data-i18n="f3_h"></div>
+                <div class="feature-p" data-i18n="f3_p"></div>
+              </div>
+            </div>
+
+            <div class="desktop-foot">
+              <div class="trust">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span data-i18n-html="trust"></span>
+              </div>
+              <div data-i18n-html="foot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MOBILE MOCKUP ══ -->
+      <div class="mobile-mock-wrap">
+        <div class="viewport-tag"><span class="dot"></span>Mobile · iPhone</div>
+        <div class="mobile-mock">
+          <div class="mobile-screen">
+            <div class="mobile-notch"></div>
+            <div class="mobile-status-bar">
+              <span>9:41</span>
+              <span class="m-status-icons">
+                <svg width="14" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="2.5" height="3"/><rect x="3.5" y="4" width="2.5" height="5"/><rect x="7" y="2" width="2.5" height="7"/><rect x="10.5" y="0" width="2.5" height="9"/></svg>
+                <span class="m-bat"><span></span></span>
+              </span>
+            </div>
+            <div class="mobile-chrome">
+              🔒
+              <div class="url-mini">pay.allscale.io/kyb</div>
+            </div>
+            <div class="mobile-content">
+              <div class="m-logo">
+                <div class="m-logo-mark">A</div>
+                <div class="m-logo-text">AllScale Pay</div>
+                <div class="lang-switch m-lang">
+                  <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+                  <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中</button>
+                </div>
+              </div>
+              <div class="m-eyebrow"><span data-i18n="eyebrow"></span></div>
+              <h1 class="m-h" data-i18n-html="title_m"></h1>
+              <p class="m-sub" data-i18n="sub"></p>
+              <ul class="m-points">
+                <li><span class="dot"></span><span data-i18n="p1"></span></li>
+                <li><span class="dot"></span><span data-i18n="p2"></span></li>
+                <li><span class="dot"></span><span data-i18n="p3"></span></li>
+              </ul>
+              <div class="m-next" data-i18n-html="next_box"></div>
+              <button class="m-cta" onclick="goScreen('sumsub')">
+                <span data-i18n="cta"></span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+              <div class="m-trust">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span data-i18n-html="trust_short"></span>
+              </div>
+              <div class="m-foot" data-i18n-html="foot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout" style="margin-top:18px">
+      落地页只做<b>品牌引导 + 一键跳 Sumsub</b>，不要表单、不要登录、不要账号。商家邮箱在 Sumsub 那一步采集；本页面响应式，桌面和手机共用同一个 URL。
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ③ Sumsub Hosted ═══════════ -->
+<div class="screen" id="screen-sumsub">
+  <div class="container">
+    <div class="section-title">商家视角 · Sumsub Hosted Page</div>
+
+    <div class="sumsub-frame">
+      <div class="sumsub-bar">
+        <div class="sumsub-bar-logo">S</div>
+        <div class="sumsub-bar-title">Sumsub · KYB Verification</div>
+        <div class="sumsub-bar-host">in.sumsub.com</div>
+      </div>
+      <div class="sumsub-body">
+
+        <div class="sumsub-step-tabs">
+          <div class="sumsub-step" id="ss-tab-1" onclick="setSumsubStep(1)">1. 公司信息</div>
+          <div class="sumsub-step" id="ss-tab-2" onclick="setSumsubStep(2)">2. 证件资料</div>
+          <div class="sumsub-step" id="ss-tab-3" onclick="setSumsubStep(3)">3. 提交完成</div>
+        </div>
+
+        <div id="ss-pane-1">
+          <div class="sumsub-h">公司基本信息</div>
+          <div class="sumsub-sub">由商家在 Sumsub 自行填写，AllScale 不复制这些字段。</div>
+          <div class="sumsub-field">
+            <label class="sumsub-label">Company Legal Name</label>
+            <input class="sumsub-input" value="Acme Trading Ltd." />
+          </div>
+          <div class="sumsub-field">
+            <label class="sumsub-label">Country of Registration</label>
+            <input class="sumsub-input" value="Singapore" />
+          </div>
+          <div class="sumsub-field">
+            <label class="sumsub-label">Contact Email</label>
+            <input class="sumsub-input" value="ops@acme-trading.io" />
+          </div>
+          <div class="sumsub-field">
+            <label class="sumsub-label">Registration Number</label>
+            <input class="sumsub-input" value="202312345K" />
+          </div>
+          <button class="sumsub-btn" onclick="setSumsubStep(2)">下一步 · 上传证件</button>
+        </div>
+
+        <div id="ss-pane-2" style="display:none">
+          <div class="sumsub-h">证件 / UBO 资料</div>
+          <div class="sumsub-sub">营业执照、董事 / UBO 证件、地址证明等。<b>这些资料只存在 Sumsub。</b></div>
+          <div class="sumsub-upload" style="margin-bottom:12px">
+            <div class="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="t">上传 Certificate of Incorporation</div>
+            <div class="h">PDF / JPG · 支持拖拽</div>
+          </div>
+          <div class="sumsub-upload" style="margin-bottom:12px">
+            <div class="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 18l5-5 4 4 3-3 6 6"/></svg>
+            </div>
+            <div class="t">UBO Passport / National ID</div>
+            <div class="h">证件照 + 活体（Sumsub 内置）</div>
+          </div>
+          <button class="sumsub-btn" onclick="setSumsubStep(3)">提交审核</button>
+          <button class="sumsub-btn outline" onclick="setSumsubStep(1)" style="margin-top:8px">返回上一步</button>
+        </div>
+
+        <div id="ss-pane-3" style="display:none">
+          <div class="sumsub-success">
+            <div class="ic">✓</div>
+            <h3>资料提交成功</h3>
+            <p>Sumsub 将在 1–2 个工作日内完成审核，<br>结果会发送到 <b>ops@acme-trading.io</b>。</p>
+          </div>
+          <div class="callout" style="margin-top:6px">
+            后台事件：webhook <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:12px">applicantReviewed</code> 触发 → AllScale 落最小元信息记录 → 合规组邮件发出。
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:14px">
+      <b>商家邮件由 Sumsub 默认发送</b>（通过 / 重提 / 拒绝），AllScale 不发任何商家邮件。
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ④ Emails ═══════════ -->
+<div class="screen" id="screen-emails">
+  <div class="container-wide">
+    <div class="section-title">通过后触发的两封邮件</div>
+
+    <div class="email-grid">
+
+      <div>
+        <span class="email-tag merchant">给商家 · Sumsub 默认</span>
+        <div class="email">
+          <div class="email-head">
+            <div class="email-from">
+              <div class="email-avatar sumsub">S</div>
+              <div class="who">Sumsub Verification<small>noreply@sumsub.com</small></div>
+            </div>
+            <div class="email-subject">Your verification has been approved</div>
+            <div class="email-meta">→ ops@acme-trading.io · 自动发送</div>
+          </div>
+          <div class="email-body">
+            <p>Hello,</p>
+            <p>Your KYB verification on <b>AllScale</b> has been successfully approved. You can now proceed with the next steps.</p>
+            <p>If you need to update any details later, please contact your AllScale BD.</p>
+            <p style="color:var(--text);margin-top:14px">— Sumsub Verification Team</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="email-tag compliance">给合规组 · AllScale 自建</span>
+        <div class="email">
+          <div class="email-head">
+            <div class="email-from">
+              <div class="email-avatar allscale">A</div>
+              <div class="who">AllScale System<small>system@allscale.io</small></div>
+            </div>
+            <div class="email-subject">[KYB] Acme Trading Ltd. verified — review on Sumsub</div>
+            <div class="email-meta">→ compliance@allscale.io · 触发条件 reviewAnswer = GREEN</div>
+          </div>
+          <div class="email-body">
+            <p>A new merchant has just passed KYB on Sumsub.</p>
+            <span class="mono">Company:        Acme Trading Ltd.
+Country:        Singapore
+Contact email:  ops@acme-trading.io
+Verified at:    2026-05-08 11:42 UTC</span>
+            <p>View full applicant details on Sumsub:</p>
+            <a class="email-cta" href="#">Open in Sumsub Dashboard ↗</a>
+            <p style="color:var(--text);margin-top:14px">— AllScale System</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout" style="margin-top:18px">
+      <b>详细资料不在邮件里。</b>注册号、UBO、地址、行业、turnover、活体结果、reject labels 等都只在 Sumsub Dashboard 看 — AllScale 不复制存储。
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">链接已复制</div>
+
+<script>
+const i18n={
+  en:{
+    eyebrow:'KYB Verification',
+    nav_help:'Need help? Contact your BD',
+    title_d:'Verify your business to unlock <span class="accent">Off-Ramp & Payroll</span>',
+    title_m:'Verify your business to unlock <span class="accent">Off-Ramp & Payroll</span>',
+    sub:'Complete a one-time KYB to enable fiat Off-Ramp and Payroll on AllScale. Verification is handled by our compliance partner Sumsub and takes about 10 minutes.',
+    cta:'Start Verification',
+    meta:'~10 min · No AllScale account needed',
+    next_h:'What happens next',
+    step1:'<b>Submit on Sumsub</b><small>Company info, UBO documents, proof of address</small>',
+    step2:'<b>Reviewed in 1–2 business days</b><small>Industry-standard compliance check by Sumsub</small>',
+    step3:'<b>Result emailed to you</b>',
+    f1_h:'Documents you\'ll need',
+    f1_p:'Incorporation certificate, UBO ID, proof of address. All collected on the next page.',
+    f2_h:'Trusted compliance',
+    f2_p:'Verification handled by Sumsub, an industry-standard KYB provider used by leading fintechs.',
+    f3_h:'Email-based result',
+    f3_p:'Result emailed within 1–2 business days. Nothing else to do here — no AllScale account required.',
+    p1:'Incorporation certificate, UBO ID and proof of address',
+    p2:'Verified by Sumsub (industry-standard compliance)',
+    p3:'No AllScale account · BD enables services after approval',
+    next_box:'<b>What happens next</b>After you submit, Sumsub reviews within 1–2 business days and emails the result to the address you provide.',
+    trust:'Verification powered by <b>Sumsub</b> · documents go to Sumsub only — AllScale does not store original IDs',
+    trust_short:'<b>Sumsub-secured</b> · AllScale does not store original IDs',
+    foot:'Questions? Reach out to your BD or email <a href="#">support@allscale.io</a>'
+  },
+  zh:{
+    eyebrow:'KYB 商户验证',
+    nav_help:'有疑问？联系你的 BD',
+    title_d:'完成 KYB 验证，解锁 <span class="accent">Off-Ramp 和 Payroll</span>',
+    title_m:'完成 KYB 验证，解锁 <span class="accent">Off-Ramp 和 Payroll</span>',
+    sub:'在 AllScale 完成一次性 KYB 验证后，即可使用法币 Off-Ramp 和 Payroll。验证由我们的合规合作方 Sumsub 受理，整个过程约 10 分钟。',
+    cta:'开始验证',
+    meta:'约 10 分钟 · 无需注册 AllScale 账号',
+    next_h:'提交后会发生什么',
+    step1:'<b>在 Sumsub 提交资料</b><small>公司信息、UBO 证件、地址证明</small>',
+    step2:'<b>1–2 个工作日内完成审核</b><small>由 Sumsub 按行业合规标准核验</small>',
+    step3:'<b>结果通过邮件通知</b>',
+    f1_h:'需要准备的资料',
+    f1_p:'营业执照、UBO 证件、地址证明，下一页统一提交。',
+    f2_h:'合规可信',
+    f2_p:'由行业合规标准的 Sumsub 受理审核，被多家头部金融科技公司采用。',
+    f3_h:'邮件通知结果',
+    f3_p:'1–2 个工作日内邮件通知结果，本页面无需任何后续操作，也无需 AllScale 账号。',
+    p1:'营业执照、UBO 证件、地址证明',
+    p2:'由 Sumsub 受理（行业合规标准）',
+    p3:'无需 AllScale 账号 · 通过后 BD 同步开通',
+    next_box:'<b>提交后会发生什么</b>提交后 Sumsub 在 1–2 个工作日内完成审核，结果发送到你填写的邮箱。',
+    trust:'验证服务由 <b>Sumsub</b> 提供 · 资料只提交至 Sumsub，AllScale 不存储证件原件',
+    trust_short:'由 <b>Sumsub</b> 提供安全验证 · AllScale 不存储证件原件',
+    foot:'有疑问？联系你的 BD，或发送邮件至 <a href="#">support@allscale.io</a>'
+  }
+};
+function setLang(lang){
+  const dict=i18n[lang]||i18n.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=dict[el.dataset.i18n]||''});
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{el.innerHTML=dict[el.dataset.i18nHtml]||''});
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+}
+setLang('en');
+
+const screens=['bd','landing','sumsub','emails'];
+const stageLabels=document.querySelectorAll('#stageStrip span');
+
+function goScreen(name){
+  screens.forEach((s,i)=>{
+    document.getElementById('screen-'+s).classList.toggle('active',s===name);
+    stageLabels[i].classList.toggle('on',s===name);
+  });
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',screens[i]===name));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function setSumsubStep(n){
+  for(let i=1;i<=3;i++){
+    const tab=document.getElementById('ss-tab-'+i);
+    const pane=document.getElementById('ss-pane-'+i);
+    pane.style.display=(i===n)?'block':'none';
+    tab.classList.toggle('on',i===n);
+    tab.classList.toggle('done',i<n);
+  }
+}
+setSumsubStep(1);
+
+function copyLink(){
+  const url='https://in.sumsub.com/idensic/l/#/uni_kyb_allscale_v1';
+  if(navigator.clipboard) navigator.clipboard.writeText(url);
+  const t=document.getElementById('copyToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1400);
+}
+
+</script>
+
+</body>
+</html>

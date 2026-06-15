@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Wallet — Scan to Pay Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#009859;--green-hover:#0CAA67;--green-bg:#EAF9F1;
+  --card:#FAFBFA;--btn:#F2F8F5;--border:#E5EEEA;
+  --dark:#0C3124;--text:#83968F;--white:#FFFFFF;--surface:#F0F4F2;
+  --usdt:#26A17B;--usdc:#2775CA;
+  --red:#E5484D;--red-bg:rgba(229,72,77,.08);
+  --orange:#F5A623;--orange-bg:rgba(245,166,35,.10);
+  --blue:#2775CA;--blue-bg:rgba(39,117,202,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em;min-height:100vh}
+
+/* ── Demo chrome (page header above the phone frame) ── */
+.demo-chrome{max-width:560px;margin:0 auto;padding:20px 16px 8px;text-align:center}
+.demo-chrome h1{font-size:18px;font-weight:600;color:var(--dark);letter-spacing:-0.02em}
+.demo-chrome p{font-size:13px;color:var(--text);margin-top:4px}
+.demo-chrome .pill{display:inline-block;font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);padding:3px 10px;border-radius:50px;margin-top:8px;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── Phone frame ── */
+.phone-wrap{max-width:412px;margin:16px auto 40px;padding:0 12px;position:relative}
+.phone-screen{position:relative;background:var(--white);border-radius:38px;overflow:hidden;border:1px solid var(--border);box-shadow:0 18px 40px rgba(12,49,36,.10);min-height:780px;display:flex;flex-direction:column}
+.phone-statusbar{height:36px;display:flex;align-items:center;justify-content:space-between;padding:10px 24px 0;font-size:12px;font-weight:600;color:var(--dark);flex-shrink:0}
+.phone-statusbar .icons{display:inline-flex;align-items:center;gap:5px}
+
+.screen{display:none;flex:1;flex-direction:column;min-height:0;animation:fadeIn .2s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Wallet topbar ── */
+.w-top{padding:8px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.w-top-left{display:flex;align-items:center;gap:10px;min-width:0}
+.w-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;flex-shrink:0}
+.w-name{font-size:15px;font-weight:600;color:var(--dark);letter-spacing:-0.01em}
+.w-sub{font-size:12px;color:var(--text);font-weight:500;margin-top:1px;display:flex;align-items:center;gap:4px}
+.w-sub .net-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+.w-top-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.w-icon-btn{width:38px;height:38px;border-radius:50%;background:var(--btn);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--dark);cursor:pointer;transition:all .15s;position:relative}
+.w-icon-btn:hover{background:var(--green-bg);border-color:rgba(0,152,89,.2);color:var(--green)}
+.w-icon-btn.scan{background:var(--dark);color:white;border-color:var(--dark)}
+.w-icon-btn.scan:hover{background:#1a4636;color:white}
+.w-icon-btn .new-badge{position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;background:var(--green);color:white;font-size:8px;font-weight:700;border-radius:50px;padding:0 4px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--white)}
+
+/* ── Wallet body scroll area ── */
+.w-body{flex:1;overflow-y:auto;padding:0 20px 20px;display:flex;flex-direction:column;gap:18px;-webkit-overflow-scrolling:touch}
+.w-body::-webkit-scrollbar{display:none}
+
+/* ── Balance card ── */
+.bal-card{background:linear-gradient(180deg,#FAFBFA 0%,#F0F7F2 100%);border:1px solid var(--border);border-radius:24px;padding:22px 20px;position:relative;overflow:hidden}
+.bal-card::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,var(--green-bg) 0%,transparent 70%);pointer-events:none}
+.bal-label{font-size:13px;color:var(--text);font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.eye{cursor:pointer;color:var(--text)}
+.bal-amount{font-size:36px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;line-height:1.1;position:relative;z-index:1}
+.bal-amount .dec{font-size:20px;color:var(--text)}
+.bal-amount .unit{font-size:14px;color:var(--text);font-weight:500;margin-left:8px}
+.bal-trend{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--green);font-weight:600;margin-top:8px;background:var(--green-bg);padding:3px 10px;border-radius:50px;position:relative;z-index:1}
+
+/* ── Action tiles ── */
+.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.action-tile{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Archivo',sans-serif}
+.action-tile:hover{border-color:var(--green);background:var(--btn)}
+.action-tile-icon{width:36px;height:36px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;color:var(--green);border:1px solid var(--border)}
+.action-tile-label{font-size:12px;font-weight:500;color:var(--dark);letter-spacing:-0.02em;line-height:1.2}
+
+/* ── Asset list ── */
+.asset-section-title{font-size:13px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.04em;padding:0 4px;margin-bottom:-6px}
+.asset-list{background:var(--white);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.asset-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.asset-row:last-child{border-bottom:none}
+.asset-row:hover{background:var(--card)}
+.asset-icon{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;flex-shrink:0}
+.asset-icon.usdt{background:var(--usdt)}
+.asset-icon.usdc{background:var(--usdc)}
+.asset-info{flex:1;min-width:0}
+.asset-name{font-size:15px;font-weight:500;color:var(--dark);letter-spacing:-0.01em}
+.asset-sub{font-size:12px;color:var(--text);margin-top:2px}
+.asset-right{text-align:right;flex-shrink:0}
+.asset-bal{font-size:15px;font-weight:500;color:var(--dark);letter-spacing:-0.01em}
+.asset-bal-sub{font-size:12px;color:var(--text);margin-top:2px}
+
+/* ── Placeholder block (Figma-source notice for non-MVP areas) ── */
+.placeholder-block{background:repeating-linear-gradient(135deg,var(--card) 0 14px,var(--white) 14px 28px);border:1.5px dashed var(--border);border-radius:18px;padding:22px 18px;text-align:center}
+.placeholder-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--text);background:var(--white);border:1px solid var(--border);padding:3px 10px;border-radius:50px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.placeholder-title{font-size:14px;font-weight:600;color:var(--dark);letter-spacing:-0.01em;margin-bottom:6px}
+.placeholder-desc{font-size:12px;color:var(--text);line-height:1.6}
+.placeholder-desc b{color:var(--dark);font-weight:600}
+
+/* ── Recent activity ── */
+.act-list{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:4px 14px}
+.act-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.act-icon-sm{width:34px;height:34px;border-radius:10px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-icon-sm.in{background:var(--blue-bg);color:var(--blue)}
+.act-info{flex:1;min-width:0}
+.act-title{font-size:14px;font-weight:500;color:var(--dark);letter-spacing:-0.01em}
+.act-meta{font-size:12px;color:var(--text);margin-top:2px}
+.act-amt{font-size:14px;font-weight:500;color:var(--dark);letter-spacing:-0.01em}
+.act-amt.in{color:var(--green)}
+
+/* ── Camera permission modal (iOS-style) ── */
+.perm-overlay{position:absolute;inset:0;background:rgba(12,49,36,.45);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;padding:24px}
+.perm-overlay.show{display:flex;animation:fadeIn .2s ease}
+.perm-modal{background:rgba(245,245,245,.95);backdrop-filter:blur(20px);border-radius:18px;width:280px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Archivo',sans-serif}
+.perm-content{padding:20px 16px 18px;text-align:center}
+.perm-title{font-size:17px;font-weight:600;color:#000;margin-bottom:6px;letter-spacing:-0.02em}
+.perm-msg{font-size:13px;color:#222;line-height:1.4}
+.perm-msg b{font-weight:600}
+.perm-actions{display:flex;border-top:1px solid rgba(0,0,0,.12)}
+.perm-btn{flex:1;padding:11px 0;font-size:16px;font-family:inherit;background:transparent;border:none;cursor:pointer;color:#007AFF;letter-spacing:-0.02em}
+.perm-btn.deny{border-right:1px solid rgba(0,0,0,.12)}
+.perm-btn.allow{font-weight:600}
+
+/* ── Scanner screen (dark) ── */
+.scan-screen{background:#000;color:white;position:relative}
+.scan-screen .scan-top{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;color:white;z-index:5;position:relative}
+.scan-cancel{background:transparent;border:none;color:white;font-size:16px;font-weight:500;font-family:'Archivo',sans-serif;cursor:pointer;padding:6px 4px;letter-spacing:-0.02em}
+.scan-title{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.scan-help{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.scan-camera{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+/* Faux camera background */
+.scan-camera::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(circle at 30% 40%, rgba(255,255,255,.06), transparent 50%),
+  radial-gradient(circle at 70% 70%, rgba(0,152,89,.10), transparent 50%),
+  linear-gradient(135deg,#181818,#2a2a2a 50%,#0e0e0e);
+  pointer-events:none}
+.scan-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);clip-path:polygon(
+  0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+  10% 30%, 10% calc(30% + 240px), calc(10% + 240px) calc(30% + 240px), calc(10% + 240px) 30%, 10% 30%
+);pointer-events:none}
+.scan-frame{position:relative;width:240px;height:240px;z-index:2}
+.scan-corner{position:absolute;width:28px;height:28px;border:3px solid var(--green);border-radius:4px}
+.scan-corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-top-left-radius:10px}
+.scan-corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-top-right-radius:10px}
+.scan-corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-bottom-left-radius:10px}
+.scan-corner.br{bottom:0;right:0;border-left:none;border-top:none;border-bottom-right-radius:10px}
+.scan-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--green) 50%,transparent);box-shadow:0 0 12px var(--green);animation:scanLine 2.2s ease-in-out infinite}
+@keyframes scanLine{
+  0%{top:8px;opacity:1}
+  45%{top:calc(100% - 10px);opacity:1}
+  50%{top:calc(100% - 10px);opacity:0}
+  55%{top:8px;opacity:0}
+  60%{top:8px;opacity:1}
+  100%{top:calc(100% - 10px);opacity:1}
+}
+.scan-hint{position:absolute;left:20px;right:20px;top:calc(50% + 140px);text-align:center;color:rgba(255,255,255,.85);font-size:14px;font-weight:500;z-index:3;letter-spacing:-0.01em}
+
+/* Demo simulator panel inside scanner (only for the demo) */
+.sim-panel{position:absolute;left:16px;right:16px;bottom:18px;background:rgba(20,20,20,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px;z-index:4}
+.sim-panel-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sim-panel-title::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--orange)}
+.sim-row{display:flex;gap:8px;margin-bottom:8px}
+.sim-row:last-child{margin-bottom:0}
+.sim-btn{flex:1;padding:11px 8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);border-radius:12px;color:white;font-size:12px;font-weight:500;font-family:'Archivo',sans-serif;cursor:pointer;letter-spacing:-0.01em;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.3;text-align:center}
+.sim-btn:hover{background:rgba(0,152,89,.20);border-color:var(--green)}
+.sim-btn b{font-size:13px;font-weight:600}
+.sim-btn .sim-sub{font-size:10px;color:rgba(255,255,255,.55);font-weight:400}
+.sim-btn.danger:hover{background:rgba(229,72,77,.20);border-color:var(--red)}
+
+/* Scanner error toast */
+.scan-toast{position:absolute;left:20px;right:20px;top:74px;background:rgba(229,72,77,.95);backdrop-filter:blur(8px);color:white;padding:14px 16px;border-radius:14px;font-size:13px;font-weight:500;line-height:1.4;z-index:6;display:none;align-items:flex-start;gap:10px;letter-spacing:-0.01em;box-shadow:0 8px 24px rgba(229,72,77,.30)}
+.scan-toast.show{display:flex;animation:toastIn .25s ease}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.scan-toast .toast-icon{flex-shrink:0;margin-top:1px}
+
+/* ── Permission denied screen ── */
+.denied-screen{padding:0 20px}
+.denied-top{padding:8px 0 0;display:flex;align-items:center}
+.back-btn{background:none;border:none;color:var(--dark);font-size:15px;font-weight:500;font-family:'Archivo',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:8px 0;letter-spacing:-0.02em}
+.denied-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 8px 32px}
+.denied-icon{width:84px;height:84px;border-radius:24px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.denied-title{font-size:22px;font-weight:600;color:var(--dark);margin-bottom:8px;letter-spacing:-0.02em}
+.denied-desc{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:24px;max-width:280px}
+.denied-steps{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;width:100%;text-align:left;margin-bottom:24px}
+.denied-steps .step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--dark)}
+.denied-steps .step:not(:last-child){border-bottom:1px solid var(--border)}
+.denied-steps .step-num{width:22px;height:22px;border-radius:50%;background:var(--green-bg);color:var(--green);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.denied-actions{display:flex;flex-direction:column;gap:10px;width:100%;padding:0 8px 20px}
+.btn-primary{width:100%;height:52px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--green-hover)}
+.btn-secondary{width:100%;height:52px;border-radius:50px;border:none;background:var(--card);color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-secondary:hover{background:var(--btn)}
+.btn-primary.disabled{background:var(--border);color:var(--text);cursor:default;pointer-events:none}
+
+/* ── Withdraw screen (prefilled) ── */
+.wd-screen{padding:0}
+.wd-top{padding:8px 16px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.wd-top .scanned-pill{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;padding:5px 10px;border-radius:50px;letter-spacing:.02em;text-transform:uppercase}
+.wd-top .scanned-pill svg{flex-shrink:0}
+.wd-body{flex:1;overflow-y:auto;padding:8px 20px 16px;-webkit-overflow-scrolling:touch}
+.wd-body::-webkit-scrollbar{display:none}
+.wd-title{font-size:26px;font-weight:500;color:var(--dark);letter-spacing:-0.02em;margin:8px 0 18px;padding:0 0px}
+
+.wd-section{background:var(--card);border-radius:16px;padding:14px 16px 16px;margin-bottom:10px}
+.wd-section-label{display:inline-block;font-size:12px;color:var(--green);font-weight:600;margin-bottom:10px;background:var(--white);padding:4px 8px;border-radius:8px;letter-spacing:.02em}
+.wd-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--white);border-radius:12px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s}
+.wd-row:hover{border-color:var(--green)}
+.wd-row .row-icon{width:38px;height:38px;border-radius:12px;background:var(--btn);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0}
+.wd-row .row-text{flex:1;font-size:15px;font-weight:500;color:var(--dark);letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:'DM Mono','SF Mono',monospace}
+.wd-row .row-text.regular{font-family:'Archivo',sans-serif}
+.wd-row .row-text.placeholder{color:var(--text);font-weight:400;font-family:'Archivo',sans-serif}
+.wd-row .row-sub{font-size:12px;color:var(--text);margin-top:2px}
+.wd-row .row-chev{color:var(--text);font-size:18px;flex-shrink:0;line-height:1}
+.wd-row .row-edit{color:var(--text);font-size:13px;font-weight:500;cursor:pointer;background:transparent;border:none;font-family:inherit;padding:4px 8px;border-radius:50px;flex-shrink:0}
+.wd-row .row-edit:hover{background:var(--btn);color:var(--dark)}
+
+.wd-token-cluster{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.wd-token-icon-wrap{position:relative;width:34px;height:34px;flex-shrink:0}
+.wd-token-icon-wrap .coin-icon{width:34px;height:34px}
+.wd-token-icon-wrap .chain-mini{position:absolute;bottom:-2px;right:-3px;width:14px;height:14px;border-radius:50%;border:2px solid var(--white);background:#627EEA;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:700}
+.coin-icon{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0}
+.coin-icon.usdt{background:var(--usdt)}
+.coin-icon.usdc{background:var(--usdc)}
+.wd-token-name{font-size:15px;font-weight:500;color:var(--dark);letter-spacing:-0.01em;line-height:1.2}
+.wd-token-chain{font-size:12px;color:var(--text);margin-top:2px}
+
+.wd-amount-row{display:flex;align-items:center;gap:8px}
+.wd-amount-inner{display:flex;align-items:baseline;flex:1;min-width:0;gap:6px}
+.wd-amount-input{font-size:34px;font-weight:500;color:var(--dark);letter-spacing:-0.03em;line-height:1;border:none;background:transparent;outline:none;font-family:'Archivo',sans-serif;width:100%;max-width:180px;min-width:1ch;padding:0}
+.wd-amount-input::placeholder{color:#B0C4BB}
+.wd-amount-input.placeholder-state{color:#B0C4BB}
+.wd-amount-unit{font-size:34px;font-weight:500;color:var(--text);letter-spacing:-0.03em;white-space:nowrap;flex-shrink:0}
+.wd-max-btn{padding:6px 14px;border-radius:50px;border:none;background:var(--white);color:var(--dark);font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:-0.02em;border:1px solid var(--border)}
+.wd-max-btn:hover{border-color:var(--green);color:var(--green)}
+.wd-avail{font-size:13px;color:var(--text);margin-top:10px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.wd-avail.error{color:var(--red)}
+
+.wd-footer{padding:12px 20px 20px;border-top:1px solid var(--border);background:var(--white);flex-shrink:0}
+.wd-fee-summary{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);margin-bottom:10px;padding:0 4px}
+.wd-fee-summary .val{color:var(--dark);font-weight:500}
+
+/* Status bar */
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:50px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.status-pill.info{background:var(--blue-bg);color:var(--blue)}
+
+/* ── Floating scenario nav (page-level controls) ── */
+.scenario-bar{max-width:560px;margin:0 auto 24px;padding:0 16px}
+.scenario-bar-inner{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.scenario-bar-title{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.scenario-bar-row{display:flex;gap:8px;flex-wrap:wrap}
+.scenario-chip{padding:7px 12px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--dark);font-size:12px;font-weight:500;cursor:pointer;font-family:'Archivo',sans-serif;transition:all .15s;letter-spacing:-0.02em}
+.scenario-chip:hover{border-color:var(--green);color:var(--green)}
+.scenario-chip.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+
+/* Generic icon paths use SVG inline. Avoid font-icons. */
+</style>
+</head>
+<body>
+
+<div class="demo-chrome">
+  <h1>AllScale Wallet — Scan to Pay</h1>
+  <p>Tap Scan top-right → camera → QR detected → Withdraw prefilled</p>
+  <span class="pill">MVP only · No album · No amount 2nd-confirm</span>
+  <div style="font-size:11px;color:var(--text);margin-top:10px;line-height:1.5">
+    Wallet Home is a placeholder · <b>visual to follow Jony's Figma</b><br>
+    Focus of this demo: Scan entry → camera → Withdraw prefill + error states
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="phone-screen">
+    <div class="phone-statusbar">
+      <span>9:41</span>
+      <span class="icons">
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M1 5h2v4H1zM4 3h2v6H4zM7 1h2v8H7zM10 2h2v7h-2z"/></svg>
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="1" y="2" width="9" height="6" rx="1.5"/><rect x="11" y="4" width="1.5" height="2" fill="currentColor"/><rect x="2" y="3" width="7" height="4" rx=".5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <!-- ═══ SCREEN: Wallet Home ═══ -->
+    <div class="screen active" id="screen-home">
+      <div class="w-top">
+        <div class="w-top-left">
+          <div class="w-avatar">JY</div>
+          <div>
+            <div class="w-name">Jony</div>
+            <div class="w-sub"><span class="net-dot"></span>0x640…7F9K2</div>
+          </div>
+        </div>
+        <div class="w-top-actions">
+          <button class="w-icon-btn" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <button class="w-icon-btn scan" title="Scan to Pay" onclick="goScan()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            <span class="new-badge">NEW</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="w-body">
+        <div class="bal-card">
+          <div class="bal-label">Total balance <svg class="eye" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="bal-amount">$4,231<span class="dec">.42</span><span class="unit">USD</span></div>
+          <span class="bal-trend">+ $128.40 this week</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;margin-bottom:-4px">
+          <div class="asset-section-title" style="margin-bottom:0">Quick actions</div>
+          <span style="font-size:10px;color:var(--text);letter-spacing:.04em">视觉以 Figma 为准</span>
+        </div>
+        <div class="action-grid">
+          <div class="action-tile" onclick="goWithdraw('none')">
+            <div class="action-tile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div class="action-tile-label">Send</div>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="action-tile-label">Receive</div>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div class="action-tile-label">Deposit</div>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </div>
+            <div class="action-tile-label">Swap</div>
+          </div>
+        </div>
+
+        <div class="placeholder-block">
+          <div class="placeholder-tag">Figma 为准 (Jony)</div>
+          <div class="placeholder-title">Assets / Recent activity</div>
+          <div class="placeholder-desc">本 Demo 不还原首页其余区块。<br>视觉以 Jony 的 Figma 为准；这里只演示<b>右上角 Scan 图标</b>这条路径。</div>
+        </div>
+      </div>
+
+      <!-- iOS-style permission modal lives inside the home screen so it overlays it -->
+      <div class="perm-overlay" id="perm-overlay">
+        <div class="perm-modal">
+          <div class="perm-content">
+            <div class="perm-title">"AllScale" Would Like to Access the Camera</div>
+            <div class="perm-msg">To scan QR codes for payments. Your camera feed never leaves the device.</div>
+          </div>
+          <div class="perm-actions">
+            <button class="perm-btn deny" onclick="permDeny()">Don't Allow</button>
+            <button class="perm-btn allow" onclick="permAllow()">Allow</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: Scanner (dark camera view) ═══ -->
+    <div class="screen scan-screen" id="screen-scan">
+      <div class="scan-top">
+        <button class="scan-cancel" onclick="goHome()">Cancel</button>
+        <div class="scan-title">Scan to Pay</div>
+        <button class="scan-help" title="Help">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      </div>
+
+      <div class="scan-toast" id="scan-toast">
+        <svg class="toast-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="scan-toast-text">We couldn't recognize this QR code. Please try again, or check that it's an AllScale QR code.</span>
+      </div>
+
+      <div class="scan-camera">
+        <div class="scan-overlay"></div>
+        <div class="scan-frame">
+          <div class="scan-corner tl"></div>
+          <div class="scan-corner tr"></div>
+          <div class="scan-corner bl"></div>
+          <div class="scan-corner br"></div>
+          <div class="scan-line"></div>
+        </div>
+        <div class="scan-hint">Align the QR code within the frame</div>
+
+        <div class="sim-panel">
+          <div class="sim-panel-title">Demo · Simulate a QR detection</div>
+          <div class="sim-row">
+            <button class="sim-btn" onclick="simulateQR('full')">
+              <b>Full QR</b>
+              <span class="sim-sub">Address + Amount + Chain</span>
+            </button>
+            <button class="sim-btn" onclick="simulateQR('addr')">
+              <b>Address only</b>
+              <span class="sim-sub">User fills the rest</span>
+            </button>
+          </div>
+          <div class="sim-row">
+            <button class="sim-btn danger" onclick="simulateQR('invalid')">
+              <b>Invalid / non-EVM</b>
+              <span class="sim-sub">Triggers error</span>
+            </button>
+            <button class="sim-btn danger" onclick="simulateQR('random')">
+              <b>Random QR</b>
+              <span class="sim-sub">e.g. a website URL</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: Permission denied ═══ -->
+    <div class="screen denied-screen" id="screen-denied">
+      <div class="denied-top">
+        <button class="back-btn" onclick="goHome()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+      </div>
+      <div class="denied-body">
+        <div class="denied-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="denied-title">Camera access needed</div>
+        <div class="denied-desc">Scan to Pay reads QR codes through your camera. Turn it on in iOS Settings to continue.</div>
+        <div class="denied-steps">
+          <div class="step"><div class="step-num">1</div><div>Open <b>Settings</b> on your iPhone</div></div>
+          <div class="step"><div class="step-num">2</div><div>Find <b>AllScale</b> in the apps list</div></div>
+          <div class="step"><div class="step-num">3</div><div>Tap <b>Camera</b> and turn it on</div></div>
+        </div>
+      </div>
+      <div class="denied-actions">
+        <button class="btn-primary" onclick="goScan()">Open Settings</button>
+        <button class="btn-secondary" onclick="goHome()">Not now</button>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: Withdraw (prefilled from QR) ═══ -->
+    <div class="screen wd-screen" id="screen-withdraw">
+      <div class="wd-top">
+        <button class="back-btn" onclick="goHome()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <span class="scanned-pill" id="wd-scanned-pill">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Filled from QR
+        </span>
+      </div>
+      <div class="wd-body">
+        <div class="wd-title">Send</div>
+
+        <div class="wd-section">
+          <div class="wd-section-label">To</div>
+          <div class="wd-row">
+            <div class="row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M22 10H2"/><circle cx="18" cy="15" r="1.5" fill="currentColor"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="row-text" id="wd-address">0x9c4e…A7F2</div>
+              <div class="row-sub" id="wd-address-sub">Merchant · AllScale Checkout</div>
+            </div>
+            <span class="row-chev">›</span>
+          </div>
+        </div>
+
+        <div class="wd-section">
+          <div class="wd-section-label">Token &amp; Network</div>
+          <div class="wd-row" id="wd-token-row">
+            <div class="wd-token-icon-wrap">
+              <span class="coin-icon usdt" id="wd-coin">₮</span>
+              <span class="chain-mini" id="wd-chain-mini" style="background:#F3BA2F">B</span>
+            </div>
+            <div class="wd-token-cluster" style="display:block">
+              <div class="wd-token-name" id="wd-token-name">USDT</div>
+              <div class="wd-token-chain" id="wd-token-chain">BSC (BEP20)</div>
+            </div>
+            <span class="row-chev">›</span>
+          </div>
+        </div>
+
+        <div class="wd-section">
+          <div class="wd-section-label">Amount</div>
+          <div class="wd-amount-row">
+            <div class="wd-amount-inner">
+              <input class="wd-amount-input" id="wd-amount" type="text" inputmode="decimal" value="49.99">
+              <span class="wd-amount-unit" id="wd-amount-unit">USDT</span>
+            </div>
+            <button class="wd-max-btn" onclick="setMax()">MAX</button>
+          </div>
+          <div class="wd-avail" id="wd-avail">
+            <span>Available: <span id="wd-bal">1,810.52 USDT</span></span>
+            <span class="status-pill info" style="display:none" id="wd-edit-hint">Edited</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wd-footer">
+        <div class="wd-fee-summary">
+          <span>Network fee</span>
+          <span class="val" id="wd-fee">≈ $0.18</span>
+        </div>
+        <button class="btn-primary" onclick="goSuccess()">Continue</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="scenario-bar">
+  <div class="scenario-bar-inner">
+    <div class="scenario-bar-title">Jump to a scenario</div>
+    <div class="scenario-bar-row">
+      <button class="scenario-chip active" data-scenario="home" onclick="jumpTo('home')">Wallet Home</button>
+      <button class="scenario-chip" data-scenario="perm" onclick="jumpTo('perm')">Permission prompt</button>
+      <button class="scenario-chip" data-scenario="scan" onclick="jumpTo('scan')">Scanner</button>
+      <button class="scenario-chip" data-scenario="denied" onclick="jumpTo('denied')">Permission denied</button>
+      <button class="scenario-chip" data-scenario="full" onclick="jumpTo('full')">Withdraw · full prefill</button>
+      <button class="scenario-chip" data-scenario="addr" onclick="jumpTo('addr')">Withdraw · address only</button>
+      <button class="scenario-chip" data-scenario="error" onclick="jumpTo('error')">Scanner error</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── State ── */
+let permissionGranted = false;
+const screens = ['screen-home','screen-scan','screen-denied','screen-withdraw'];
+
+function showScreen(id){
+  screens.forEach(s=>{
+    const el = document.getElementById(s);
+    if(s===id) el.classList.add('active'); else el.classList.remove('active');
+  });
+}
+
+function setActiveChip(name){
+  document.querySelectorAll('.scenario-chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.scenario===name);
+  });
+}
+
+/* ── Navigation ── */
+function goHome(){
+  closePerm();
+  hideToast();
+  showScreen('screen-home');
+  setActiveChip('home');
+}
+
+function goScan(){
+  // PRD: first time tap → request permission. After granted, go straight to scanner.
+  hideToast();
+  if(!permissionGranted){
+    showScreen('screen-home');
+    openPerm();
+    setActiveChip('perm');
+  } else {
+    showScreen('screen-scan');
+    setActiveChip('scan');
+  }
+}
+
+function openPerm(){
+  document.getElementById('perm-overlay').classList.add('show');
+}
+function closePerm(){
+  document.getElementById('perm-overlay').classList.remove('show');
+}
+
+function permAllow(){
+  permissionGranted = true;
+  closePerm();
+  showScreen('screen-scan');
+  setActiveChip('scan');
+}
+function permDeny(){
+  closePerm();
+  showScreen('screen-denied');
+  setActiveChip('denied');
+}
+
+/* ── Withdraw prefill ── */
+const presets = {
+  full: {
+    address: '0x9c4e…A7F2',
+    addressSub: 'Merchant · AllScale Checkout',
+    token: 'USDT', chain: 'BSC (BEP20)',
+    chainBadge: 'B', chainColor: '#F3BA2F',
+    coinClass: 'usdt', coinGlyph: '₮',
+    amount: '49.99', unit: 'USDT',
+    bal: '1,810.52 USDT'
+  },
+  addr: {
+    address: '0x4F1b…2D9B',
+    addressSub: 'Wallet user',
+    token: 'USDT', chain: 'BSC (BEP20)',
+    chainBadge: 'B', chainColor: '#F3BA2F',
+    coinClass: 'usdt', coinGlyph: '₮',
+    amount: '', unit: 'USDT',
+    bal: '1,810.52 USDT'
+  },
+  // "none" = user entered Withdraw from the Send tile, nothing prefilled
+  none: {
+    address: 'Tap to choose recipient',
+    addressSub: '',
+    token: 'USDT', chain: 'BSC (BEP20)',
+    chainBadge: 'B', chainColor: '#F3BA2F',
+    coinClass: 'usdt', coinGlyph: '₮',
+    amount: '',  unit: 'USDT',
+    bal: '1,810.52 USDT'
+  }
+};
+
+function goWithdraw(source){
+  const p = presets[source] || presets.full;
+  // address
+  const addrEl = document.getElementById('wd-address');
+  const subEl  = document.getElementById('wd-address-sub');
+  addrEl.textContent = p.address;
+  addrEl.classList.toggle('placeholder', source==='none');
+  subEl.textContent = p.addressSub;
+  subEl.style.display = p.addressSub ? '' : 'none';
+
+  // token & chain
+  const coin = document.getElementById('wd-coin');
+  coin.className = 'coin-icon ' + p.coinClass;
+  coin.textContent = p.coinGlyph;
+  const mini = document.getElementById('wd-chain-mini');
+  mini.style.background = p.chainColor;
+  mini.textContent = p.chainBadge;
+  document.getElementById('wd-token-name').textContent = p.token;
+  document.getElementById('wd-token-chain').textContent = p.chain;
+
+  // amount
+  const amtInput = document.getElementById('wd-amount');
+  amtInput.value = p.amount;
+  amtInput.placeholder = '0';
+  document.getElementById('wd-amount-unit').textContent = p.unit;
+  document.getElementById('wd-bal').textContent = p.bal;
+  document.getElementById('wd-edit-hint').style.display = 'none';
+  prefilledAmount = p.amount;
+
+  // "Filled from QR" pill only when something was scanned
+  document.getElementById('wd-scanned-pill').style.display =
+    (source==='full' || source==='addr') ? '' : 'none';
+
+  showScreen('screen-withdraw');
+  setActiveChip(source==='addr' ? 'addr' : (source==='full' ? 'full' : 'home'));
+}
+
+/* Track edits so "Edited" pill appears once user changes prefilled value */
+let prefilledAmount = '';
+document.getElementById('wd-amount').addEventListener('input', e=>{
+  const changed = e.target.value !== prefilledAmount && prefilledAmount !== '';
+  document.getElementById('wd-edit-hint').style.display = changed ? '' : 'none';
+});
+
+function setMax(){
+  document.getElementById('wd-amount').value = '1810.52';
+  document.getElementById('wd-amount').dispatchEvent(new Event('input'));
+}
+
+function goSuccess(){
+  // For demo brevity, just bounce back to home with a confirmation toast hint
+  alert('Sent! (Demo) — out of scope; real flow continues into existing Withdraw confirm + sign.');
+  goHome();
+}
+
+/* ── Scanner simulation ── */
+function simulateQR(kind){
+  if(kind==='full'){ hideToast(); goWithdraw('full'); return; }
+  if(kind==='addr'){ hideToast(); goWithdraw('addr'); return; }
+  // invalid / random — toast and stay on scanner
+  showToast(kind);
+}
+
+function showToast(kind){
+  const t = document.getElementById('scan-toast');
+  const text = document.getElementById('scan-toast-text');
+  if(kind==='invalid'){
+    text.textContent = "This QR code isn't supported. AllScale supports EVM addresses only.";
+  } else {
+    text.textContent = "We couldn't recognize this QR code. Please try again, or check that it's an AllScale QR code.";
+  }
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>hideToast(), 3200);
+}
+function hideToast(){
+  document.getElementById('scan-toast').classList.remove('show');
+}
+
+/* ── Scenario jumps (page-level controls) ── */
+function jumpTo(scenario){
+  permissionGranted = true; // skip the prompt for direct jumps
+  switch(scenario){
+    case 'home': goHome(); break;
+    case 'perm':
+      permissionGranted = false;
+      showScreen('screen-home');
+      openPerm();
+      setActiveChip('perm');
+      break;
+    case 'scan':
+      hideToast();
+      showScreen('screen-scan');
+      setActiveChip('scan');
+      break;
+    case 'denied':
+      showScreen('screen-denied');
+      setActiveChip('denied');
+      break;
+    case 'full': goWithdraw('full'); setActiveChip('full'); break;
+    case 'addr': goWithdraw('addr'); setActiveChip('addr'); break;
+    case 'error':
+      hideToast();
+      showScreen('screen-scan');
+      setActiveChip('error');
+      setTimeout(()=>showToast('random'), 250);
+      break;
+  }
+}
+</script>
+</body>
+</html>

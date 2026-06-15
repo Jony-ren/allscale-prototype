@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Pay — Payment Link Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#009859;--green-hover:#0CAA67;--green-bg:#EAF9F1;--card:#FAFBFA;--btn:#F2F8F5;--border:#E5EEEA;--dark:#0C3124;--text:#83968F;--white:#FFFFFF;--surface:#F0F4F2;--usdt:#26A17B;--usdc:#2775CA;--red:#E5484D;--red-bg:rgba(229,72,77,.08);--orange:#F5A623;--orange-bg:rgba(245,166,35,.10);--blue:#2775CA;--blue-bg:rgba(39,117,202,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);font-family:'Archivo',system-ui,sans-serif;font-size:14px;color:var(--dark);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+
+/* ── Topbar (Pay product chrome) ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(12,49,36,.04);flex-wrap:wrap}
+.topbar.public{background:var(--white);border-bottom:1px solid var(--border)}
+.topbar-logo{width:28px;height:28px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--dark);flex:1;min-width:200px}
+.topbar-title span{color:var(--text);font-weight:400;font-size:13px;margin-left:6px}
+.topbar-sub{font-size:12px;font-weight:400;color:var(--text);margin-top:2px;letter-spacing:0}
+.mode-btns{display:flex;gap:6px;flex-wrap:wrap}
+.mode-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Archivo',sans-serif}
+.mode-btn:hover{border-color:var(--green);color:var(--dark)}
+.mode-btn.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+
+.container{max-width:480px;margin:0 auto;padding:20px}
+.section-title{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-left:4px}
+.section-block{margin-bottom:28px}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:27px;padding:24px 20px;position:relative;overflow:hidden}
+
+.screen{display:none;animation:fadeIn .25s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;padding:8px 0;margin-bottom:12px;background:none;border:none;font-family:'Archivo',sans-serif;letter-spacing:-0.02em}
+.back-btn:hover{color:var(--dark)}
+
+.pg-title{font-size:28px;font-weight:500;color:var(--dark);margin-bottom:8px;letter-spacing:-0.02em}
+.pg-subtitle{font-size:14px;color:var(--text);margin-bottom:20px}
+
+.btn-primary{width:100%;height:52px;border-radius:50px;border:none;background:var(--green);color:#fff;font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--green-hover)}
+.btn-primary.disabled{background:var(--border);color:var(--text);cursor:default;pointer-events:none}
+.btn-secondary{width:100%;height:52px;border-radius:50px;border:none;background:var(--card);color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-secondary:hover{background:var(--btn)}
+.btn-outline{width:100%;height:48px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--dark);font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-row{display:flex;gap:10px;margin-top:16px}
+.btn-row>*{flex:1}
+.btn-danger{width:100%;height:48px;border-radius:50px;border:1.5px solid var(--red);background:var(--white);color:var(--red);font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-danger:hover{background:var(--red-bg)}
+
+/* ── Dashboard balance (matches offramp/multi-stablecoin) ── */
+.rev-balance{font-size:42px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;line-height:1.1}
+.rev-balance .dec{font-size:22px;color:var(--text)}
+.rev-label{font-size:14px;color:var(--text);margin-bottom:6px;font-weight:500}
+.rev-sub{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text);margin-top:8px}
+.coin-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+.action-tile{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;font-family:'Archivo',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px}
+.action-tile:hover{border-color:var(--green);background:var(--btn)}
+.action-tile.featured{background:var(--green-bg);border-color:rgba(0,152,89,.2);position:relative}
+.action-tile.featured::after{content:'NEW';position:absolute;top:6px;right:6px;background:var(--green);color:white;font-size:8px;font-weight:700;padding:2px 6px;border-radius:50px;letter-spacing:.04em}
+.action-tile-icon{width:36px;height:36px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;color:var(--green);border:1px solid var(--border)}
+.action-tile.featured .action-tile-icon{background:var(--green);color:white;border-color:var(--green)}
+.action-tile-label{font-size:12px;font-weight:500;color:var(--dark);letter-spacing:-0.02em;line-height:1.2}
+
+/* ── Form ── */
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:4px}
+.form-label .opt{color:var(--text);font-weight:400;font-size:12px}
+.form-input{width:100%;height:48px;border:1.5px solid var(--border);border-radius:14px;padding:0 16px;font-size:15px;font-family:'Archivo',sans-serif;color:var(--dark);background:var(--white);outline:none;transition:border-color .15s;letter-spacing:-0.02em}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:#B0C4BB}
+.form-input:disabled{background:var(--card);color:var(--text)}
+.form-textarea{width:100%;min-height:72px;border:1.5px solid var(--border);border-radius:14px;padding:12px 16px;font-size:15px;font-family:'Archivo',sans-serif;color:var(--dark);background:var(--white);outline:none;transition:border-color .15s;letter-spacing:-0.02em;resize:none}
+.form-textarea:focus{border-color:var(--green)}
+.form-hint{font-size:12px;color:var(--text);margin-top:4px}
+.form-hint.error{color:var(--red)}
+
+/* ── Send-flow — mirrors multi-stablecoin Withdraw popup style ── */
+.popup-title{font-size:28px;font-weight:500;color:var(--dark);margin-bottom:24px;letter-spacing:-0.02em}
+
+.wd-to-section,.wd-section,.wd-amount-section{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.wd-to-label,.wd-section-label,.wd-amount-label{display:inline-block;font-size:13px;color:var(--green);font-weight:500;margin-bottom:12px;background:var(--btn);padding:4px 6px;border-radius:10px}
+
+.wd-to-row,.wd-token-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:12px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s}
+.wd-to-row:hover,.wd-token-row:hover{border-color:var(--green)}
+.wd-to-icon{width:40px;height:40px;border-radius:12px;background:var(--btn);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0}
+.wd-to-text{flex:1;font-size:16px;font-weight:500;color:var(--dark);letter-spacing:-0.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wd-to-text.placeholder{color:var(--text);font-weight:400}
+.wd-to-sub{font-size:12px;color:var(--text);font-weight:500;margin-top:2px}
+.wd-to-chevron,.wd-token-chevron{color:var(--text);font-size:18px;flex-shrink:0}
+.wd-token-icon-wrap{position:relative;width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.wd-token-name{flex:1;font-size:16px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+
+.wd-amount-row{display:flex;align-items:center;gap:8px}
+.wd-amount-inner{display:flex;align-items:baseline;flex:1;min-width:0;gap:6px}
+.wd-amount-input{font-size:38px;font-weight:500;color:var(--dark);letter-spacing:-0.03em;line-height:1;border:none;background:transparent;outline:none;font-family:'Archivo',sans-serif;width:100%;max-width:200px;min-width:1ch}
+.wd-amount-input::placeholder{color:#B0C4BB}
+.wd-amount-unit{font-size:38px;font-weight:500;color:var(--text);letter-spacing:-0.03em;white-space:nowrap;flex-shrink:0}
+.wd-max-btn{padding:6px 14px;border-radius:50px;border:none;background:transparent;color:var(--dark);font-family:'Archivo',sans-serif;font-size:16px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:-0.02em}
+.wd-avail{font-size:13px;color:var(--text);margin-top:8px;font-weight:500}
+.wd-avail.error{color:var(--red)}
+
+/* Inline tabs inside the To section — matches wd-sheet-tabs style */
+.wd-dest-tabs{display:flex;gap:8px;margin-bottom:12px}
+.wd-dest-tab{display:inline-flex;align-items:center;gap:8px;padding:8px 16px 8px 12px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:all .15s;font-size:14px;font-weight:500;color:var(--text);letter-spacing:-0.02em;font-family:'Archivo',sans-serif}
+.wd-dest-tab:hover{border-color:var(--green);color:var(--dark)}
+.wd-dest-tab.active{border-color:var(--green);background:var(--btn);color:var(--green)}
+.wd-dest-tab svg{flex-shrink:0}
+.wd-dest-tab-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px;background:var(--green-bg);color:var(--green);letter-spacing:.04em;text-transform:uppercase}
+.wd-dest-tab.active .wd-dest-tab-badge{background:var(--green);color:white}
+
+/* Email input inline (matches the same style as wd-to-row but as input) */
+.wd-email-input{width:100%;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 16px;font-size:15px;font-family:'Archivo',sans-serif;color:var(--dark);background:var(--card);outline:none;transition:border-color .15s;letter-spacing:-0.02em}
+.wd-email-input:focus{border-color:var(--green);background:var(--white)}
+.wd-email-input::placeholder{color:#B0C4BB}
+.wd-email-input:disabled{color:var(--text);cursor:not-allowed}
+.wd-message-input{width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;font-size:15px;font-family:'Archivo',sans-serif;color:var(--dark);background:var(--card);outline:none;transition:border-color .15s;letter-spacing:-0.02em;resize:none}
+.wd-message-input:focus{border-color:var(--green);background:var(--white)}
+.wd-msg-counter{font-size:12px;color:var(--text);margin-top:6px;text-align:right}
+
+.coin-icon{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0}
+.coin-icon.usdt{background:var(--usdt)}
+.coin-icon.usdc{background:var(--usdc)}
+.coin-icon.lg{width:36px;height:36px;font-size:14px}
+.chain-mini{position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;border:2px solid var(--white);background:#627EEA;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:700}
+
+.skip-toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:50px;background:var(--btn);cursor:pointer;font-size:12px;font-weight:500;color:var(--green);margin-top:10px;border:1.5px solid transparent;transition:all .15s}
+.skip-toggle:hover{background:var(--green-bg)}
+.skip-toggle.active{background:var(--green);color:white}
+.skip-toggle.active .skip-icon{background:white;color:var(--green)}
+.skip-icon{width:16px;height:16px;border-radius:50%;background:var(--white);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.skip-hint{font-size:12px;color:var(--text);margin-top:6px}
+.skip-hint.error{color:var(--red)}
+
+/* ── Share Card ── */
+.share-card-wrap{padding:8px 0 16px}
+.share-card{background:linear-gradient(180deg,#FAFBFA 0%,#F2F8F5 100%);border:1px solid var(--border);border-radius:24px;padding:28px 24px;text-align:center;position:relative;overflow:hidden}
+.share-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,var(--green-bg) 0%,transparent 70%);pointer-events:none}
+.share-card::after{content:'';position:absolute;bottom:-50px;left:-30px;width:120px;height:120px;background:radial-gradient(circle,var(--green-bg) 0%,transparent 70%);pointer-events:none}
+.share-sender{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;position:relative;z-index:1}
+.share-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;flex-shrink:0}
+.share-avatar.brand{background:var(--white);border:1.5px solid var(--border)}
+.share-avatar.brand svg{width:20px;height:20px}
+.share-sender-name{font-size:14px;font-weight:500;color:var(--dark)}
+.share-sender-sub{font-size:12px;color:var(--text);font-weight:400}
+.share-amount{font-size:48px;font-weight:600;color:var(--dark);letter-spacing:-0.04em;line-height:1;margin-bottom:4px;position:relative;z-index:1}
+.share-amount .unit{font-size:20px;font-weight:500;color:var(--text);margin-left:6px;letter-spacing:-0.02em}
+.share-token-line{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text);margin-bottom:22px;position:relative;z-index:1}
+.share-qr{width:160px;height:160px;background:white;border-radius:16px;padding:10px;margin:0 auto 18px;border:1px solid var(--border);position:relative;z-index:1}
+.share-message{font-size:14px;color:var(--dark);font-weight:500;background:var(--white);padding:10px 16px;border-radius:50px;border:1px solid var(--border);display:inline-block;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:18px;position:relative;z-index:1}
+.share-brand{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text);font-weight:500;letter-spacing:0.02em;text-transform:uppercase;position:relative;z-index:1}
+.share-brand-logo{width:14px;height:14px;border-radius:4px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+
+/* ── Receiver claim landing (public) ── */
+.public-wrap{min-height:calc(100vh - 60px);background:linear-gradient(180deg,var(--surface) 0%,var(--green-bg) 100%);padding:24px 16px 60px}
+.public-inner{max-width:440px;margin:0 auto}
+.public-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;padding-top:8px}
+.public-brand-text{font-size:14px;color:var(--text);font-weight:500;letter-spacing:.02em}
+.public-brand-text b{color:var(--dark);font-weight:600}
+.public-card{background:var(--white);border:1px solid var(--border);border-radius:27px;padding:28px 24px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(12,49,36,.06)}
+.public-footer{text-align:center;font-size:12px;color:var(--text);margin-top:24px;line-height:1.7}
+.public-footer a{color:var(--green);text-decoration:none;font-weight:500}
+
+.claim-hero{text-align:center;padding:8px 0 20px}
+.claim-hero .from{font-size:14px;color:var(--text);margin-bottom:6px}
+.claim-hero .from-name{color:var(--dark);font-weight:600}
+.claim-amount{font-size:56px;font-weight:600;color:var(--dark);letter-spacing:-0.04em;line-height:1;margin-bottom:6px}
+.claim-amount .unit{font-size:24px;font-weight:500;color:var(--text);margin-left:8px}
+.claim-message-bubble{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin:16px 0;font-size:14px;color:var(--dark);line-height:1.5}
+.claim-message-bubble .label{font-size:11px;color:var(--text);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+
+.timer-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;background:var(--orange-bg);color:var(--orange);font-size:13px;font-weight:600;margin:8px 0}
+.timer-pill.expired{background:var(--red-bg);color:var(--red)}
+.timer-pill svg{width:14px;height:14px}
+
+/* ── Claim landing FULL-SCREEN (Figma 24118:19971) ── */
+#container-public.claim-landing-fs{min-height:100vh;padding:0;background:none;position:relative;overflow:auto}
+#container-public.claim-landing-fs::before{content:'';position:fixed;inset:0;background:#fdfffe url('../checkout/assets/wallpaper/bg-1.jpg') center/cover no-repeat;z-index:-1}
+#container-public.claim-landing-fs .public-inner{max-width:none;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+#container-public.claim-landing-fs .claim-fs-stack{display:flex;flex-direction:column;align-items:center;gap:20px;width:371px;max-width:100%}
+.claim-fs-title{font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:36px;letter-spacing:-1.52px;color:#fff;text-align:center;margin:0}
+.claim-fs-card{background:linear-gradient(103.99deg,#fff 7.08%,#f4f4f4 52.77%,#fff 98.47%);border:0.5px solid #f3f4f6;border-radius:16px;padding:24px;width:100%;display:flex;flex-direction:column;gap:38px;box-shadow:0 8px 32px rgba(12,49,36,0.08)}
+.claim-fs-head{display:flex;gap:23px;align-items:center}
+.claim-fs-head-info{display:flex;flex-direction:column;gap:24px;align-items:center;justify-content:center;flex:1;min-width:0}
+.claim-fs-head-amount{display:flex;flex-direction:column;gap:4px;align-items:flex-start;white-space:nowrap}
+.claim-fs-redeem-label{font-family:'Archivo',sans-serif;font-weight:600;font-size:14px;line-height:1;letter-spacing:-0.28px;color:#009859;margin:0}
+.claim-fs-amount{font-family:'Archivo',sans-serif;font-weight:700;font-size:32px;line-height:36px;letter-spacing:-1.28px;color:#000;margin:0}
+.claim-fs-from{font-family:'Archivo',sans-serif;font-weight:400;font-size:14px;line-height:1;color:#83968f;margin:0;align-self:stretch;text-align:left}
+.claim-fs-from b{color:#0c3124;font-weight:400}
+.claim-fs-qr{width:133px;height:133px;flex-shrink:0;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:4px}
+.claim-fs-qr svg,.claim-fs-qr img{width:100%;height:100%;display:block}
+.claim-fs-methods{display:flex;flex-direction:column;gap:16px}
+.claim-fs-methods-title{font-family:'Archivo',sans-serif;font-weight:500;font-size:20px;line-height:1;letter-spacing:-0.4px;color:#0c3124;margin:0}
+.claim-fs-options{display:flex;flex-direction:column;gap:4px}
+.claim-fs-option{display:flex;align-items:center;gap:20px;padding:14px;border-radius:12px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:'Archivo',sans-serif;text-align:left;width:100%;transition:border-color .15s}
+.claim-fs-option.selected{border-color:#0c3124}
+.claim-fs-option.disabled{opacity:.5;cursor:not-allowed}
+.claim-fs-option-radio{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.claim-fs-option-radio .ring{width:20.5px;height:20.5px;border-radius:50%;border:1.5px solid #83968f;display:block}
+.claim-fs-option-radio.checked{position:relative}
+.claim-fs-option-radio.checked .dot{width:22px;height:22px;border-radius:50%;background:#000;display:flex;align-items:center;justify-content:center}
+.claim-fs-option-radio.checked .dot svg{width:11px;height:7px;stroke:#fff;fill:none;stroke-width:1.5}
+.claim-fs-option-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.claim-fs-option-title{font-family:'Archivo',sans-serif;font-weight:500;font-size:18px;line-height:1;letter-spacing:-0.36px;color:#0d0d0d;margin:0;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.claim-fs-option-title .as-logo{height:18px;width:auto;display:inline-block;vertical-align:middle}
+.claim-fs-option-sub{font-family:'Archivo',sans-serif;font-weight:400;font-size:14px;line-height:1;color:#0d0d0d;margin:0;white-space:nowrap}
+.claim-fs-option.disabled .claim-fs-option-sub,.claim-fs-option.disabled .claim-fs-option-title{color:#0c3124}
+.claim-fs-cta{height:48px;border:none;border-radius:30px;background:#0d0d0d;color:#fff;font-family:'Archivo',sans-serif;font-weight:500;font-size:18px;line-height:1;letter-spacing:-0.36px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:15px;padding:0 20px;width:100%;transition:background .15s}
+.claim-fs-cta:hover{background:#1a1a1a}
+.claim-fs-footer{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:400;font-size:12px;line-height:1;white-space:nowrap}
+.claim-fs-footer a{color:#fff;text-decoration:underline}
+.claim-fs-footer .row2{display:inline}
+.claim-fs-dev{margin-top:24px;width:371px;max-width:100%;background:rgba(255,255,255,0.9);backdrop-filter:blur(8px);border-radius:12px;padding:14px}
+.claim-fs-dev .section-title{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.claim-fs-dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.claim-fs-dev-grid button{font-size:12px;padding:8px 10px}
+@media(max-width:520px){
+  .claim-fs-title{font-size:30px;line-height:32px;letter-spacing:-1.2px}
+  #container-public.claim-landing-fs .claim-fs-stack{width:100%}
+  .claim-fs-card{padding:20px;gap:28px}
+  .claim-fs-head{gap:14px}
+  .claim-fs-qr{width:108px;height:108px}
+  .claim-fs-amount{font-size:26px}
+  .claim-fs-option-title,.claim-fs-option-sub{white-space:normal}
+}
+
+/* ── Recent activity items (mirrors hist-item) ── */
+.act-list{padding:0}
+.act-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.act-item:last-child{border-bottom:none}
+.act-item:hover{background:var(--card);margin:0 -8px;padding:14px 8px;border-radius:12px;border-bottom-color:transparent}
+.act-icon{width:40px;height:40px;border-radius:12px;background:var(--green-bg);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;position:relative}
+.act-icon.cancelled{background:#EDEFED;color:var(--text)}
+.act-icon.expired{background:var(--orange-bg);color:var(--orange)}
+.act-info{flex:1;min-width:0}
+.act-recipient{font-size:14px;font-weight:500;color:var(--dark);letter-spacing:-0.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-meta{font-size:12px;color:var(--text);margin-top:2px;display:flex;align-items:center;gap:6px}
+.act-right{text-align:right;flex-shrink:0}
+.act-amount{font-size:14px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.act-status{font-size:11px;font-weight:500;margin-top:2px}
+.act-status.awaiting{color:var(--orange)}
+.act-status.claimed{color:var(--green)}
+.act-status.expired{color:var(--text)}
+.act-status.cancelled{color:var(--text)}
+
+/* ── Detail page status ── */
+.detail-status-card{background:var(--card);border-radius:18px;padding:20px;margin-bottom:16px;text-align:center}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;margin-bottom:12px}
+.status-pill.awaiting-deposit{background:var(--blue-bg);color:var(--blue)}
+.status-pill.awaiting-claim{background:var(--orange-bg);color:var(--orange)}
+.status-pill.claimed{background:var(--green-bg);color:var(--green)}
+.status-pill.expired{background:var(--red-bg);color:var(--red)}
+.status-pill.cancelled{background:#EDEFED;color:var(--text)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.status-dot.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.detail-amount{font-size:42px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;margin-bottom:4px}
+.detail-amount .unit{font-size:18px;color:var(--text);font-weight:500;margin-left:6px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;gap:12px}
+.detail-row:last-of-type{border-bottom:none}
+.detail-row .k{color:var(--text);font-weight:500;flex-shrink:0}
+.detail-row .v{color:var(--dark);font-weight:500;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.detail-row .v.mono{font-family:'DM Mono','SF Mono',monospace;font-size:13px}
+.detail-row .v.link{color:var(--green);cursor:pointer;text-decoration:underline}
+
+.link-box{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.link-box .url{flex:1;font-family:'DM Mono','SF Mono',monospace;font-size:12px;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.copy-btn{padding:6px 12px;border-radius:50px;background:var(--green);color:white;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Archivo',sans-serif;flex-shrink:0;transition:background .15s}
+.copy-btn:hover{background:var(--green-hover)}
+
+/* ── Status track ── */
+.status-track{padding:8px 0}
+.status-step{display:flex;align-items:flex-start;gap:14px;position:relative;padding-bottom:20px}
+.status-step:last-child{padding-bottom:0}
+.status-step::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--border)}
+.status-step:last-child::before{display:none}
+.status-step.done::before{background:var(--green)}
+.status-step.active::before{background:linear-gradient(to bottom,var(--green) 50%,var(--border) 50%)}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;position:relative;z-index:1}
+.step-dot.done{background:var(--green);color:white}
+.step-dot.active{background:var(--green-bg);color:var(--green);border:2px solid var(--green)}
+.step-dot.pending{background:var(--card);color:var(--text);border:2px solid var(--border)}
+.step-info{flex:1;padding-top:4px}
+.step-info .label{font-size:14px;font-weight:500;color:var(--dark)}
+.step-info .sub{font-size:12px;color:var(--text);margin-top:2px}
+.status-step.done .step-info .label{color:var(--green)}
+
+/* ── Completion ── */
+.completion{text-align:center;padding:16px 0}
+.completion-icon{width:72px;height:72px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.completion-icon.success{background:var(--green-bg);color:var(--green)}
+.completion-icon.failed{background:var(--red-bg);color:var(--red)}
+.completion-icon.warn{background:var(--orange-bg);color:var(--orange)}
+.completion-icon.neutral{background:var(--btn);color:var(--text)}
+.completion-title{font-size:22px;font-weight:600;margin-bottom:6px;letter-spacing:-0.02em}
+.completion-sub{font-size:14px;color:var(--text);line-height:1.6}
+
+/* ── Receiver CTAs ── */
+.cta-group{margin-top:8px}
+.cta-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;cursor:pointer;transition:all .15s;margin-bottom:10px;text-align:left;width:100%;font-family:'Archivo',sans-serif}
+.cta-card:hover{border-color:var(--green);background:var(--green-bg)}
+.cta-card-icon{width:44px;height:44px;border-radius:12px;background:var(--white);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green)}
+.cta-card-info{flex:1;min-width:0}
+.cta-card-title{font-size:15px;font-weight:600;color:var(--dark);letter-spacing:-0.02em}
+.cta-card-sub{font-size:12px;color:var(--text);margin-top:2px;line-height:1.5}
+.cta-card-arrow{color:var(--text);font-size:20px;flex-shrink:0}
+
+/* ── Confirm checkbox ── */
+.confirm-row{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--card);border-radius:12px;margin:12px 0;cursor:pointer}
+.confirm-checkbox{width:20px;height:20px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;transition:all .15s;margin-top:1px}
+.confirm-checkbox.checked{background:var(--green);border-color:var(--green);color:white}
+.confirm-text{font-size:13px;color:var(--dark);line-height:1.5}
+
+/* ── Alert ── */
+.alert-box{border-radius:14px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
+.alert-box.warn{background:var(--orange-bg);border:1px solid rgba(245,166,35,.2)}
+.alert-box.info{background:var(--blue-bg);border:1px solid rgba(39,117,202,.15)}
+.alert-box.success{background:var(--green-bg);border:1px solid rgba(0,152,89,.15)}
+.alert-icon{font-size:18px;flex-shrink:0}
+.alert-content{flex:1}
+.alert-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.alert-text{font-size:13px;line-height:1.5;color:var(--dark);opacity:.85}
+
+/* ── Token picker rows (matches offramp bank-card pattern) ── */
+.token-pick-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;margin-bottom:10px;cursor:pointer;transition:all .15s;position:relative;font-family:'Archivo',sans-serif}
+.token-pick-card:last-child{margin-bottom:0}
+.token-pick-card:hover{border-color:var(--green);background:var(--btn)}
+.token-pick-card.selected{border-color:var(--green);background:var(--green-bg)}
+.token-pick-name{font-size:16px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.token-pick-sub{font-size:13px;color:var(--text);margin-top:2px;font-weight:500}
+.token-pick-bal{font-size:16px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.token-pick-bal-sub{font-size:12px;color:var(--text);margin-top:2px;font-weight:500}
+.token-pick-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center}
+
+/* ── Sheet ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.sheet-overlay.open{opacity:1;pointer-events:all}
+.sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--white);border-radius:24px 24px 0 0;padding:0;z-index:201;transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:85vh;overflow-y:auto}
+.sheet.open{transform:translateX(-50%) translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0}
+.sheet-header{padding:20px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.sheet-title{font-size:22px;font-weight:500;color:var(--dark);letter-spacing:-0.02em}
+.sheet-close{width:32px;height:32px;border-radius:50%;background:var(--btn);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dark);flex-shrink:0}
+.sheet-close:hover{background:var(--border)}
+.sheet-body{padding:0 20px 24px}
+
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:#FAFBFA;border:1px solid #E5EEEA;border-radius:28px;padding:12px 16px;font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;box-shadow:0 8px 40px rgba(0,0,0,0.10);display:inline-flex;align-items:center;gap:10px;pointer-events:auto;animation:toastIn .25s ease;white-space:nowrap}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* Email delivery status badge (§6.4.7) */
+.email-badge{display:inline-flex;align-items:center;gap:4px}
+.email-badge.delivered{background:var(--green-bg);color:var(--green)}
+.email-badge.bounced{background:var(--red-bg);color:var(--red)}
+.email-badge.pending{background:var(--orange-bg);color:var(--orange)}
+
+/* Refunds-list filter pills (§7.5) */
+.refund-filter-pill:hover{border-color:var(--green);color:var(--green)}
+.refund-filter-pill.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+.refund-filter-pill[data-filter="action"].active{background:var(--red);border-color:var(--red);color:white}
+
+/* Status pills for refund states not in main list */
+.status-pill.awaiting-deposit{background:var(--blue-bg);color:var(--blue)}
+.status-pill.link-sent{background:var(--orange-bg);color:var(--orange)}
+.status-pill.claiming{background:var(--blue-bg);color:var(--blue)}
+.status-pill.failed-pending-merchant{background:var(--red-bg);color:var(--red)}
+
+/* Resend rate-limit countdown styling */
+.btn-secondary.cooling{color:var(--text);cursor:not-allowed;pointer-events:none;background:var(--card)}
+.btn-secondary.cooling::after{content:attr(data-countdown);font-family:'DM Mono','SF Mono',monospace;font-size:11px;margin-left:6px;opacity:.7}
+
+/* ── Email preview ── */
+.mail-preview{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px}
+.mail-header{padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border)}
+.mail-from{font-size:12px;color:var(--text);margin-bottom:2px}
+.mail-from b{color:var(--dark);font-weight:600}
+.mail-subject{font-size:14px;font-weight:600;color:var(--dark);margin-top:4px}
+.mail-body{padding:18px 16px;font-size:13px;color:var(--dark);line-height:1.6;white-space:pre-wrap}
+.mail-cta{display:inline-block;background:var(--green);color:white;padding:10px 20px;border-radius:50px;text-decoration:none;font-weight:500;margin:10px 0;font-size:13px}
+
+/* ── New-feature callout ── */
+.new-callout{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--green-bg);border:1px solid rgba(0,152,89,.15);border-radius:16px;margin-bottom:16px}
+.new-callout-icon{width:32px;height:32px;border-radius:10px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.new-callout-text{flex:1;font-size:13px;color:var(--dark);line-height:1.5}
+.new-callout-text b{color:var(--green);font-weight:600}
+
+@media(max-width:520px){.container{padding:12px}.card{padding:20px 16px;border-radius:22px}.pg-title{font-size:24px}.share-amount{font-size:40px}.claim-amount{font-size:44px}.action-grid{grid-template-columns:repeat(4,1fr)}.action-tile{padding:10px 4px}.action-tile-label{font-size:11px}}
+
+/* ── Bell icon (top-right of Wallet page · matches production) ── */
+.bell-btn{position:relative;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.bell-btn:hover{background:var(--card)}
+.bell-dot{position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--white)}
+
+/* ── Updates screen (existing notification surface) ── */
+.updates-header{display:flex;align-items:center;justify-content:center;position:relative;padding:14px 0 22px}
+.updates-back{position:absolute;left:0;top:8px;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dark)}
+.updates-back:hover{background:var(--card)}
+.updates-title-wrap{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;color:var(--dark);letter-spacing:-0.02em}
+.updates-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 8px;border-radius:50px;background:var(--red);color:white;font-size:12px;font-weight:700;letter-spacing:0;line-height:1}
+.update-item{padding:18px 0;border-bottom:1px solid var(--border)}
+.update-item:first-child{padding-top:6px}
+.update-item:last-child{border-bottom:none}
+.update-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.update-item-title{font-size:15px;font-weight:600;color:var(--dark);letter-spacing:-0.02em;line-height:1.3}
+.update-item-date{font-size:12px;color:var(--text);font-weight:500;flex-shrink:0;line-height:1.5}
+.update-item-desc{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:10px;font-weight:500}
+.update-item-desc b{color:var(--dark);font-weight:600}
+
+/* ── Pending "New status" widget (matches production wallet) ── */
+.ns-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ns-title{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;color:var(--dark);letter-spacing:-0.02em}
+.ns-title-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0}
+.ns-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 8px;border-radius:50px;background:var(--red);color:white;font-size:12px;font-weight:700;letter-spacing:0;line-height:1}
+.ns-collapse-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.ns-collapse-btn:hover{background:var(--card)}
+.ns-collapse-btn svg{transition:transform .25s ease}
+.ns-collapse-btn.collapsed svg{transform:rotate(180deg)}
+.ns-list{transition:max-height .3s ease,opacity .2s ease;overflow:hidden;max-height:2000px}
+.ns-list.collapsed{max-height:0;opacity:0}
+.ns-item{padding:14px 0;border-bottom:1px solid var(--border)}
+.ns-item:first-child{padding-top:4px}
+.ns-item:last-child{border-bottom:none;padding-bottom:8px}
+.ns-item-row{display:flex;align-items:flex-start;gap:12px}
+.ns-avatar{width:44px;height:44px;border-radius:50%;background:var(--btn);color:var(--dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.ns-avatar.brand{background:var(--green);color:white}
+.ns-avatar.system{background:var(--green-bg);color:var(--green)}
+.ns-info{flex:1;min-width:0}
+.ns-name{font-size:15px;font-weight:600;color:var(--dark);letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.3}
+.ns-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;color:var(--green);padding:2px 8px;border-radius:50px;background:var(--green-bg);letter-spacing:0;line-height:1.4}
+.ns-name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
+.ns-time{font-size:12px;color:var(--text);margin-top:3px;font-weight:500}
+.ns-amount{font-size:15px;font-weight:600;color:var(--dark);letter-spacing:-0.02em;text-align:right;flex-shrink:0;line-height:1.3}
+.ns-amount.pos{color:var(--green)}
+.ns-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;margin-left:56px}
+.ns-action-btn{padding:10px;border:none;border-radius:50px;font-family:'Archivo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-0.02em;transition:background .15s}
+.ns-action-btn.primary{background:var(--green-bg);color:var(--green)}
+.ns-action-btn.primary:hover{background:rgba(0,152,89,.18)}
+.ns-action-btn.secondary{background:var(--card);color:var(--text)}
+.ns-action-btn.secondary:hover{background:var(--btn);color:var(--dark)}
+.ns-see-more{display:block;width:100%;margin-top:12px;padding:12px;border:1.5px solid var(--border);border-radius:50px;background:transparent;color:var(--dark);font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:-0.02em;transition:all .15s}
+.ns-see-more:hover{border-color:var(--green);color:var(--green)}
+.ns-progress{font-size:13px;color:var(--text);font-weight:500;margin-top:2px}
+.ns-progress b{color:var(--dark);font-weight:600}
+
+/* ── Annotation overlay (toggle in topbar) ── */
+/* For non-sheet elements: add position:relative + overflow:visible + outline */
+body.show-annotations [data-anno]:not(.sheet){position:relative;outline:1px dashed transparent;outline-offset:2px;overflow:visible}
+/* For sheets: keep their position:fixed and overflow-y:auto intact — only add the dashed outline */
+body.show-annotations .sheet[data-anno]{outline:1px dashed transparent;outline-offset:2px}
+body.show-annotations [data-anno="NEW"]{outline-color:rgba(0,152,89,.5)}
+body.show-annotations [data-anno="AS-IS"]{outline-color:rgba(39,117,202,.5)}
+body.show-annotations [data-anno]::after{
+  content:attr(data-anno);
+  position:absolute;top:-9px;right:8px;padding:2px 7px;border-radius:50px;
+  font-size:9px;font-weight:700;letter-spacing:.06em;line-height:1.4;
+  font-family:'Archivo',sans-serif;z-index:50;pointer-events:none;
+  box-shadow:0 1px 3px rgba(12,49,36,.15);
+}
+/* For sheets, the pill must sit INSIDE (sheet's overflow-y:auto would otherwise clip it at top).
+   Tuck it into the sheet header area, left of the close button. */
+body.show-annotations .sheet[data-anno]::after{top:14px;right:60px}
+body.show-annotations [data-anno="NEW"]::after{background:var(--green);color:white}
+body.show-annotations [data-anno="AS-IS"]::after{background:var(--blue);color:white}
+.anno-banner{display:none;background:var(--white);border-bottom:1px solid var(--border);padding:8px 20px;font-size:12px;color:var(--text);text-align:center;letter-spacing:0}
+body.show-annotations .anno-banner{display:block}
+.anno-banner .anno-tag{display:inline-block;padding:1px 7px;border-radius:50px;color:white;font-size:10px;font-weight:700;letter-spacing:.06em;margin:0 4px 0 10px;vertical-align:1px}
+.anno-banner .anno-tag.new{background:var(--green)}
+.anno-banner .anno-tag.asis{background:var(--blue)}
+.anno-toggle{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;font-family:'Archivo',sans-serif;transition:all .15s}
+.anno-toggle:hover{border-color:var(--green);color:var(--dark)}
+.anno-toggle.active{background:var(--dark);border-color:var(--dark);color:white}
+.anno-toggle-dot{width:6px;height:6px;border-radius:50%;background:var(--text);transition:background .15s}
+.anno-toggle.active .anno-toggle-dot{background:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- ── Topbar (Sender / Email side) ── -->
+<div class="topbar" id="topbar-pay">
+  <div class="topbar-logo">A</div>
+  <div class="topbar-title">AllScale Pay <span id="topbar-mode-label">Dashboard</span>
+    <div class="topbar-sub">PRD MVP · Proj Richmond · 1-on-1 P2P / Merchant refund (Payment Link or original address)</div>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn active" data-side="sender" onclick="switchSide('sender')">Sender</button>
+    <button class="mode-btn" data-side="merchant" onclick="switchSide('merchant')">Merchant</button>
+    <button class="mode-btn" data-side="receiver" onclick="switchSide('receiver')">Receiver</button>
+    <button class="anno-toggle" id="anno-toggle-1" onclick="toggleAnnotations()">
+      <span class="anno-toggle-dot"></span> Annotations
+    </button>
+  </div>
+</div>
+
+<!-- ── Topbar (Receiver public chrome) ── -->
+<div class="topbar public" id="topbar-public" style="display:none;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="topbar-logo">A</div>
+    <div style="font-size:15px;font-weight:600;color:var(--dark)">AllScale</div>
+  </div>
+  <div class="mode-btns">
+    <button class="mode-btn" data-side="sender" onclick="switchSide('sender')">Sender</button>
+    <button class="mode-btn" data-side="merchant" onclick="switchSide('merchant')">Merchant</button>
+    <button class="mode-btn active" data-side="receiver" onclick="switchSide('receiver')">Receiver</button>
+    <button class="anno-toggle" id="anno-toggle-2" onclick="toggleAnnotations()">
+      <span class="anno-toggle-dot"></span> Annotations
+    </button>
+  </div>
+</div>
+
+<!-- Annotation legend banner (only visible when annotations toggle is on) -->
+<div class="anno-banner">
+  <span class="anno-tag new">NEW</span>本 PRD 实现
+  <span class="anno-tag asis">AS-IS</span>原有逻辑 / demo 占位，<b style="color:var(--red)">不要改动</b>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SENDER SIDE — Pay dashboard
+     ════════════════════════════════════════════════ -->
+<div class="container" id="container-pay">
+
+  <!-- ─── Dashboard (matches production Wallet page) ─── -->
+  <div class="screen active" id="screen-dashboard">
+    <!-- Page chrome row · avatar + bell (existing) -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div data-anno="AS-IS" style="width:40px;height:40px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--dark);font-size:14px">Y</div>
+      <button class="bell-btn" data-anno="AS-IS" onclick="goScreen('updates')" title="Updates">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--dark)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="bell-dot"></span>
+      </button>
+    </div>
+
+    <!-- Balance card (centered, matches production) -->
+    <div class="card" data-anno="AS-IS" style="text-align:center;padding:28px 20px">
+      <div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:8px">Balance</div>
+      <div style="display:inline-flex;align-items:baseline;gap:6px;cursor:pointer" onclick="toast('Balance breakdown · 1,250 USDT + 320 USDC')">
+        <div style="font-size:48px;font-weight:700;color:var(--dark);letter-spacing:-0.04em;line-height:1;display:flex;align-items:baseline">
+          <span>$1,570</span><span style="font-size:24px;color:var(--text);font-weight:700;margin-left:2px">.00</span>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" style="margin-left:4px"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px">
+        <button onclick="toast('Existing deposit flow')" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:50px;border:none;background:var(--green);color:white;font-family:'Archivo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:-0.02em">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><polyline points="16 12 12 16 8 12"/></svg>
+          Deposit
+        </button>
+        <button onclick="openWithdrawPicker()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--dark);font-family:'Archivo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:-0.02em">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          Withdraw
+        </button>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+    <div class="section-title">Activity</div>
+    <div class="card" data-anno="AS-IS" style="padding:14px 18px">
+      <div class="act-list" id="recent-list"></div>
+    </div>
+
+    <div style="height:18px"></div>
+    <div class="section-title">Demo controls</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="loadScenario('p2p')" style="margin-bottom:8px">Quick: P2P send (with email)</button>
+      <button class="btn-outline" onclick="loadScenario('url')" style="margin-bottom:8px">Quick: Share-link only (no email)</button>
+      <button class="btn-outline" onclick="loadScenario('overlimit')" style="margin-bottom:8px">Edge case: Amount &gt; $500 limit</button>
+      <button class="btn-outline" onclick="switchSide('merchant')">→ Switch to Merchant view</button>
+    </div>
+  </div>
+
+  <!-- ─── Updates (existing notification surface · Payment Link items go here) ─── -->
+  <div class="screen" id="screen-updates">
+    <div class="updates-header" data-anno="AS-IS">
+      <button class="updates-back" onclick="goScreen('dashboard')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="updates-title-wrap">
+        <span>Updates</span>
+        <span class="updates-count" id="updates-count">3</span>
+      </div>
+    </div>
+
+    <div class="card" data-anno="AS-IS" style="padding:0 20px">
+      <div id="updates-list"></div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="alert-box info" data-anno="NEW" style="margin-bottom:0">
+      <div class="alert-icon">ℹ️</div>
+      <div class="alert-content">
+        <div class="alert-title">What's new in this PRD</div>
+        <div class="alert-text">The Updates surface itself is existing infrastructure. <b>Payment Link items (outgoing & incoming) are the new content type</b> being added — they reuse the same row format and action-button pattern as existing notifications.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── All Refunds list (Merchant cross-order view, §7.5) ─── -->
+  <div class="screen" id="screen-refunds-list">
+    <button class="back-btn" onclick="goScreen('merchant-dashboard')">← Back to merchant</button>
+    <div class="pg-title">Refunds</div>
+    <div class="pg-subtitle">All refunds across your Checkout orders · same state machine as Payment Link (§6.2.5)</div>
+
+    <!-- Filter pills -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="refund-filter-pill active" data-filter="all" onclick="setRefundFilter('all')" style="padding:6px 14px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-size:13px;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:500">All</button>
+      <button class="refund-filter-pill" data-filter="active" onclick="setRefundFilter('active')" style="padding:6px 14px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-size:13px;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:500">Active</button>
+      <button class="refund-filter-pill" data-filter="terminal" onclick="setRefundFilter('terminal')" style="padding:6px 14px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-size:13px;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:500">Completed</button>
+      <button class="refund-filter-pill" data-filter="action" onclick="setRefundFilter('action')" style="padding:6px 14px;border-radius:50px;border:1.5px solid var(--red);background:var(--white);color:var(--red);font-size:13px;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:500">Action needed</button>
+    </div>
+
+    <div class="card" style="padding:14px 18px">
+      <div class="act-list" id="refunds-list"></div>
+    </div>
+  </div>
+
+  <!-- ─── Merchant Dashboard ─── -->
+  <div class="screen" id="screen-merchant-dashboard">
+    <div class="section-title">Merchant</div>
+    <div class="card" data-anno="AS-IS">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0">B</div>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:600;color:var(--dark);letter-spacing:-0.02em">Bravo Coffee</div>
+          <div style="font-size:13px;color:var(--text);margin-top:2px">Merchant ID · M-9032 · Settled to USDT / Ethereum</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:13px;color:var(--text);font-weight:500">Total volume (30d)</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;margin-top:2px">$8,420<span style="font-size:14px;color:var(--text)">.00</span></div>
+        </div>
+        <div>
+          <div style="font-size:13px;color:var(--text);font-weight:500">Refunded (30d)</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dark);letter-spacing:-0.03em;margin-top:2px">$149<span style="font-size:14px;color:var(--text)">.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+    <div class="section-title">Recent orders</div>
+    <div class="card" data-anno="AS-IS" style="padding:14px 18px">
+      <div class="act-list">
+        <div class="act-item" onclick="goScreen('order-detail')">
+          <div class="act-icon" style="background:var(--green-bg);color:var(--green)">✓</div>
+          <div class="act-info">
+            <div class="act-recipient">ORD-4821 · 0x742d…F44e</div>
+            <div class="act-meta">Settled · Apr 15, 2026 · 14:32</div>
+          </div>
+          <div class="act-right">
+            <div class="act-amount">120.00 USDT</div>
+            <div class="act-status claimed">Settled</div>
+          </div>
+        </div>
+        <div class="act-item" onclick="toast('Existing Checkout order — out of demo scope')">
+          <div class="act-icon" style="background:var(--green-bg);color:var(--green)">✓</div>
+          <div class="act-info">
+            <div class="act-recipient">ORD-4820 · 0x91a3…8B7C</div>
+            <div class="act-meta">Settled · Apr 14, 2026 · 09:12</div>
+          </div>
+          <div class="act-right">
+            <div class="act-amount">75.00 USDC</div>
+            <div class="act-status claimed">Settled</div>
+          </div>
+        </div>
+        <div class="act-item" onclick="toast('Existing Checkout order — out of demo scope')">
+          <div class="act-icon" style="background:var(--green-bg);color:var(--green)">✓</div>
+          <div class="act-info">
+            <div class="act-recipient">ORD-4818 · 0xc4f9…1A30</div>
+            <div class="act-meta">Settled · Apr 12, 2026 · 16:48</div>
+          </div>
+          <div class="act-right">
+            <div class="act-amount">42.50 USDT</div>
+            <div class="act-status claimed">Settled</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Refunds issued <span style="color:var(--text);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px">· §7.5</span></span>
+      <span style="color:var(--green);font-weight:500;cursor:pointer;letter-spacing:0;text-transform:none" onclick="goScreen('refunds-list')">View all →</span>
+    </div>
+    <div class="card" data-anno="NEW" style="padding:14px 18px">
+      <div class="act-list" id="dashboard-refunds-preview"></div>
+    </div>
+
+    <div style="height:18px"></div>
+    <div class="section-title">Demo controls</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="goScreen('order-detail')" style="margin-bottom:8px">Open ORD-4821 detail (§7.6 refund flow)</button>
+      <button class="btn-outline" onclick="loadScenario('merchant-refund')">Quick: skip to refund creation form</button>
+    </div>
+  </div>
+
+  <!-- ─── Order Detail (Checkout merchant view, §7.6 entry) ─── -->
+  <div class="screen" id="screen-order-detail">
+    <button class="back-btn" onclick="goScreen('merchant-dashboard')">← Back to merchant</button>
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div class="pg-title" style="margin-bottom:4px">Order #ORD-4821</div>
+        <div class="pg-subtitle" style="margin-bottom:0">Checkout · Settled Apr 15, 2026 · 14:32</div>
+      </div>
+      <button class="btn-primary" data-anno="NEW" id="order-refund-btn" onclick="openRefundModal()" style="width:auto;height:40px;padding:0 18px;font-size:14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Refund
+      </button>
+    </div>
+
+    <!-- Order summary -->
+    <div class="card" data-anno="AS-IS" style="margin-bottom:14px">
+      <div class="detail-row">
+        <span class="k">Customer</span>
+        <span class="v mono">0x742d…F44e</span>
+      </div>
+      <div class="detail-row" id="order-email-row">
+        <span class="k">Customer email</span>
+        <span class="v">refund@buyer.io</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">Settlement</span>
+        <span class="v">120.00 USDT · Ethereum</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">Status</span>
+        <span class="v" style="color:var(--green);font-weight:600">Settled</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">Order ID</span>
+        <span class="v mono">ORD-4821</span>
+      </div>
+    </div>
+
+    <!-- Refund history -->
+    <div class="section-title">Refund history</div>
+    <div class="card" data-anno="NEW" style="padding:14px 18px">
+      <div id="refund-history-list">
+        <div style="text-align:center;font-size:13px;color:var(--text);padding:18px 0">No refunds yet for this order.</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="section-title">Demo controls</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="setOrderEmail(true)" style="margin-bottom:8px" id="oc-with-email-btn">Order has customer email (default mode 1)</button>
+      <button class="btn-outline" onclick="setOrderEmail(false)" id="oc-no-email-btn">Order has no customer email (default mode 2)</button>
+    </div>
+  </div>
+
+  <!-- ─── Send Create — mirrors multi-stablecoin Withdraw popup ─── -->
+  <div class="screen" id="screen-send-create">
+    <button class="back-btn" onclick="goScreen('dashboard')">← Back</button>
+
+    <div class="card">
+      <div class="popup-title" id="send-popup-title">Create Payment Link</div>
+
+      <!-- Scenario banner (only shown for KYT / merchant refund) -->
+      <div id="scenario-banner" class="alert-box" style="display:none;margin-bottom:14px">
+        <div class="alert-icon" id="scenario-banner-icon">🛡️</div>
+        <div class="alert-content">
+          <div class="alert-title" id="scenario-banner-title">KYT refund</div>
+          <div class="alert-text" id="scenario-banner-text">System-initiated. Recipient email is auto-filled from the original payment record.</div>
+        </div>
+      </div>
+
+      <!-- Send to (with destination type tabs inline) -->
+      <div class="wd-to-section" data-anno="NEW">
+        <div class="wd-to-label">Send to</div>
+        <div class="wd-dest-tabs">
+          <button class="wd-dest-tab" data-dest="address" onclick="setDest('address')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Wallet address
+          </button>
+          <button class="wd-dest-tab active" data-dest="email" onclick="setDest('email')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email or Link
+            <span class="wd-dest-tab-badge">New</span>
+          </button>
+        </div>
+
+        <!-- Address mode (existing) -->
+        <div id="dest-address" style="display:none">
+          <div class="wd-to-row">
+            <div class="wd-to-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <span class="wd-to-text placeholder">Enter wallet address…</span>
+            <span class="wd-to-chevron">›</span>
+          </div>
+          <div class="skip-hint">Existing send flow — handled by current Send module.</div>
+        </div>
+
+        <!-- Email or link mode -->
+        <div id="dest-email">
+          <input class="wd-email-input" id="send-email" type="email" placeholder="friend@example.com" oninput="onEmailChange()" autocomplete="off">
+          <div class="skip-toggle" id="skip-toggle" onclick="toggleSkipEmail()">
+            <div class="skip-icon" id="skip-icon">✓</div>
+            <span id="skip-label">Skip — share via link instead</span>
+          </div>
+          <div class="skip-hint" id="email-hint">We'll email a claim link to your recipient.</div>
+        </div>
+      </div>
+
+      <!-- Token & Network -->
+      <div class="wd-section" data-anno="AS-IS">
+        <div class="wd-section-label">Token&amp;Network</div>
+        <div class="wd-token-row" onclick="openTokenSheet()">
+          <div class="wd-token-icon-wrap">
+            <span class="coin-icon usdt lg" id="send-token-icon" style="position:relative">T<span class="chain-mini">E</span></span>
+          </div>
+          <span class="wd-token-name" id="send-token-name">Ethereum — USDT</span>
+          <span class="wd-token-chevron">›</span>
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div class="wd-amount-section" data-anno="AS-IS">
+        <div class="wd-amount-label">Amount</div>
+        <div class="wd-amount-row">
+          <div class="wd-amount-inner">
+            <input class="wd-amount-input" id="send-amount" type="text" inputmode="decimal" placeholder="0" oninput="onAmountChange()">
+            <span class="wd-amount-unit" id="send-amount-unit">USDT</span>
+          </div>
+          <button class="wd-max-btn" onclick="setMax()">MAX</button>
+        </div>
+        <div class="wd-avail" id="send-avail">Available: <span id="send-avail-balance">1,250.00 USDT</span> · Single-send limit: $500</div>
+      </div>
+
+      <!-- Message (only relevant for Email/Link mode) -->
+      <div class="wd-section" data-anno="NEW" id="msg-group">
+        <div class="wd-section-label">Message <span style="color:var(--text);font-weight:400;background:transparent;padding:0;margin-left:2px">(optional)</span></div>
+        <textarea class="wd-message-input" id="send-message" placeholder="Happy birthday 🎂" maxlength="200" oninput="onMsgChange()"></textarea>
+        <div class="wd-msg-counter"><span id="msg-counter">0</span>/200</div>
+      </div>
+
+      <button class="btn-primary disabled" id="send-btn" onclick="onSubmitSend()" style="margin-top:8px">Continue</button>
+    </div>
+  </div>
+
+  <!-- ─── Mode 3: Refund to original address (no AS temp wallet, no claim link) ─── -->
+  <div class="screen" id="screen-merchant-onchain">
+    <button class="back-btn" onclick="goScreen('dashboard')">← Back</button>
+
+    <div class="card" data-anno="NEW">
+      <div class="popup-title">Refund to original address</div>
+
+      <div class="alert-box info" style="margin-bottom:14px">
+        <div class="alert-icon">↩️</div>
+        <div class="alert-content">
+          <div class="alert-title">Mode 3 · Original-address refund</div>
+          <div class="alert-text">No claim link. AllScale doesn't custody these funds — you'll sign a transfer directly back to the customer's original payer address.</div>
+        </div>
+      </div>
+
+      <!-- Recipient: original payer (read-only, system-filled) -->
+      <div class="wd-to-section">
+        <div class="wd-to-label">Refund to · Original payer</div>
+        <div class="wd-to-row" style="cursor:default">
+          <div class="wd-to-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div class="wd-to-text" style="font-family:'DM Mono','SF Mono',monospace;font-size:13px">0x742d…F44e</div>
+            <div class="wd-to-sub">Auto-filled from original Checkout order #ORD-4821</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token & Network (locked to original chain) -->
+      <div class="wd-section">
+        <div class="wd-section-label">Token · same chain as original payment</div>
+        <div class="wd-token-row" style="cursor:default">
+          <div class="wd-token-icon-wrap">
+            <span class="coin-icon usdt lg" style="position:relative">T<span class="chain-mini">E</span></span>
+          </div>
+          <span class="wd-token-name">Ethereum — USDT</span>
+        </div>
+      </div>
+
+      <!-- Amount (editable for partial refund) -->
+      <div class="wd-amount-section">
+        <div class="wd-amount-label">Refund amount</div>
+        <div class="wd-amount-row">
+          <div class="wd-amount-inner">
+            <input class="wd-amount-input" id="oc-amount" type="text" inputmode="decimal" value="120.00">
+            <span class="wd-amount-unit">USDT</span>
+          </div>
+        </div>
+        <div class="wd-avail">Original payment: <span>120.00 USDT</span></div>
+      </div>
+
+      <div class="alert-box warn" style="margin-bottom:14px">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <div class="alert-title">Address risk is yours</div>
+          <div class="alert-text">If the original payer used an exchange deposit address or contract wallet, the on-chain transfer may complete but funds may not reach the customer. Verify before signing.</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="goScreen('merchant-onchain-2fa')">Authorize & sign</button>
+    </div>
+  </div>
+
+  <!-- ─── Mode 3: 2FA confirm ─── -->
+  <div class="screen" id="screen-merchant-onchain-2fa">
+    <button class="back-btn" onclick="goScreen('merchant-onchain')">← Back</button>
+    <div class="card" data-anno="AS-IS">
+      <div class="completion">
+        <div style="font-size:48px;margin-bottom:16px">📧</div>
+        <div class="completion-title" style="margin-bottom:6px">Confirm refund</div>
+        <div class="completion-sub">Enter the verification code sent to your email.</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin:20px 0">
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="4" readonly>
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="8" readonly>
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="2" readonly>
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="6" readonly>
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="1" readonly>
+        <input class="form-input" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:600;padding:0" maxlength="1" value="9" readonly>
+      </div>
+      <button class="btn-primary" onclick="submitOnchainRefund()">Sign & broadcast</button>
+      <div style="height:14px"></div>
+      <div class="section-title">Simulate states</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-outline" onclick="onchainOutcome('claimed')" style="flex:1">→ Success (claimed)</button>
+        <button class="btn-outline" onclick="onchainOutcome('failed')" style="flex:1">→ Hard fail</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Awaiting deposit ─── -->
+  <div class="screen" id="screen-send-deposit">
+    <div class="pg-title" id="dep-page-title">Creating Payment Link…</div>
+    <div class="pg-subtitle" id="dep-page-sub">Funding a one-time link wallet from your AllScale balance.</div>
+
+    <div class="card" data-anno="NEW" id="dep-progress-card">
+      <div class="completion">
+        <div class="completion-icon" id="dep-icon" style="background:var(--green-bg);color:var(--green)">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="completion-title" id="dep-title">Funding link wallet</div>
+        <div class="completion-sub" id="dep-completion-sub">Sending <b id="dep-amount">100.00 USDT</b> from your AllScale wallet.</div>
+      </div>
+
+      <div class="status-track" style="margin-top:16px" id="dep-status-track">
+        <div class="status-step done">
+          <div class="step-dot done">✓</div>
+          <div class="step-info">
+            <div class="label">One-time wallet created</div>
+            <div class="sub">Custodial · expires in 72h</div>
+          </div>
+        </div>
+        <div class="status-step active" id="dep-step-fund">
+          <div class="step-dot active">2</div>
+          <div class="step-info">
+            <div class="label">Funding wallet</div>
+            <div class="sub" id="dep-step2-sub">Confirming on-chain transfer…</div>
+          </div>
+        </div>
+        <div class="status-step" id="dep-step-link">
+          <div class="step-dot pending">3</div>
+          <div class="step-info">
+            <div class="label">Generate claim link</div>
+            <div class="sub" id="dep-step3-sub">Email will be sent to recipient.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="dep-cta" onclick="goScreen('send-success')" style="margin-top:16px;display:none">Continue</button>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="section-title">Simulate states</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="simulateDeposit('success')" style="margin-bottom:8px">Funding succeeded → show link</button>
+      <button class="btn-outline" onclick="simulateDeposit('pending')" style="margin-bottom:8px">Funding still pending</button>
+      <button class="btn-outline" onclick="simulateDeposit('failed')">On-chain transfer failed</button>
+    </div>
+  </div>
+
+  <!-- ─── Send Success ─── -->
+  <div class="screen" id="screen-send-success">
+    <div class="pg-title">Link is ready</div>
+    <div class="pg-subtitle" id="success-subtitle">Email sent to your recipient. Share the card or link anywhere.</div>
+
+    <div class="card" data-anno="NEW">
+      <div class="share-card-wrap">
+        <div class="share-card" id="share-card">
+          <div class="share-sender">
+            <div class="share-avatar" id="share-avatar">Y</div>
+            <div style="text-align:left">
+              <div class="share-sender-name" id="share-sender-name">Yao</div>
+              <div class="share-sender-sub">sent you</div>
+            </div>
+          </div>
+          <div class="share-amount"><span id="share-amount">100.00</span><span class="unit" id="share-amount-unit">USDT</span></div>
+          <div class="share-token-line">via AllScale</div>
+          <div class="share-qr">
+            <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" id="qr-svg"></svg>
+          </div>
+          <div class="share-message" id="share-message" style="display:none"></div>
+          <div class="share-brand">
+            <div class="share-brand-logo">A</div>
+            Powered by AllScale
+          </div>
+        </div>
+      </div>
+
+      <div class="link-box">
+        <div class="url" id="claim-url">https://allscale.io/claim/abc123XYZ</div>
+        <button class="copy-btn" onclick="copyLink()">Copy</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="downloadCard()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download card
+        </button>
+        <button class="btn-primary" onclick="shareCard()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+      </div>
+
+      <button class="btn-outline" style="margin-top:10px" onclick="goScreen('send-detail')">View details</button>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="section-title">Simulate states</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="jumpToState('claimed')" style="margin-bottom:8px">Recipient claimed → detail</button>
+      <button class="btn-outline" onclick="jumpToState('expired')" style="margin-bottom:8px">72h expired (auto-return) → detail</button>
+      <button class="btn-outline" onclick="jumpToState('cancelled')" style="margin-bottom:8px">Sender cancelled → detail</button>
+      <button class="btn-outline" onclick="switchSide('receiver')">→ View as Recipient (claim page)</button>
+    </div>
+
+    <div style="height:14px"></div>
+    <button class="btn-outline" onclick="goScreen('dashboard')">← Back to dashboard</button>
+  </div>
+
+  <!-- ─── Send Detail ─── -->
+  <div class="screen" id="screen-send-detail">
+    <button class="back-btn" onclick="goScreen('dashboard')">← Back to dashboard</button>
+    <div class="pg-title">Payment Link</div>
+    <div class="pg-subtitle" id="detail-subtitle">Created Apr 27, 2026 · ID #SBL-7K3M9</div>
+
+    <div class="card" data-anno="NEW">
+      <div class="detail-status-card">
+        <div class="status-pill awaiting-claim" id="detail-status-pill">
+          <span class="status-dot pulse"></span>
+          <span id="detail-status-label">Awaiting claim</span>
+        </div>
+        <div class="detail-amount"><span id="detail-amount">100.00</span><span class="unit" id="detail-amount-unit">USDT</span></div>
+        <div class="timer-pill" id="detail-timer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="detail-countdown">Expires in 71h 58m</span>
+        </div>
+      </div>
+
+      <div class="detail-row" id="detail-recipient-row">
+        <span class="k">Recipient</span>
+        <span class="v" id="detail-recipient" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+          <span id="detail-recipient-text">friend@example.com</span>
+          <span id="detail-email-status" class="email-badge delivered" style="font-size:11px;padding:2px 8px;border-radius:50px;font-weight:500;letter-spacing:0">✓ Delivered</span>
+        </span>
+      </div>
+      <div class="detail-row">
+        <span class="k">Created</span>
+        <span class="v">Apr 27, 2026 · 14:32</span>
+      </div>
+      <div class="detail-row" id="detail-time-row">
+        <span class="k" id="detail-time-key">Expires</span>
+        <span class="v" id="detail-time-val">Apr 30, 2026 · 14:32</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">On-chain (deposit)</span>
+        <span class="v link" onclick="toast('Opening Etherscan...')">0xa1f3…2d8c ↗</span>
+      </div>
+      <div class="detail-row" id="detail-claim-tx-row" style="display:none">
+        <span class="k" id="detail-claim-tx-key">On-chain (claim)</span>
+        <span class="v link" onclick="toast('Opening Etherscan...')">0x9b3c…7a12 ↗</span>
+      </div>
+
+      <!-- Active actions (awaiting-claim only) -->
+      <div id="detail-active-actions">
+        <div style="height:14px"></div>
+        <div class="info-label">Claim link</div>
+        <div class="link-box">
+          <div class="url" id="detail-url">https://allscale.io/claim/abc123XYZ</div>
+          <button class="copy-btn" onclick="copyLink()">Copy</button>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="downloadCard()">Download card</button>
+          <button class="btn-secondary" id="detail-resend-btn" onclick="resendEmail()">Resend email</button>
+        </div>
+        <button class="btn-danger" onclick="confirmCancel()" style="margin-top:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Cancel & return funds
+        </button>
+      </div>
+
+      <!-- Finished actions (claimed / expired / cancelled) -->
+      <div id="detail-finished-actions" style="display:none">
+        <div style="height:14px"></div>
+        <div class="alert-box" id="detail-finished-alert" style="margin-bottom:14px">
+          <div class="alert-icon" id="detail-finished-icon">✓</div>
+          <div class="alert-content">
+            <div class="alert-title" id="detail-finished-title">Funds claimed</div>
+            <div class="alert-text" id="detail-finished-text">The recipient received the payment. This link is no longer active.</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="goScreen('send-create')">Send again</button>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="section-title">Simulate states</div>
+    <div class="card" data-anno="AS-IS">
+      <button class="btn-outline" onclick="simulateState('claimed')" style="margin-bottom:8px">Recipient claimed</button>
+      <button class="btn-outline" onclick="simulateState('expired')" style="margin-bottom:8px">72h expired (auto-return)</button>
+      <button class="btn-outline" onclick="simulateState('cancelled')" style="margin-bottom:8px">Sender cancelled</button>
+      <button class="btn-outline" onclick="simulateState('failed_pending_merchant')" style="margin-bottom:8px">Mode 3 hard fail (§6.4.5)</button>
+      <button class="btn-outline" onclick="simulateState('awaiting-claim')">Reset to Awaiting claim</button>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="section-title">Email delivery status (§6.4.7)</div>
+    <div class="card">
+      <div style="display:flex;gap:8px">
+        <button class="btn-outline" onclick="simulateEmailStatus('delivered')" style="flex:1;font-size:13px">Delivered</button>
+        <button class="btn-outline" onclick="simulateEmailStatus('pending')" style="flex:1;font-size:13px">Sending</button>
+        <button class="btn-outline" onclick="simulateEmailStatus('bounced')" style="flex:1;font-size:13px">Bounced</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     RECEIVER SIDE — Public claim landing
+     ════════════════════════════════════════════════ -->
+<div class="public-wrap" id="container-public" style="display:none">
+  <div class="public-inner">
+
+    <div class="public-brand">
+      <div style="font-family:'DM Mono','SF Mono',monospace;font-size:12px;color:var(--text)">allscale.io/claim/<b style="color:var(--dark)">abc123XYZ</b></div>
+    </div>
+
+    <!-- ─── Claim landing (Figma 24118:19971 — full-screen replica) ─── -->
+    <div class="screen active" id="screen-claim-landing">
+      <!-- Legacy compatibility nodes (kept hidden so existing JS that targets these IDs still works) -->
+      <span id="claim-avatar" style="display:none">Y</span>
+      <span id="claim-countdown" style="display:none"></span>
+      <div id="claim-message-bubble" style="display:none"><span id="claim-message-text"></span></div>
+      <span id="wallet-cta-sub" style="display:none"></span>
+
+      <div class="claim-fs-stack">
+
+        <h1 class="claim-fs-title">Claim Now</h1>
+
+        <div class="claim-fs-card">
+          <div class="claim-fs-head">
+            <div class="claim-fs-head-info">
+              <div class="claim-fs-head-amount">
+                <p class="claim-fs-redeem-label">Redeem Payment</p>
+                <p class="claim-fs-amount"><span id="claim-amount">23.00</span> <span id="claim-amount-unit">USDT</span></p>
+              </div>
+              <p class="claim-fs-from">From <b id="claim-from">Jony</b></p>
+            </div>
+            <div class="claim-fs-qr" aria-label="Claim QR code">
+              <!-- QR placeholder (decorative) -->
+              <svg viewBox="0 0 133 133" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                <rect width="133" height="133" fill="#fff"/>
+                <g fill="#000">
+                  <!-- finder top-left -->
+                  <rect x="6" y="6" width="35" height="35"/><rect x="11" y="11" width="25" height="25" fill="#fff"/><rect x="16" y="16" width="15" height="15"/>
+                  <!-- finder top-right -->
+                  <rect x="92" y="6" width="35" height="35"/><rect x="97" y="11" width="25" height="25" fill="#fff"/><rect x="102" y="16" width="15" height="15"/>
+                  <!-- finder bottom-left -->
+                  <rect x="6" y="92" width="35" height="35"/><rect x="11" y="97" width="25" height="25" fill="#fff"/><rect x="16" y="102" width="15" height="15"/>
+                  <!-- noise pattern -->
+                  <rect x="46" y="6"  width="5" height="5"/><rect x="56" y="6"  width="5" height="5"/><rect x="66" y="11" width="5" height="5"/><rect x="76" y="6"  width="5" height="5"/><rect x="86" y="11" width="5" height="5"/>
+                  <rect x="46" y="16" width="5" height="5"/><rect x="61" y="16" width="5" height="5"/><rect x="71" y="16" width="5" height="5"/><rect x="81" y="16" width="5" height="5"/>
+                  <rect x="51" y="21" width="5" height="5"/><rect x="61" y="21" width="5" height="5"/><rect x="76" y="21" width="5" height="5"/><rect x="86" y="21" width="5" height="5"/>
+                  <rect x="46" y="26" width="5" height="5"/><rect x="56" y="26" width="5" height="5"/><rect x="66" y="26" width="5" height="5"/><rect x="81" y="26" width="5" height="5"/>
+                  <rect x="51" y="31" width="5" height="5"/><rect x="61" y="31" width="5" height="5"/><rect x="71" y="31" width="5" height="5"/><rect x="86" y="31" width="5" height="5"/>
+                  <rect x="6"  y="46" width="5" height="5"/><rect x="16" y="46" width="5" height="5"/><rect x="26" y="46" width="5" height="5"/><rect x="36" y="46" width="5" height="5"/><rect x="46" y="46" width="5" height="5"/><rect x="56" y="46" width="5" height="5"/><rect x="71" y="46" width="5" height="5"/><rect x="81" y="46" width="5" height="5"/><rect x="91" y="46" width="5" height="5"/><rect x="101" y="46" width="5" height="5"/><rect x="116" y="46" width="5" height="5"/><rect x="126" y="46" width="5" height="5"/>
+                  <rect x="11" y="51" width="5" height="5"/><rect x="21" y="51" width="5" height="5"/><rect x="31" y="51" width="5" height="5"/><rect x="51" y="51" width="5" height="5"/><rect x="61" y="51" width="5" height="5"/><rect x="76" y="51" width="5" height="5"/><rect x="86" y="51" width="5" height="5"/><rect x="96" y="51" width="5" height="5"/><rect x="106" y="51" width="5" height="5"/><rect x="121" y="51" width="5" height="5"/>
+                  <rect x="6"  y="56" width="5" height="5"/><rect x="26" y="56" width="5" height="5"/><rect x="36" y="56" width="5" height="5"/><rect x="46" y="56" width="5" height="5"/><rect x="66" y="56" width="5" height="5"/><rect x="81" y="56" width="5" height="5"/><rect x="91" y="56" width="5" height="5"/><rect x="111" y="56" width="5" height="5"/><rect x="121" y="56" width="5" height="5"/>
+                  <rect x="16" y="61" width="5" height="5"/><rect x="31" y="61" width="5" height="5"/><rect x="41" y="61" width="5" height="5"/><rect x="56" y="61" width="5" height="5"/><rect x="66" y="61" width="5" height="5"/><rect x="76" y="61" width="5" height="5"/><rect x="91" y="61" width="5" height="5"/><rect x="106" y="61" width="5" height="5"/><rect x="116" y="61" width="5" height="5"/>
+                  <rect x="6"  y="66" width="5" height="5"/><rect x="21" y="66" width="5" height="5"/><rect x="46" y="66" width="5" height="5"/><rect x="61" y="66" width="5" height="5"/><rect x="71" y="66" width="5" height="5"/><rect x="81" y="66" width="5" height="5"/><rect x="96" y="66" width="5" height="5"/><rect x="111" y="66" width="5" height="5"/><rect x="126" y="66" width="5" height="5"/>
+                  <rect x="16" y="71" width="5" height="5"/><rect x="26" y="71" width="5" height="5"/><rect x="36" y="71" width="5" height="5"/><rect x="51" y="71" width="5" height="5"/><rect x="66" y="71" width="5" height="5"/><rect x="86" y="71" width="5" height="5"/><rect x="101" y="71" width="5" height="5"/><rect x="116" y="71" width="5" height="5"/>
+                  <rect x="6"  y="76" width="5" height="5"/><rect x="11" y="76" width="5" height="5"/><rect x="31" y="76" width="5" height="5"/><rect x="41" y="76" width="5" height="5"/><rect x="56" y="76" width="5" height="5"/><rect x="71" y="76" width="5" height="5"/><rect x="81" y="76" width="5" height="5"/><rect x="91" y="76" width="5" height="5"/><rect x="106" y="76" width="5" height="5"/><rect x="121" y="76" width="5" height="5"/>
+                  <rect x="46" y="81" width="5" height="5"/><rect x="56" y="81" width="5" height="5"/><rect x="66" y="81" width="5" height="5"/><rect x="76" y="81" width="5" height="5"/><rect x="86" y="81" width="5" height="5"/><rect x="91" y="81" width="5" height="5"/><rect x="101" y="81" width="5" height="5"/><rect x="111" y="81" width="5" height="5"/><rect x="126" y="81" width="5" height="5"/>
+                  <rect x="51" y="86" width="5" height="5"/><rect x="61" y="86" width="5" height="5"/><rect x="76" y="86" width="5" height="5"/><rect x="86" y="86" width="5" height="5"/><rect x="96" y="86" width="5" height="5"/><rect x="116" y="86" width="5" height="5"/><rect x="121" y="86" width="5" height="5"/>
+                  <rect x="46" y="96" width="5" height="5"/><rect x="56" y="96" width="5" height="5"/><rect x="66" y="96" width="5" height="5"/><rect x="86" y="96" width="5" height="5"/><rect x="101" y="96" width="5" height="5"/><rect x="111" y="96" width="5" height="5"/><rect x="121" y="96" width="5" height="5"/>
+                  <rect x="51" y="101" width="5" height="5"/><rect x="61" y="101" width="5" height="5"/><rect x="76" y="101" width="5" height="5"/><rect x="91" y="101" width="5" height="5"/><rect x="106" y="101" width="5" height="5"/><rect x="116" y="101" width="5" height="5"/><rect x="126" y="101" width="5" height="5"/>
+                  <rect x="46" y="106" width="5" height="5"/><rect x="71" y="106" width="5" height="5"/><rect x="81" y="106" width="5" height="5"/><rect x="96" y="106" width="5" height="5"/><rect x="111" y="106" width="5" height="5"/><rect x="121" y="106" width="5" height="5"/>
+                  <rect x="56" y="111" width="5" height="5"/><rect x="66" y="111" width="5" height="5"/><rect x="76" y="111" width="5" height="5"/><rect x="86" y="111" width="5" height="5"/><rect x="91" y="111" width="5" height="5"/><rect x="106" y="111" width="5" height="5"/><rect x="116" y="111" width="5" height="5"/><rect x="126" y="111" width="5" height="5"/>
+                  <rect x="46" y="116" width="5" height="5"/><rect x="61" y="116" width="5" height="5"/><rect x="71" y="116" width="5" height="5"/><rect x="81" y="116" width="5" height="5"/><rect x="101" y="116" width="5" height="5"/><rect x="111" y="116" width="5" height="5"/><rect x="121" y="116" width="5" height="5"/>
+                  <rect x="51" y="121" width="5" height="5"/><rect x="66" y="121" width="5" height="5"/><rect x="81" y="121" width="5" height="5"/><rect x="91" y="121" width="5" height="5"/><rect x="96" y="121" width="5" height="5"/><rect x="106" y="121" width="5" height="5"/><rect x="116" y="121" width="5" height="5"/><rect x="126" y="121" width="5" height="5"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <div class="claim-fs-methods">
+            <h2 class="claim-fs-methods-title">Claim methods</h2>
+            <div class="claim-fs-options" role="radiogroup" aria-label="Claim methods">
+              <button class="claim-fs-option selected" id="claim-opt-wallet" role="radio" aria-checked="true" onclick="selectClaimMethod('wallet')">
+                <span class="claim-fs-option-radio checked" aria-hidden="true">
+                  <span class="dot">
+                    <svg viewBox="0 0 12 8"><polyline points="1 4 5 7 11 1"/></svg>
+                  </span>
+                </span>
+                <span class="claim-fs-option-text">
+                  <span class="claim-fs-option-title">To my wallet</span>
+                  <span class="claim-fs-option-sub">Withdraw to my own wallet</span>
+                </span>
+              </button>
+              <button class="claim-fs-option" id="claim-opt-allscale" role="radio" aria-checked="false" onclick="selectClaimMethod('allscale')">
+                <span class="claim-fs-option-radio" aria-hidden="true">
+                  <span class="ring"></span>
+                </span>
+                <span class="claim-fs-option-text" style="opacity:.5">
+                  <span class="claim-fs-option-title">To
+                    <svg class="as-logo" viewBox="0 0 73 23" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AllScale">
+                      <path d="M7.33337 16.9148L11.5441 5.715H14.4789L18.6896 16.9148H16.1217L15.3401 14.7108H10.5712L9.78963 16.9148H7.33337ZM11.257 12.7516H14.6543L13.6814 9.99249C13.6388 9.87276 13.5857 9.73127 13.5219 9.568C13.4687 9.39386 13.4102 9.20338 13.3464 8.99658C13.2826 8.78979 13.2188 8.58843 13.155 8.39251C13.1019 8.18571 13.0487 8.00068 12.9955 7.83742H12.8998C12.8467 8.04422 12.7775 8.28911 12.6925 8.5721C12.6074 8.84421 12.5224 9.11087 12.4373 9.37209C12.3522 9.62243 12.2831 9.82923 12.2299 9.99249L11.257 12.7516Z" fill="#0D0D0D"/>
+                      <path d="M19.1622 16.9148V5.11093H21.3792V16.9148H19.1622Z" fill="#0D0D0D"/>
+                      <path d="M22.7765 16.9148V5.11093H24.9935V16.9148H22.7765Z" fill="#0D0D0D"/>
+                      <path d="M30.8407 17.1107C30.2027 17.1107 29.5966 17.0454 29.0224 16.9148C28.4482 16.7842 27.9378 16.5774 27.4912 16.2944C27.0553 16.0006 26.7097 15.6359 26.4545 15.2006C26.2099 14.7543 26.0876 14.2156 26.0876 13.5843C26.0876 13.5298 26.0876 13.4754 26.0876 13.421C26.0876 13.3557 26.093 13.3067 26.1036 13.2741H28.4641C28.4535 13.3067 28.4482 13.3503 28.4482 13.4047C28.4482 13.4591 28.4482 13.5081 28.4482 13.5516C28.4482 13.8999 28.5386 14.1938 28.7193 14.4332C28.9107 14.6727 29.1872 14.8523 29.5487 14.972C29.9103 15.0917 30.3303 15.1516 30.8088 15.1516C31.1171 15.1516 31.3883 15.1353 31.6222 15.1026C31.8668 15.0591 32.0794 15.0047 32.2602 14.9393C32.4516 14.8632 32.6058 14.7761 32.7227 14.6781C32.8503 14.5802 32.9407 14.4659 32.9939 14.3353C33.0577 14.2047 33.0896 14.0577 33.0896 13.8945C33.0896 13.6006 32.9939 13.3611 32.8025 13.1761C32.6217 12.9911 32.3665 12.8333 32.0369 12.7026C31.7179 12.572 31.3564 12.4523 30.9523 12.3435C30.5482 12.2346 30.1336 12.1258 29.7082 12.0169C29.2829 11.8972 28.8682 11.7557 28.4641 11.5925C28.0601 11.4183 27.6986 11.2115 27.3796 10.9721C27.0606 10.7326 26.8054 10.4279 26.614 10.0578C26.4226 9.68773 26.3269 9.24148 26.3269 8.71904C26.3269 8.16394 26.4385 7.68504 26.6618 7.28233C26.8958 6.87961 27.2201 6.54764 27.6348 6.28642C28.0495 6.0252 28.5279 5.83473 29.0702 5.715C29.6125 5.58439 30.2027 5.51909 30.8407 5.51909C31.4361 5.51909 31.9997 5.58439 32.5313 5.715C33.063 5.83473 33.5308 6.03065 33.9349 6.30275C34.339 6.57485 34.6526 6.91771 34.8759 7.33131C35.1099 7.7449 35.2268 8.23469 35.2268 8.80067V8.99658H32.9141V8.86597C32.9141 8.5721 32.8291 8.32177 32.6589 8.11497C32.4888 7.90817 32.2496 7.7449 31.9412 7.62518C31.6328 7.50545 31.2713 7.44559 30.8566 7.44559C30.41 7.44559 30.0272 7.48913 29.7082 7.5762C29.3999 7.66327 29.1606 7.79388 28.9905 7.96803C28.831 8.13129 28.7512 8.32721 28.7512 8.55578C28.7512 8.817 28.8416 9.03468 29.0224 9.20883C29.2138 9.37209 29.469 9.51903 29.788 9.64964C30.1176 9.76936 30.4844 9.8782 30.8885 9.97616C31.2926 10.0741 31.7073 10.183 32.1326 10.3027C32.5579 10.4224 32.9726 10.5639 33.3767 10.7272C33.7807 10.8904 34.1423 11.0972 34.4613 11.3476C34.7802 11.587 35.0354 11.8863 35.2268 12.2455C35.4182 12.6047 35.5139 13.0346 35.5139 13.5353C35.5139 14.3951 35.3119 15.0863 34.9078 15.6087C34.5038 16.1312 33.9509 16.5121 33.2491 16.7516C32.5473 16.991 31.7445 17.1107 30.8407 17.1107Z" fill="#0D0D0D"/>
+                      <path d="M40.2623 17.1107C39.3692 17.1107 38.6195 16.9529 38.0134 16.6373C37.4073 16.3108 36.9448 15.8155 36.6258 15.1516C36.3174 14.4768 36.1633 13.6332 36.1633 12.621C36.1633 11.587 36.3174 10.7435 36.6258 10.0904C36.9448 9.42651 37.4073 8.93128 38.0134 8.60475C38.6302 8.27823 39.3798 8.11497 40.2623 8.11497C40.8365 8.11497 41.3522 8.18571 41.8095 8.32721C42.2773 8.4687 42.6814 8.68639 43.0216 8.98026C43.3619 9.27413 43.6171 9.63875 43.7872 10.0741C43.968 10.4986 44.0584 11.0047 44.0584 11.5925H41.8414C41.8414 11.2006 41.7829 10.8795 41.6659 10.6292C41.549 10.3789 41.3682 10.1884 41.1236 10.0578C40.8897 9.92718 40.592 9.86188 40.2304 9.86188C39.8051 9.86188 39.4595 9.95984 39.1937 10.1558C38.9279 10.3517 38.7312 10.6401 38.6036 11.021C38.476 11.402 38.4122 11.8755 38.4122 12.4414V12.8169C38.4122 13.372 38.476 13.84 38.6036 14.221C38.7418 14.6019 38.9491 14.8904 39.2256 15.0863C39.5021 15.2713 39.8636 15.3638 40.3102 15.3638C40.6717 15.3638 40.9694 15.2985 41.2034 15.1679C41.4479 15.0373 41.634 14.8414 41.7616 14.5802C41.8892 14.319 41.953 14.0033 41.953 13.6332H44.0584C44.0584 14.1883 43.968 14.6836 43.7872 15.1189C43.6171 15.5543 43.3619 15.9189 43.0216 16.2128C42.692 16.5067 42.2933 16.7298 41.8254 16.8822C41.3576 17.0346 40.8365 17.1107 40.2623 17.1107Z" fill="#0D0D0D"/>
+                      <path d="M47.3 17.1107C47.0236 17.1107 46.7258 17.0781 46.4069 17.0128C46.0985 16.9475 45.8061 16.8332 45.5296 16.6699C45.2532 16.4958 45.0245 16.2509 44.8438 15.9353C44.6736 15.6087 44.5886 15.1951 44.5886 14.6945C44.5886 14.0958 44.7162 13.6006 44.9714 13.2088C45.2266 12.8169 45.5881 12.5122 46.056 12.2945C46.5345 12.0659 47.1033 11.9081 47.7626 11.821C48.4218 11.734 49.1502 11.6904 49.9477 11.6904V11.0537C49.9477 10.8034 49.9052 10.5857 49.8201 10.4006C49.7457 10.2156 49.6074 10.0687 49.4054 9.95984C49.214 9.85099 48.9429 9.79657 48.592 9.79657C48.2411 9.79657 47.954 9.84011 47.7307 9.92718C47.518 10.0143 47.3638 10.1285 47.2681 10.27C47.1831 10.4006 47.1405 10.5476 47.1405 10.7108V10.9068H44.9873C44.9767 10.8523 44.9714 10.8034 44.9714 10.7598C44.9714 10.7054 44.9714 10.6401 44.9714 10.5639C44.9714 10.0632 45.1202 9.63331 45.418 9.27413C45.7157 8.90407 46.1357 8.62108 46.678 8.42516C47.2203 8.22925 47.853 8.13129 48.576 8.13129C49.3522 8.13129 50.0009 8.23469 50.5219 8.44149C51.0535 8.64829 51.4576 8.95305 51.7341 9.35576C52.0212 9.75848 52.1647 10.2646 52.1647 10.8741V14.7761C52.1647 14.972 52.2179 15.1189 52.3242 15.2169C52.4412 15.304 52.5688 15.3475 52.707 15.3475H53.2333V16.8332C53.127 16.8876 52.9622 16.942 52.7389 16.9965C52.5156 17.0618 52.2445 17.0944 51.9255 17.0944C51.6171 17.0944 51.3406 17.0454 51.0961 16.9475C50.8621 16.8604 50.6654 16.7352 50.5059 16.572C50.3464 16.3978 50.2348 16.191 50.171 15.9516H50.0593C49.8786 16.1801 49.6553 16.3815 49.3895 16.5557C49.1343 16.7298 48.8312 16.8658 48.4803 16.9638C48.1401 17.0618 47.7466 17.1107 47.3 17.1107ZM48.0497 15.3965C48.3474 15.3965 48.6132 15.3529 48.8472 15.2659C49.0811 15.1679 49.2778 15.0427 49.4373 14.8904C49.5968 14.7271 49.7191 14.5312 49.8041 14.3026C49.8998 14.0741 49.9477 13.8292 49.9477 13.5679V13.0945C49.3522 13.0945 48.8206 13.138 48.3527 13.2251C47.8849 13.3013 47.5127 13.4373 47.2362 13.6332C46.9704 13.8292 46.8375 14.1013 46.8375 14.4496C46.8375 14.6455 46.8853 14.8142 46.981 14.9557C47.0767 15.0972 47.215 15.206 47.3957 15.2822C47.5765 15.3584 47.7945 15.3965 48.0497 15.3965Z" fill="#0D0D0D"/>
+                      <path d="M53.6971 16.9148V5.11093H55.9141V16.9148H53.6971Z" fill="#0D0D0D"/>
+                      <path d="M61.1233 17.1107C60.1983 17.1107 59.422 16.9529 58.7947 16.6373C58.1673 16.3108 57.6942 15.8155 57.3752 15.1516C57.0562 14.4877 56.8967 13.6441 56.8967 12.621C56.8967 11.587 57.0562 10.7435 57.3752 10.0904C57.6942 9.42651 58.162 8.93672 58.7787 8.62108C59.4061 8.29455 60.1717 8.13129 61.0755 8.13129C61.9261 8.13129 62.6439 8.28911 63.2287 8.60475C63.8135 8.90951 64.2548 9.38842 64.5525 10.0415C64.8503 10.6836 64.9991 11.5163 64.9991 12.5394V13.1271H59.1456C59.1668 13.6278 59.2413 14.0523 59.3689 14.4006C59.5071 14.7489 59.7145 15.0101 59.9909 15.1842C60.278 15.3475 60.6555 15.4291 61.1233 15.4291C61.3785 15.4291 61.6072 15.3965 61.8092 15.3312C62.0218 15.2659 62.2026 15.1679 62.3515 15.0373C62.5003 14.9067 62.6173 14.7434 62.7024 14.5475C62.7874 14.3516 62.83 14.1285 62.83 13.8781H64.9991C64.9991 14.4223 64.9034 14.8958 64.712 15.2985C64.5206 15.7012 64.2548 16.0387 63.9146 16.3108C63.5743 16.572 63.1649 16.7733 62.6864 16.9148C62.2186 17.0454 61.6975 17.1107 61.1233 17.1107ZM59.1775 11.6904H62.7183C62.7183 11.3639 62.6758 11.0809 62.5907 10.8415C62.5163 10.602 62.41 10.4061 62.2717 10.2537C62.1335 10.1013 61.9634 9.99249 61.7613 9.92718C61.5699 9.85099 61.352 9.8129 61.1074 9.8129C60.7033 9.8129 60.3631 9.88365 60.0866 10.0251C59.8208 10.1558 59.6134 10.3625 59.4646 10.6455C59.3263 10.9176 59.2306 11.2659 59.1775 11.6904Z" fill="#0D0D0D"/>
+                      <path d="M72.6655 15.6442C72.6655 17.9466 72.6655 19.0978 72.2174 19.9772C71.8233 20.7507 71.1944 21.3796 70.4209 21.7737C69.5415 22.2218 68.3902 22.2219 66.0878 22.2219H65.0223V19.4441H67.7896C68.5112 19.4441 68.872 19.4441 69.1495 19.3082C69.4152 19.178 69.6301 18.9631 69.7603 18.6974C69.8963 18.4199 69.8963 18.0591 69.8963 17.3375V15.1109H72.6655V15.6442ZM7.53243 2.77773H4.8759C4.15433 2.77773 3.79353 2.77773 3.516 2.91369C3.25028 3.04387 3.03541 3.25874 2.90523 3.52447C2.76927 3.802 2.76927 4.16279 2.76927 4.88436V7.55544H0V6.5777C0 4.27529 4.93824e-05 3.12405 0.448127 2.24465C0.842261 1.47113 1.47113 0.842261 2.24465 0.448127C3.12405 4.93824e-05 4.27529 0 6.5777 0H7.53243V2.77773Z" fill="#009859"/>
+                    </svg>
+                  </span>
+                  <span class="claim-fs-option-sub">Sign in or sign up</span>
+                </span>
+              </button>
+            </div>
+            <button class="claim-fs-cta" id="claim-cta" onclick="executeClaim()">Claim • <span id="claim-cta-amount">39.50 USDT</span></button>
+          </div>
+        </div>
+
+        <div class="claim-fs-footer">
+          <p>Powered by AllScale</p>
+          <p><a href="#" onclick="event.preventDefault()">Terms</a> <a href="#" onclick="event.preventDefault()">Privacy</a> Need help? Contact <a href="mailto:support@allscale.io">support@allscale.io</a></p>
+        </div>
+
+        <div class="claim-fs-dev" data-anno="AS-IS">
+          <div class="section-title">Other claim states (demo)</div>
+          <div class="claim-fs-dev-grid">
+            <button class="btn-outline" onclick="goScreen('claim-processing')">Processing (claiming)</button>
+            <button class="btn-outline" onclick="goScreen('claim-failed')">Hard fail · 5a</button>
+            <button class="btn-outline" onclick="goScreen('claim-login')">Existing user · login</button>
+            <button class="btn-outline" onclick="goScreen('claim-already')">Already claimed</button>
+            <button class="btn-outline" onclick="goScreen('claim-expired')">Expired</button>
+            <button class="btn-outline" onclick="goScreen('claim-cancelled')">Sender cancelled</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── Email OTP (path 5a, only when Sender provided email) ─── -->
+    <div class="screen" id="screen-claim-otp">
+      <button class="back-btn" onclick="goScreen('claim-landing')">← Back</button>
+      <div class="public-card" data-anno="NEW">
+        <div class="pg-title">Verify your email</div>
+        <div class="pg-subtitle">Confirm you're the intended recipient. We sent a 6-digit code to <b id="otp-email">friend@example.com</b>.</div>
+
+        <div class="form-group">
+          <div class="form-label"><span>6-digit code</span></div>
+          <input class="form-input" id="otp-code" placeholder="123456" maxlength="6" inputmode="numeric" oninput="onOtpCodeChange()" style="letter-spacing:0.4em;font-family:'DM Mono','SF Mono',monospace">
+          <div class="form-hint">Didn't get it? <span style="color:var(--green);cursor:pointer;font-weight:500" onclick="toast('✓ Code resent')">Resend</span></div>
+        </div>
+
+        <button class="btn-primary disabled" id="otp-btn" onclick="executeOtp()">Verify & continue</button>
+      </div>
+    </div>
+
+    <!-- ─── Withdraw to my wallet ─── -->
+    <div class="screen" id="screen-claim-wallet-input">
+      <button class="back-btn" onclick="goScreen('claim-landing')">← Back</button>
+      <div class="public-card" data-anno="NEW">
+        <div class="pg-title">Withdraw to my wallet</div>
+        <div class="pg-subtitle">Send <b id="wd-amt-text">100.00 USDT</b> to your existing wallet on Ethereum.</div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Destination address</span></div>
+          <input class="form-input" id="wd-address" placeholder="0x… (42 characters)" oninput="onAddressChange()" style="font-family:'DM Mono','SF Mono',monospace;font-size:13px">
+          <div class="form-hint" id="wd-addr-hint">EVM-compatible address only · USDT on Ethereum.</div>
+        </div>
+
+        <div class="alert-box warn">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <div class="alert-title">On-chain transfers are irreversible</div>
+            <div class="alert-text">If you enter the wrong address, your funds may be lost. Double-check before continuing.</div>
+          </div>
+        </div>
+
+        <div class="confirm-row" onclick="toggleConfirm()">
+          <div class="confirm-checkbox" id="confirm-box">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="confirm-text">I've double-checked the address. I understand on-chain transfers cannot be reversed.</div>
+        </div>
+
+        <div class="detail-row" style="margin-top:8px">
+          <span class="k">You receive</span>
+          <span class="v" style="color:var(--green);font-weight:600" id="wd-receive">100.00 USDT</span>
+        </div>
+        <div class="detail-row">
+          <span class="k">Network fee (gas)</span>
+          <span class="v" style="color:var(--green);font-weight:600">Covered by AllScale</span>
+        </div>
+        <div class="detail-row" style="border-bottom:none;padding-top:6px">
+          <span class="k" style="font-size:12px">No native token needed</span>
+          <span class="v" style="color:var(--text);font-weight:500;font-size:12px">Gasless · paid by sender at send time</span>
+        </div>
+
+        <button class="btn-primary disabled" id="withdraw-btn" onclick="executeWithdraw()" style="margin-top:14px">Withdraw</button>
+      </div>
+    </div>
+
+    <!-- ─── Withdraw success ─── -->
+    <div class="screen" id="screen-claim-wallet-success">
+      <div class="public-card" data-anno="NEW">
+        <div class="completion">
+          <div class="completion-icon success">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="completion-title">Withdrawn</div>
+          <div class="completion-sub"><b id="success-amount">100.00 USDT</b> is on its way to your wallet.</div>
+        </div>
+
+        <div class="detail-row">
+          <span class="k">To</span>
+          <span class="v mono" id="success-to">0x742d…F44e</span>
+        </div>
+        <div class="detail-row">
+          <span class="k">Transaction</span>
+          <span class="v link" onclick="toast('Opening Etherscan...')">0x9b3c…7a12 ↗</span>
+        </div>
+        <div class="detail-row">
+          <span class="k">From</span>
+          <span class="v" id="success-from">Yao via AllScale</span>
+        </div>
+
+        <div class="alert-box info" style="margin-top:14px">
+          <div class="alert-icon">ℹ️</div>
+          <div class="alert-content">
+            <div class="alert-title">Wrong address?</div>
+            <div class="alert-text">If something looks off, contact <b>support@allscale.io</b> with the transaction hash.</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="goScreen('claim-landing')" style="margin-top:8px">Done</button>
+      </div>
+    </div>
+
+    <!-- ─── Register & claim (5b register path; pure URL mode allows custom email per §10.4) ─── -->
+    <div class="screen" id="screen-claim-register">
+      <button class="back-btn" onclick="goScreen('claim-landing')">← Back</button>
+      <div class="public-card" data-anno="AS-IS">
+        <div class="pg-title">Create AllScale wallet</div>
+        <div class="pg-subtitle">We'll send your <b id="reg-amount">100.00 USDT</b> to a new wallet — no gas fees.</div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Email</span></div>
+          <input class="form-input" id="reg-email" value="friend@example.com" oninput="onRegEmailChange()">
+          <div class="form-hint" id="reg-email-hint">Must match the email this link was sent to.</div>
+        </div>
+
+        <div id="reg-existing-banner" class="alert-box info" style="margin-bottom:14px;display:none">
+          <div class="alert-icon">↪</div>
+          <div class="alert-content">
+            <div class="alert-title">Already have an AllScale account?</div>
+            <div class="alert-text"><span style="color:var(--green);font-weight:600;cursor:pointer" onclick="goScreen('claim-login')">Sign in instead →</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label"><span>6-digit verification code</span></div>
+          <input class="form-input" id="reg-code" placeholder="123456" maxlength="6" inputmode="numeric" oninput="onCodeChange()" style="letter-spacing:0.4em;font-family:'DM Mono','SF Mono',monospace">
+          <div class="form-hint">We sent a code to your email · <span style="color:var(--green);cursor:pointer">Resend</span></div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Set password</span></div>
+          <input class="form-input" id="reg-pass" type="password" placeholder="At least 8 characters" oninput="onPassChange()">
+        </div>
+
+        <div class="alert-box success">
+          <div class="alert-icon">🎁</div>
+          <div class="alert-content">
+            <div class="alert-title">Gas sponsored by AllScale</div>
+            <div class="alert-text">Your funds will arrive instantly with no network fees.</div>
+          </div>
+        </div>
+
+        <button class="btn-primary disabled" id="reg-btn" onclick="executeRegister()">Create wallet & claim</button>
+      </div>
+    </div>
+
+    <!-- ─── Register success ─── -->
+    <div class="screen" id="screen-claim-register-success">
+      <div class="public-card" data-anno="AS-IS">
+        <div class="completion">
+          <div class="completion-icon success">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="completion-title">Welcome to AllScale</div>
+          <div class="completion-sub">Your wallet is ready and your funds have arrived.</div>
+        </div>
+
+        <div class="amount-section" style="text-align:center;background:var(--green-bg);border:1px solid rgba(0,152,89,.15)">
+          <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">New balance</div>
+          <div style="font-size:42px;font-weight:600;color:var(--dark);letter-spacing:-0.03em"><span id="reg-success-amount">100.00</span><span style="font-size:18px;color:var(--text);margin-left:6px" id="reg-success-unit">USDT</span></div>
+        </div>
+
+        <button class="btn-primary" onclick="toast('Opening AllScale Pay dashboard...')">Open my wallet</button>
+      </div>
+    </div>
+
+    <!-- ─── Claim attempt failed (5a hard fail per §6.4.5) ─── -->
+    <div class="screen" id="screen-claim-failed">
+      <div class="public-card">
+        <div class="completion">
+          <div class="completion-icon failed"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="completion-title">Claim attempt failed</div>
+          <div class="completion-sub">The on-chain transfer didn't go through. The link is still active — try again with a different option.</div>
+        </div>
+        <div class="alert-box info" style="margin-top:8px">
+          <div class="alert-icon">↻</div>
+          <div class="alert-content">
+            <div class="alert-title">What happened?</div>
+            <div class="alert-text">Common causes: the address rejected the token, contract wallet declined, or extreme gas spike. Funds remain in the link wallet — pick another option below.</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="goScreen('claim-wallet-input')" style="margin-top:14px">Try a different address</button>
+        <button class="btn-secondary" onclick="goScreen('claim-register')" style="margin-top:8px">Use AllScale wallet instead</button>
+      </div>
+    </div>
+
+    <!-- ─── Claim processing (claiming state in-flight per §6.4.6) ─── -->
+    <div class="screen" id="screen-claim-processing">
+      <div class="public-card">
+        <div class="completion">
+          <div class="completion-icon" style="background:var(--blue-bg);color:var(--blue)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1.5s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          </div>
+          <div class="completion-title">Processing your claim</div>
+          <div class="completion-sub">On-chain transfer in progress. This usually takes 10–30 seconds.</div>
+        </div>
+        <div class="status-track" style="margin-top:16px">
+          <div class="status-step done"><span class="step-icon">✓</span><div class="copy"><div class="title">Submitted</div></div></div>
+          <div class="status-step active"><span class="step-icon">⟳</span><div class="copy"><div class="title">Waiting for blockchain confirmation</div></div></div>
+          <div class="status-step"><span class="step-icon">○</span><div class="copy"><div class="title">Funds delivered</div></div></div>
+        </div>
+        <div class="alert-box info" style="margin-top:14px">
+          <div class="alert-icon">ℹ️</div>
+          <div class="alert-content">
+            <div class="alert-text">No need to refresh — this page updates automatically. You can safely close this tab and come back later.</div>
+          </div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="section-title">Demo simulate outcome</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-outline" onclick="goScreen('claim-wallet-success')" style="flex:1;font-size:13px">→ Success</button>
+          <button class="btn-outline" onclick="goScreen('claim-failed')" style="flex:1;font-size:13px">→ Hard fail</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Sign in to existing AllScale account (5b login path per §6.3 Step 5b) ─── -->
+    <div class="screen" id="screen-claim-login">
+      <button class="back-btn" onclick="goScreen('claim-landing')">← Back</button>
+      <div class="public-card">
+        <div class="pg-title">Sign in to AllScale</div>
+        <div class="pg-subtitle">Welcome back! We found an account for <b id="login-email">friend@example.com</b>. Sign in to claim your <b id="login-amount">100.00 USDT</b>.</div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Password</span></div>
+          <input class="form-input" id="login-pass" type="password" placeholder="Enter your password" oninput="onLoginPassChange()">
+        </div>
+
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;font-size:13px;align-items:center">
+          <span style="color:var(--green);cursor:pointer;font-weight:500" onclick="toast('✓ Magic link sent to your email')">Email me a magic link instead</span>
+          <span style="color:var(--text);cursor:pointer">Forgot password</span>
+        </div>
+
+        <div class="alert-box success" style="margin-bottom:14px">
+          <div class="alert-icon">🎁</div>
+          <div class="alert-content">
+            <div class="alert-title">Gas sponsored by AllScale</div>
+            <div class="alert-text">Funds arrive instantly with no network fees.</div>
+          </div>
+        </div>
+
+        <button class="btn-primary disabled" id="login-btn" onclick="executeLogin()">Sign in & claim</button>
+
+        <div style="margin-top:12px;text-align:center;font-size:13px;color:var(--text)">
+          Not your account? <span style="color:var(--green);cursor:pointer;font-weight:500" onclick="goScreen('claim-register')">Use a different email</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Already claimed ─── -->
+    <div class="screen" id="screen-claim-already">
+      <div class="public-card" data-anno="NEW">
+        <div class="completion">
+          <div class="completion-icon neutral"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="completion-title">Already claimed</div>
+          <div class="completion-sub">This payment has already been received. Each link can only be claimed once.</div>
+        </div>
+        <button class="btn-secondary" onclick="goScreen('claim-landing')" style="margin-top:8px">Back</button>
+      </div>
+    </div>
+
+    <!-- ─── Expired ─── -->
+    <div class="screen" id="screen-claim-expired">
+      <div class="public-card" data-anno="NEW">
+        <div class="completion">
+          <div class="completion-icon warn"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="completion-title">Link expired</div>
+          <div class="completion-sub">This claim link expired after 72 hours. The funds have been returned to the sender.</div>
+        </div>
+        <div class="alert-box info" style="margin-top:8px">
+          <div class="alert-icon">ℹ️</div>
+          <div class="alert-content">
+            <div class="alert-title">Need it resent?</div>
+            <div class="alert-text">Ask the sender to create a new payment from their AllScale dashboard.</div>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="goScreen('claim-landing')">Back</button>
+      </div>
+    </div>
+
+    <!-- ─── Cancelled ─── -->
+    <div class="screen" id="screen-claim-cancelled">
+      <div class="public-card" data-anno="NEW">
+        <div class="completion">
+          <div class="completion-icon failed"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="completion-title">Sender cancelled</div>
+          <div class="completion-sub">The sender cancelled this payment. Funds have been returned to their wallet.</div>
+        </div>
+        <button class="btn-secondary" onclick="goScreen('claim-landing')" style="margin-top:8px">Back</button>
+      </div>
+    </div>
+
+    <div class="public-footer">
+      <a href="#">Terms</a> · <a href="#">Privacy</a> · Need help? <a href="#">support@allscale.io</a>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw mode picker (Sender wallet · post-click on Withdraw button) -->
+<div class="sheet-overlay" id="wdpick-overlay" onclick="closeWithdrawPicker()"></div>
+<div class="sheet" data-anno="NEW" id="wdpick-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">Withdraw</div>
+    <button class="sheet-close" onclick="closeWithdrawPicker()">✕</button>
+  </div>
+  <div class="sheet-body">
+    <button class="cta-card" onclick="closeWithdrawPicker(); goScreen('send-create')" style="margin-bottom:8px">
+      <div class="cta-card-icon" style="background:var(--green-bg);color:var(--green);border:none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div class="cta-card-info">
+        <div class="cta-card-title">Send via Payment Link <span style="display:inline-block;padding:1px 7px;border-radius:50px;background:var(--green);color:white;font-size:9px;font-weight:700;letter-spacing:.06em;margin-left:6px;vertical-align:1px">NEW</span></div>
+        <div class="cta-card-sub">Send to anyone with just an email · or share a link</div>
+      </div>
+      <span class="cta-card-arrow">›</span>
+    </button>
+    <button class="cta-card" onclick="closeWithdrawPicker(); toast('→ Existing direct withdraw flow (out of scope for this PRD)')">
+      <div class="cta-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="cta-card-info">
+        <div class="cta-card-title">Withdraw to wallet</div>
+        <div class="cta-card-sub">Send directly to a wallet address you have</div>
+      </div>
+      <span class="cta-card-arrow">›</span>
+    </button>
+  </div>
+</div>
+
+<!-- Token picker sheet -->
+<div class="sheet-overlay" id="token-overlay" onclick="closeTokenSheet()"></div>
+<div class="sheet" id="token-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">Select token</div>
+    <button class="sheet-close" onclick="closeTokenSheet()">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div id="token-sheet-list"></div>
+  </div>
+</div>
+
+<!-- Refund sheet (§7.6) -->
+<div class="sheet-overlay" id="refund-overlay" onclick="closeRefundModal()"></div>
+<div class="sheet" data-anno="NEW" id="refund-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">Refund order</div>
+    <button class="sheet-close" onclick="closeRefundModal()">✕</button>
+  </div>
+  <div class="sheet-body">
+
+    <!-- Amount -->
+    <div class="wd-amount-section" style="margin-bottom:14px">
+      <div class="wd-amount-label">Amount</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="wd-dest-tab active" id="amt-mode-full" onclick="setAmtMode('full')" style="font-size:13px">Full · 120.00</button>
+        <button class="wd-dest-tab" id="amt-mode-partial" onclick="setAmtMode('partial')" style="font-size:13px">Partial</button>
+      </div>
+      <div id="partial-row" style="display:none">
+        <div class="wd-amount-row">
+          <div class="wd-amount-inner">
+            <input class="wd-amount-input" id="refund-partial-amt" type="text" inputmode="decimal" value="120.00">
+            <span class="wd-amount-unit">USDT</span>
+          </div>
+        </div>
+        <div class="wd-avail">Max: <span>120.00 USDT</span> (settlement amount)</div>
+      </div>
+    </div>
+
+    <!-- Refund method (3 mode cards) -->
+    <div class="wd-section" style="margin-bottom:14px">
+      <div class="wd-section-label">Refund method</div>
+      <div id="refund-mode-cards" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- Customer email (mode 1 only) -->
+    <div class="wd-section" id="refund-email-section" style="margin-bottom:14px">
+      <div class="wd-section-label">Customer email</div>
+      <input class="wd-email-input" id="refund-email" type="email" value="refund@buyer.io" placeholder="customer@example.com">
+      <div class="skip-hint">Auto-filled from Checkout · editable.</div>
+    </div>
+
+    <!-- Locked token & chain display -->
+    <div class="wd-section" style="margin-bottom:14px">
+      <div class="wd-section-label">Token · Chain (locked to settlement)</div>
+      <div class="wd-token-row" style="cursor:default">
+        <div class="wd-token-icon-wrap">
+          <span class="coin-icon usdt lg" style="position:relative">T<span class="chain-mini">E</span></span>
+        </div>
+        <span class="wd-token-name">Ethereum — USDT</span>
+      </div>
+      <div class="skip-hint">MVP doesn't support cross-chain or cross-token refunds.</div>
+    </div>
+
+    <!-- Mode 3 risk warning -->
+    <div class="alert-box warn" id="mode3-risk" style="display:none;margin-bottom:14px">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <div class="alert-title">Address risk is yours</div>
+        <div class="alert-text">If the original payer used an exchange deposit address or contract wallet, the on-chain transfer may complete but funds may not reach the customer.</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="submitRefund()">Refund</button>
+  </div>
+</div>
+
+<!-- Cancel sheet -->
+<div class="sheet-overlay" id="cancel-overlay" onclick="closeCancel()"></div>
+<div class="sheet" id="cancel-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">Cancel this payment?</div>
+    <button class="sheet-close" onclick="closeCancel()">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="font-size:14px;color:var(--text);line-height:1.6;margin-bottom:16px">The link will stop working immediately and <b id="cancel-amount-text" style="color:var(--dark)">100.00 USDT</b> will be returned to your wallet.</div>
+    <button class="btn-danger" onclick="executeCancel()">Yes, cancel & return funds</button>
+    <div style="height:8px"></div>
+    <button class="btn-secondary" onclick="closeCancel()">Keep link active</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+const TOKENS = {
+  USDT: { name: 'Tether USD',  iconLetter: 'T', cls: 'usdt', balance: 1250.00, chain: 'Ethereum' },
+  USDC: { name: 'USD Coin',    iconLetter: 'U', cls: 'usdc', balance:  320.00, chain: 'Ethereum' }
+};
+
+const state = {
+  side: 'sender',
+  token: 'USDT',
+  amount: '',
+  email: '',
+  message: '',
+  destType: 'email',
+  skipEmail: false,
+  senderName: 'Yao',
+  senderInitial: 'Y',
+  recipientAddress: '',
+  addressValid: false,
+  confirmed: false,
+  otpCode: '',
+  regCode: '',
+  regPass: '',
+  detailStatus: 'awaiting-claim',
+  scenario: 'p2p',          // p2p | kyt | merchant-refund
+  linkHasEmail: true,       // when true, path 5a needs OTP
+  pendingSelectMode: false,
+  pendingSelected: new Set()
+};
+
+const SINGLE_LIMIT = 500;
+let depositTimers = [];
+function clearDepositTimers() { depositTimers.forEach(t => clearTimeout(t)); depositTimers = []; }
+function fmt(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+/* ═══════════════════════════════════════════════════════════
+   RECENT ACTIVITY SEED (dashboard list)
+   ═══════════════════════════════════════════════════════════ */
+const RECENT = [
+  { id: 'SBL-7K3M9', recipient: 'jane@example.com',    amount: '100.00', token: 'USDT', status: 'awaiting',  meta: 'Awaiting · 71h left',     icon: '⏳', source: 'p2p' },
+  { id: 'SBL-2H8C1', recipient: 'refund@buyer.io',     amount: '29.00',  token: 'USDC', status: 'awaiting',  meta: 'Awaiting · 64h left',     icon: '⏳', source: 'merchant-refund' },
+  { id: 'SBL-8V4F2', recipient: '0x742d…F44e (original payer)', amount: '120.00', token: 'USDT', status: 'failed_pending_merchant', meta: 'Refund failed · Action needed', icon: '!', source: 'merchant-onchain' },
+  { id: 'SBL-3J9D4', recipient: 'mike@example.com',    amount: '50.00',  token: 'USDT', status: 'claimed',   meta: 'Claimed · Apr 26, 2026',  icon: '✓',  source: 'p2p' },
+  { id: 'SBL-9X2K1', recipient: '— share via link',    amount: '20.00',  token: 'USDC', status: 'claimed',   meta: 'Claimed · Apr 25, 2026',  icon: '✓',  source: 'p2p' },
+  { id: 'SBL-4P8L2', recipient: 'lost@example.com',    amount: '15.00',  token: 'USDT', status: 'expired',   meta: 'Returned · Apr 23, 2026', icon: '⏰', source: 'p2p' },
+  { id: 'SBL-1A7B6', recipient: 'tom@example.com',     amount: '200.00', token: 'USDT', status: 'cancelled', meta: 'Cancelled · Apr 21, 2026',icon: '✕',  source: 'p2p' }
+];
+
+/* ═══════════════════════════════════════════════════════════
+   MERCHANT REFUNDS — cross-order list (§7.5)
+   ═══════════════════════════════════════════════════════════ */
+const REFUNDS = [
+  { id: 'RF-A1B2', orderId: 'ORD-4821', customer: 'refund@buyer.io',  amount: '120.00', token: 'USDT', mode: 'mode3', status: 'failed_pending_merchant', date: 'Apr 28 · 11:02' },
+  { id: 'RF-K0M5', orderId: 'ORD-4818', customer: 'pending@buyer.io', amount: '40.00',  token: 'USDT', mode: 'mode1', status: 'claiming',                date: 'Apr 28 · 10:30' },
+  { id: 'RF-Q4R3', orderId: 'ORD-4807', customer: 'depo@buyer.io',    amount: '25.00',  token: 'USDC', mode: 'mode2', status: 'pending_deposit',         date: 'Apr 28 · 08:00' },
+  { id: 'RF-E5F6', orderId: 'ORD-4810', customer: 'jane@example.com', amount: '85.00',  token: 'USDT', mode: 'mode1', status: 'link_sent',               date: 'Apr 27 · 09:15' },
+  { id: 'RF-C3D4', orderId: 'ORD-4815', customer: '0x742d…F44e',      amount: '50.00',  token: 'USDC', mode: 'mode3', status: 'claimed',                 date: 'Apr 27 · 15:30' },
+  { id: 'RF-G7H8', orderId: 'ORD-4805', customer: '— (URL share)',    amount: '30.00',  token: 'USDT', mode: 'mode2', status: 'claimed',                 date: 'Apr 26 · 14:00' },
+  { id: 'RF-I9J0', orderId: 'ORD-4798', customer: 'old@buyer.io',     amount: '20.00',  token: 'USDC', mode: 'mode1', status: 'expired',                 date: 'Apr 24 · 10:00' },
+  { id: 'RF-K1L2', orderId: 'ORD-4792', customer: 'cancelled@buyer.io', amount: '15.00', token: 'USDT', mode: 'mode2', status: 'cancelled',              date: 'Apr 23 · 11:45' }
+];
+
+const REFUND_STATUS_LABEL = {
+  pending_deposit:         { text: 'Awaiting deposit', cls: 'awaiting-deposit' },
+  link_sent:               { text: 'Awaiting claim',   cls: 'link-sent'        },
+  claiming:                { text: 'Processing',       cls: 'claiming'         },
+  claimed:                 { text: 'Claimed',          cls: 'claimed'          },
+  expired:                 { text: 'Expired',          cls: 'expired'          },
+  cancelled:               { text: 'Cancelled',        cls: 'cancelled'        },
+  failed_pending_merchant: { text: 'Action needed',    cls: 'failed-pending-merchant' }
+};
+
+const REFUND_ACTIVE = new Set(['pending_deposit', 'link_sent', 'claiming', 'failed_pending_merchant']);
+const REFUND_TERMINAL = new Set(['claimed', 'expired', 'cancelled']);
+
+function modeLabel(m) {
+  return m === 'mode1' ? 'Mode 1 · Email'
+       : m === 'mode2' ? 'Mode 2 · URL'
+       : 'Mode 3 · Original address';
+}
+
+function renderRefundItem(r) {
+  const l = REFUND_STATUS_LABEL[r.status] || { text: r.status, cls: 'cancelled' };
+  return `
+    <div class="act-item" onclick="goRefundDetail('${r.id}')" style="cursor:pointer">
+      <div class="act-info" style="flex:1;min-width:0">
+        <div class="act-recipient" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-weight:500">${r.customer}</span>
+          <span class="status-pill ${l.cls}" style="margin-bottom:0;font-size:10px;padding:2px 8px;letter-spacing:0">${l.text}</span>
+        </div>
+        <div class="act-meta" style="margin-top:2px">${modeLabel(r.mode)} · ${r.orderId} · ${r.date}</div>
+      </div>
+      <div class="act-right" style="text-align:right">
+        <div class="act-amount" style="font-weight:600">${r.amount} ${r.token}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRefundsList(filter = 'all') {
+  let items = REFUNDS;
+  if (filter === 'active')   items = REFUNDS.filter(r => REFUND_ACTIVE.has(r.status));
+  else if (filter === 'terminal') items = REFUNDS.filter(r => REFUND_TERMINAL.has(r.status));
+  else if (filter === 'action')   items = REFUNDS.filter(r => r.status === 'failed_pending_merchant');
+
+  const list = document.getElementById('refunds-list');
+  if (!list) return;
+  list.innerHTML = items.map(renderRefundItem).join('') || '<div style="text-align:center;font-size:13px;color:var(--text);padding:18px 0">No refunds match this filter.</div>';
+}
+
+function renderDashboardRefundsPreview() {
+  const preview = REFUNDS.filter(r => REFUND_ACTIVE.has(r.status)).slice(0, 3);
+  const list = document.getElementById('dashboard-refunds-preview');
+  if (!list) return;
+  list.innerHTML = preview.length
+    ? preview.map(renderRefundItem).join('')
+    : '<div style="text-align:center;font-size:13px;color:var(--text);padding:12px 0">No active refunds.</div>';
+}
+
+function setRefundFilter(f) {
+  document.querySelectorAll('.refund-filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+  renderRefundsList(f);
+}
+
+function goRefundDetail(id) {
+  const r = REFUNDS.find(x => x.id === id);
+  if (!r) return;
+  // For mode 3 failed_pending_merchant: route to send-detail with that state
+  if (r.status === 'failed_pending_merchant') {
+    state.scenario = 'merchant-onchain';
+    simulateState('failed_pending_merchant');
+    goScreen('send-detail');
+    return;
+  }
+  // Otherwise route to order detail (the order containing this refund)
+  goScreen('order-detail');
+}
+
+function sourceBadge(src) {
+  if (src === 'merchant-refund')  return '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:50px;background:var(--blue-bg);color:var(--blue);font-size:10px;font-weight:600;letter-spacing:.04em">REFUND</span>';
+  if (src === 'merchant-onchain') return '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:50px;background:#EDEFED;color:var(--text);font-size:10px;font-weight:600;letter-spacing:.04em">REFUND · MODE 3</span>';
+  return '';
+}
+
+const STATUS_LABEL = {
+  'awaiting':                 'Awaiting claim',
+  'failed_pending_merchant':  'Action needed',
+  'claimed':                  'Claimed',
+  'expired':                  'Expired',
+  'cancelled':                'Cancelled'
+};
+const STATUS_COLOR_CLASS = {
+  'awaiting':                 'awaiting',
+  'failed_pending_merchant':  'expired',  // red-ish styling reused via pill colors below
+  'claimed':                  'claimed',
+  'expired':                  'expired',
+  'cancelled':                'cancelled'
+};
+const PENDING_STATES = new Set(['awaiting', 'failed_pending_merchant']);
+
+function renderActItem(r, opts = {}) {
+  const isCancellable = r.status === 'awaiting';   // failed_pending_merchant cannot be bulk-cancelled
+  const cls = r.status === 'cancelled' ? 'cancelled' : (r.status === 'expired' ? 'expired' : '');
+  const checkbox = (opts.selectMode && isCancellable)
+    ? `<div class="confirm-checkbox ${state.pendingSelected.has(r.id) ? 'checked' : ''}" style="margin-right:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>`
+    : (opts.selectMode ? '<div style="width:20px;margin-right:6px;flex-shrink:0"></div>' : '');
+  const badge = sourceBadge(r.source);
+  const iconCls = r.status === 'failed_pending_merchant' ? 'expired' : cls;
+  const statusCls = r.status === 'failed_pending_merchant' ? 'expired' : STATUS_COLOR_CLASS[r.status];
+  const statusStyle = r.status === 'failed_pending_merchant' ? 'style="color:var(--red)"' : '';
+  return `
+    <div class="act-item" onclick="actItemClick('${r.id}')">
+      ${checkbox}
+      <div class="act-icon ${iconCls}" ${r.status === 'failed_pending_merchant' ? 'style="background:var(--red-bg);color:var(--red)"' : ''}>${r.icon}</div>
+      <div class="act-info">
+        <div class="act-recipient">${r.recipient} ${badge}</div>
+        <div class="act-meta">${r.meta}</div>
+      </div>
+      <div class="act-right">
+        <div class="act-amount">${r.amount} ${r.token}</div>
+        <div class="act-status ${statusCls}" ${statusStyle}>${STATUS_LABEL[r.status]}</div>
+      </div>
+    </div>`;
+}
+
+/* Updates feed: only Payment Link items (per user direction) — folded into existing notification surface */
+const UPDATES = [
+  {
+    id: 'u-pl-out-1',
+    kind: 'pl-out',
+    title: 'Payment Link · awaiting claim',
+    date: 'Apr 28, 2026',
+    desc: 'You sent <b>100 USDT</b> to <b>jane@example.com</b>. Expires in 71h if not claimed.',
+    primaryLabel: 'Copy link',
+    secondaryLabel: 'Cancel',
+    primaryAction: () => copyLink(),
+    secondaryAction: () => { actItemClick('SBL-7K3M9'); }
+  },
+  {
+    id: 'u-pl-in-1',
+    kind: 'pl-in',
+    title: 'Payment Link received',
+    date: 'Apr 28, 2026',
+    desc: '<b>Alex</b> sent you <b>50 USDT</b> via Payment Link. Claim it before it expires in 64h.',
+    primaryLabel: 'Claim',
+    secondaryLabel: 'Dismiss',
+    primaryAction: () => claimFromUpdates(),
+    secondaryAction: () => { dismissUpdate('u-pl-in-1'); }
+  },
+  {
+    id: 'u-pl-out-2',
+    kind: 'pl-out',
+    title: 'Refund link · awaiting claim',
+    date: 'Apr 27, 2026',
+    desc: 'AllScale sent <b>29 USDC</b> to <b>refund@buyer.io</b> on your behalf. Expires in 47h.',
+    primaryLabel: 'Copy link',
+    secondaryLabel: 'Cancel',
+    primaryAction: () => copyLink(),
+    secondaryAction: () => { actItemClick('SBL-2H8C1'); }
+  }
+];
+
+function renderUpdatesList() {
+  const list = document.getElementById('updates-list');
+  if (!list) return;
+  if (UPDATES.length === 0) {
+    list.innerHTML = '<div style="text-align:center;font-size:14px;color:var(--text);padding:32px 0">No updates.</div>';
+    document.getElementById('updates-count').textContent = '0';
+    return;
+  }
+  list.innerHTML = UPDATES.map((u, i) => `
+    <div class="update-item">
+      <div class="update-item-head">
+        <div class="update-item-title">${u.title}</div>
+        <div class="update-item-date">${u.date}</div>
+      </div>
+      <div class="update-item-desc">${u.desc}</div>
+      <div class="ns-actions" style="margin-left:0">
+        <button class="ns-action-btn primary" onclick="UPDATES[${i}].primaryAction()">${u.primaryLabel}</button>
+        <button class="ns-action-btn secondary" onclick="UPDATES[${i}].secondaryAction()">${u.secondaryLabel}</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('updates-count').textContent = UPDATES.length;
+}
+
+/* §6.3 Step 4 AS-user branch: incoming PL [Claim] skips public claim-landing.
+   Receiver is already authenticated as an AS user, so go straight into Step 5a. */
+function claimFromUpdates() {
+  // Sync the in-flight values for an incoming PL (50 USDT from alex@startup.io per Updates seed)
+  state.token = 'USDT';
+  state.amount = '50';
+  state.linkHasEmail = true;     // incoming-PL means sender did fill an email (this user's email)
+  state.email = 'you@allscale.io';
+
+  document.getElementById('claim-from').textContent = 'Alex';
+  document.getElementById('claim-avatar').textContent = 'A';
+  document.getElementById('claim-amount').textContent = '50.00';
+  document.getElementById('claim-amount-unit').textContent = 'USDT';
+  document.getElementById('wd-amt-text').textContent = '50.00 USDT';
+  document.getElementById('wd-receive').textContent = '50.00 USDT';
+
+  // Hand off to receiver chrome but jump past the public landing
+  switchSide('receiver');
+  // After switchSide() lands us on claim-landing — bounce straight into OTP step
+  setTimeout(() => goWalletPath(), 50);
+}
+
+function dismissUpdate(id) {
+  const idx = UPDATES.findIndex(u => u.id === id);
+  if (idx >= 0) UPDATES.splice(idx, 1);
+  renderUpdatesList();
+  toast('Dismissed');
+}
+
+function initial(s) { return (s || '?').trim().charAt(0).toUpperCase(); }
+
+function renderPendingItem(it) {
+  const cls = it.amountClass || (it.amount.startsWith('+') ? 'pos' : '');
+  // Match screenshot: $ shown only on incoming invoices (e.g., -$300 USDT)
+  const showSign = it.kind === 'invoice-in' ? '$' : '';
+  // Avatar
+  let avatarHTML;
+  if (it.kind === 'deposit') {
+    avatarHTML = `<div class="ns-avatar brand"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><polyline points="16 12 12 16 8 12"/></svg></div>`;
+  } else if (it.kind === 'pl-out') {
+    avatarHTML = `<div class="ns-avatar system"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>`;
+  } else {
+    avatarHTML = `<div class="ns-avatar">${initial(it.name)}</div>`;
+  }
+  // Name + tag row
+  let nameHTML = '';
+  if (it.kind === 'deposit') {
+    nameHTML = `<div class="ns-name"><span>${it.name}</span><span class="ns-tag">Pending… <b style="font-weight:700">${it.progress}</b></span></div>`;
+  } else {
+    nameHTML = `<div class="ns-name"><span class="ns-name-text">${it.name}</span>${it.tag ? `<span class="ns-tag">${it.tag}</span>` : ''}</div>`;
+  }
+  // Action buttons by kind
+  let actionsHTML = '';
+  if (it.kind === 'invoice-in') {
+    actionsHTML = `
+      <div class="ns-actions">
+        <button class="ns-action-btn primary" onclick="toast('→ Existing invoice pay flow')">Pay</button>
+        <button class="ns-action-btn secondary" onclick="toast('Dismissed')">Dismiss</button>
+      </div>`;
+  } else if (it.kind === 'invoice-out') {
+    actionsHTML = `
+      <div class="ns-actions">
+        <button class="ns-action-btn primary" onclick="toast('✓ Reminder sent')">Remind</button>
+        <button class="ns-action-btn secondary" onclick="toast('Invoice cancelled')">Cancel</button>
+      </div>`;
+  } else if (it.kind === 'pl-out') {
+    actionsHTML = `
+      <div class="ns-actions">
+        <button class="ns-action-btn primary" onclick="copyLink()">Copy link</button>
+        <button class="ns-action-btn secondary" onclick="actItemClick('${it.recordId}')">View / Cancel</button>
+      </div>`;
+  }
+  // Sub-line under name (e.g., "Expires in 71h" or "Sent · awaiting payment")
+  const subHTML = it.meta ? `<div class="ns-progress">${it.meta}</div>` : '';
+
+  return `
+    <div class="ns-item">
+      <div class="ns-item-row">
+        ${avatarHTML}
+        <div class="ns-info">
+          ${nameHTML}
+          <div class="ns-time">${it.when}</div>
+          ${subHTML}
+        </div>
+        <div class="ns-amount ${cls}">${it.amount.startsWith('-') ? '-' : '+'}${showSign}${it.amount.replace(/^[+-]/, '')} ${it.token}</div>
+      </div>
+      ${actionsHTML}
+    </div>`;
+}
+
+function renderRecent() {
+  // Activity now shows ALL Payment Link records — pending ones get a status pill, terminal ones too.
+  // Per user direction, the pending widget on the dashboard is gone; pending PLs are surfaced via Updates.
+  const recentList = document.getElementById('recent-list');
+  if (recentList) recentList.innerHTML = RECENT.map(r => renderActItem(r)).join('');
+}
+
+function actItemClick(id) {
+  const r = RECENT.find(x => x.id === id);
+  if (!r) return;
+  if (state.pendingSelectMode && r.status === 'awaiting') {
+    if (state.pendingSelected.has(id)) state.pendingSelected.delete(id);
+    else state.pendingSelected.add(id);
+    renderRecent();
+    return;
+  }
+  if (r.status === 'failed_pending_merchant') { state.scenario = 'merchant-onchain'; simulateState('failed_pending_merchant'); goScreen('send-detail'); }
+  else if (r.status === 'awaiting')           goScreen('send-detail');
+  else if (r.status === 'claimed')            { simulateState('claimed');   goScreen('send-detail'); }
+  else if (r.status === 'expired')            { simulateState('expired');   goScreen('send-detail'); }
+  else if (r.status === 'cancelled')          { simulateState('cancelled'); goScreen('send-detail'); }
+}
+
+function togglePendingSelect() {
+  state.pendingSelectMode = !state.pendingSelectMode;
+  state.pendingSelected.clear();
+  document.getElementById('pending-select-toggle').textContent = state.pendingSelectMode ? 'Done' : 'Select';
+  renderRecent();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-cancel-bar');
+  if (state.pendingSelectMode && state.pendingSelected.size > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-selected-count').textContent = state.pendingSelected.size;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function bulkCancel() {
+  const n = state.pendingSelected.size;
+  // mark them cancelled in the seed array
+  state.pendingSelected.forEach(id => {
+    const r = RECENT.find(x => x.id === id);
+    if (r) {
+      r.status = 'cancelled';
+      r.icon = '✕';
+      r.meta = 'Cancelled · Apr 28, 2026';
+    }
+  });
+  state.pendingSelected.clear();
+  state.pendingSelectMode = false;
+  document.getElementById('pending-select-toggle').textContent = 'Select';
+  renderRecent();
+  toast('✓ ' + n + ' payment link' + (n === 1 ? '' : 's') + ' cancelled · funds returned');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+function goScreen(id) {
+  if (id !== 'send-deposit') clearDepositTimers();
+  if (id === 'updates') renderUpdatesList();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + id);
+  if (target) target.classList.add('active');
+  // Full-screen Figma layout for claim-landing only
+  const pub = document.getElementById('container-public');
+  if (pub) {
+    pub.classList.toggle('claim-landing-fs', id === 'claim-landing');
+    const brand = pub.querySelector('.public-brand');
+    if (brand) brand.style.display = (id === 'claim-landing') ? 'none' : '';
+  }
+  // update topbar mode label
+  const labelMap = {
+    'dashboard': 'Dashboard',
+    'send-create': 'Send',
+    'send-deposit': 'Send · Funding',
+    'send-success': 'Send · Done',
+    'send-detail': 'Send · Detail',
+    'merchant-dashboard': 'Merchant Dashboard',
+    'order-detail': 'Order Detail',
+    'merchant-onchain': 'Refund · Original Address',
+    'merchant-onchain-2fa': 'Refund · Authorize'
+  };
+  if (labelMap[id]) {
+    const lbl = document.getElementById('topbar-mode-label');
+    if (lbl) lbl.textContent = labelMap[id];
+  }
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+function switchSide(side) {
+  state.side = side;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.side === side));
+  const payContainer = document.getElementById('container-pay');
+  const publicContainer = document.getElementById('container-public');
+  const topbarPay = document.getElementById('topbar-pay');
+  const topbarPub = document.getElementById('topbar-public');
+
+  if (side === 'receiver') {
+    payContainer.style.display = 'none';
+    publicContainer.style.display = 'block';
+    topbarPay.style.display = 'none';
+    topbarPub.style.display = 'flex';
+    goScreen('claim-landing');
+  } else {
+    payContainer.style.display = 'block';
+    publicContainer.style.display = 'none';
+    topbarPay.style.display = 'flex';
+    topbarPub.style.display = 'none';
+    if (side === 'sender') goScreen('dashboard');
+    else if (side === 'merchant') { renderDashboardRefundsPreview(); goScreen('merchant-dashboard'); }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SENDER — CREATE FORM
+   ═══════════════════════════════════════════════════════════ */
+function setDest(d) {
+  state.destType = d;
+  document.querySelectorAll('.wd-dest-tab').forEach(t => t.classList.toggle('active', t.dataset.dest === d));
+  document.getElementById('dest-address').style.display = d === 'address' ? 'block' : 'none';
+  document.getElementById('dest-email').style.display = d === 'email' ? 'block' : 'none';
+  document.getElementById('msg-group').style.display = d === 'email' ? 'block' : 'none';
+  document.getElementById('send-popup-title').textContent = d === 'email' ? 'Create Payment Link' : 'Send to wallet';
+  validateForm();
+}
+
+function setMax() {
+  const t = TOKENS[state.token];
+  const max = Math.min(t.balance, SINGLE_LIMIT);
+  document.getElementById('send-amount').value = max.toFixed(2);
+  state.amount = String(max);
+  validateForm();
+}
+
+/* ─── Token picker (matches offramp bank-card style) ─── */
+function openTokenSheet() {
+  const list = document.getElementById('token-sheet-list');
+  list.innerHTML = Object.entries(TOKENS).map(([key, t]) => {
+    const isSelected = state.token === key;
+    return `
+      <div class="token-pick-card ${isSelected ? 'selected' : ''}" onclick="selectToken('${key}')">
+        <span class="coin-icon ${t.cls} lg" style="position:relative">${t.iconLetter}<span class="chain-mini">E</span></span>
+        <div style="flex:1;min-width:0">
+          <div class="token-pick-name">${key}</div>
+          <div class="token-pick-sub">${t.name} · ${t.chain}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div class="token-pick-bal">${fmt(t.balance)}</div>
+          <div class="token-pick-bal-sub">$${fmt(t.balance)}</div>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('token-overlay').classList.add('open');
+  document.getElementById('token-sheet').classList.add('open');
+}
+function closeTokenSheet() {
+  document.getElementById('token-overlay').classList.remove('open');
+  document.getElementById('token-sheet').classList.remove('open');
+}
+
+/* ─── Jump from success page to a simulated detail state ─── */
+function jumpToState(s) {
+  goScreen('send-detail');
+  setTimeout(() => simulateState(s), 50);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ORDER DETAIL · REFUND MODAL (§7.6)
+   ═══════════════════════════════════════════════════════════ */
+const order = {
+  id: 'ORD-4821',
+  payer: '0x742d…F44e',
+  email: 'refund@buyer.io',
+  amount: 120.00,
+  token: 'USDT',
+  chain: 'Ethereum',
+  hasEmail: true,
+  history: []
+};
+
+let refundDraft = { amtMode: 'full', mode: 'mode1', amount: 120.00 };
+
+function setOrderEmail(has) {
+  order.hasEmail = has;
+  order.email = has ? 'refund@buyer.io' : '';
+  document.getElementById('order-email-row').innerHTML = has
+    ? '<span class="k">Customer email</span><span class="v">refund@buyer.io</span>'
+    : '<span class="k">Customer email</span><span class="v" style="color:var(--text)">— not collected at checkout</span>';
+  toast(has ? 'Order has email · default mode 1' : 'No email · default mode 2');
+}
+
+function openRefundModal() {
+  // Smart default: mode 1 if order has email, else mode 2
+  refundDraft.mode = order.hasEmail ? 'mode1' : 'mode2';
+  refundDraft.amtMode = 'full';
+  refundDraft.amount = order.amount;
+  setAmtMode('full');
+  renderRefundModes();
+  applyModeUI();
+  document.getElementById('refund-overlay').classList.add('open');
+  document.getElementById('refund-sheet').classList.add('open');
+}
+function closeRefundModal() {
+  document.getElementById('refund-overlay').classList.remove('open');
+  document.getElementById('refund-sheet').classList.remove('open');
+}
+
+function setAmtMode(m) {
+  refundDraft.amtMode = m;
+  document.getElementById('amt-mode-full').classList.toggle('active', m === 'full');
+  document.getElementById('amt-mode-partial').classList.toggle('active', m === 'partial');
+  document.getElementById('partial-row').style.display = m === 'partial' ? 'block' : 'none';
+}
+
+function renderRefundModes() {
+  const modes = [
+    { key: 'mode1', label: 'Payment Link · email',     sub: 'Send claim link to the customer\'s email.',                pros: 'Customer-friendly · works for non-crypto users' },
+    { key: 'mode2', label: 'Payment Link · URL only',  sub: 'Generate a claim link; share it manually.',                pros: 'No email required' },
+    { key: 'mode3', label: 'Original-address refund',  sub: 'On-chain transfer back to the payer\'s wallet. Fastest.',  pros: 'No 72h wait · for crypto-native customers' }
+  ];
+  document.getElementById('refund-mode-cards').innerHTML = modes.map(m => `
+    <div onclick="pickMode('${m.key}')" style="padding:14px;border-radius:14px;border:1.5px solid ${refundDraft.mode === m.key ? 'var(--green)' : 'var(--border)'};background:${refundDraft.mode === m.key ? 'var(--green-bg)' : 'var(--card)'};cursor:pointer;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${refundDraft.mode === m.key ? 'var(--green)' : 'var(--border)'};background:${refundDraft.mode === m.key ? 'var(--green)' : 'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${refundDraft.mode === m.key ? '<div style="width:6px;height:6px;border-radius:50%;background:white"></div>' : ''}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:var(--dark);letter-spacing:-0.02em">${m.label}</div>
+          <div style="font-size:12px;color:var(--text);margin-top:2px;line-height:1.5">${m.sub}</div>
+          <div style="font-size:11px;color:var(--green);margin-top:4px;font-weight:500">${m.pros}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function pickMode(key) {
+  refundDraft.mode = key;
+  renderRefundModes();
+  applyModeUI();
+}
+
+function applyModeUI() {
+  const isMode1 = refundDraft.mode === 'mode1';
+  const isMode3 = refundDraft.mode === 'mode3';
+  document.getElementById('refund-email-section').style.display = isMode1 ? 'block' : 'none';
+  document.getElementById('mode3-risk').style.display = isMode3 ? 'flex' : 'none';
+}
+
+function submitRefund() {
+  const amt = refundDraft.amtMode === 'full' ? order.amount : parseFloat(document.getElementById('refund-partial-amt').value) || order.amount;
+  refundDraft.amount = amt;
+  closeRefundModal();
+
+  // Mode 3 → on-chain confirm + 2FA + outcome
+  if (refundDraft.mode === 'mode3') {
+    document.getElementById('oc-amount').value = amt.toFixed(2);
+    goScreen('merchant-onchain-2fa');
+    return;
+  }
+
+  // Mode 1/2 → preload sender + email and run normal Payment Link flow
+  state.scenario = 'merchant-refund';
+  state.senderName = 'AllScale';
+  state.senderInitial = 'A';
+  state.token = order.token;
+  state.amount = String(amt);
+  if (refundDraft.mode === 'mode1') {
+    state.email = document.getElementById('refund-email').value || order.email;
+    state.skipEmail = false;
+  } else {
+    state.email = '';
+    state.skipEmail = true;
+  }
+  state.message = 'Refund from your recent purchase.';
+
+  // Simulate the Payment Link being created — go straight through deposit to success
+  // Pre-populate share / detail / claim values
+  const tk = state.token;
+  const amtFmt = amt.toFixed(2);
+  document.getElementById('share-amount').textContent = amtFmt;
+  document.getElementById('share-amount-unit').textContent = tk;
+  document.getElementById('share-avatar').textContent = 'A';
+  document.getElementById('share-sender-name').textContent = 'AllScale';
+  document.getElementById('claim-avatar').textContent = 'A';
+  document.getElementById('claim-from').textContent = 'AllScale';
+  document.getElementById('claim-amount').textContent = amtFmt;
+  document.getElementById('claim-amount-unit').textContent = tk;
+  document.getElementById('detail-amount').textContent = amtFmt;
+  document.getElementById('detail-amount-unit').textContent = tk;
+  document.getElementById('dep-amount').textContent = amtFmt + ' ' + tk;
+  document.getElementById('cancel-amount-text').textContent = amtFmt + ' ' + tk;
+  state.linkHasEmail = refundDraft.mode === 'mode1';
+
+  if (refundDraft.mode === 'mode1') {
+    document.getElementById('detail-recipient-row').innerHTML = '<span class="k">Recipient</span><span class="v" style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span id="detail-recipient-text">' + state.email + '</span><span id="detail-email-status" class="email-badge delivered" style="font-size:11px;padding:2px 8px;border-radius:50px;font-weight:500;letter-spacing:0">✓ Delivered</span></span>';
+    document.getElementById('success-subtitle').textContent = 'Email sent to ' + state.email + '. Share the card or link anywhere.';
+    document.getElementById('detail-resend-btn').style.display = '';
+  } else {
+    document.getElementById('detail-recipient-row').innerHTML = '<span class="k">Recipient</span><span class="v" style="color:var(--text)">— Share link manually</span>';
+    document.getElementById('success-subtitle').textContent = 'No email — share the card or link manually.';
+    document.getElementById('detail-resend-btn').style.display = 'none';
+  }
+
+  // Add to refund history (link_sent state)
+  order.history.unshift({
+    id: 'RF-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+    method: refundDraft.mode === 'mode1' ? 'Payment Link · email' : 'Payment Link · URL',
+    amount: amtFmt,
+    state: 'link_sent',
+    when: 'Apr 28, 2026 · 11:14',
+    tx: ''
+  });
+  renderRefundHistory();
+
+  // Skip the deposit auto-advance for cleaner demo — go straight to success
+  goScreen('send-success');
+  toast('✓ Refund created · status link_sent');
+}
+
+function renderRefundHistory() {
+  const wrap = document.getElementById('refund-history-list');
+  if (!wrap) return;
+  if (order.history.length === 0) {
+    wrap.innerHTML = '<div style="text-align:center;font-size:13px;color:var(--text);padding:18px 0">No refunds yet for this order.</div>';
+    return;
+  }
+  wrap.innerHTML = order.history.map(h => {
+    const stateColor = ({
+      'link_sent':                'var(--orange)',
+      'claimed':                  'var(--green)',
+      'failed_pending_merchant':  'var(--red)',
+      'cancelled':                'var(--text)'
+    })[h.state] || 'var(--text)';
+    const stateLabel = ({
+      'link_sent':                'Awaiting claim',
+      'claimed':                  'Claimed',
+      'failed_pending_merchant':  'Action needed',
+      'cancelled':                'Cancelled'
+    })[h.state] || h.state;
+    return `
+      <div class="act-item" style="cursor:default">
+        <div class="act-icon" style="background:var(--btn);color:var(--green)">↩</div>
+        <div class="act-info">
+          <div class="act-recipient">${h.method}</div>
+          <div class="act-meta">${h.when}${h.tx ? ' · ' + h.tx : ''}</div>
+        </div>
+        <div class="act-right">
+          <div class="act-amount">${h.amount} ${order.token}</div>
+          <div class="act-status" style="color:${stateColor};font-weight:600">${stateLabel}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // §7.6 MVP limit: 1 successful refund per order. Failed / cancelled / expired don't count.
+  const BLOCKING = new Set(['link_sent', 'claiming', 'claimed']);
+  const blocked = order.history.some(h => BLOCKING.has(h.state));
+  document.getElementById('order-refund-btn').style.display = blocked ? 'none' : '';
+}
+
+/* ─── Mode 3 (original-address refund) ─── */
+function submitOnchainRefund() {
+  // Default outcome — success
+  onchainOutcome('claimed');
+}
+function onchainOutcome(outcome) {
+  state.scenario = 'merchant-onchain';
+  const amt = parseFloat(document.getElementById('oc-amount').value || '120').toFixed(2);
+  document.getElementById('detail-amount').textContent = amt;
+  document.getElementById('detail-amount-unit').textContent = 'USDT';
+  document.getElementById('detail-recipient-row').innerHTML = '<span class="k">Refund to</span><span class="v mono">0x742d…F44e</span>';
+
+  // Append to order history if entered through order detail
+  order.history.unshift({
+    id: 'RF-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+    method: 'Original address (mode 3)',
+    amount: amt,
+    state: outcome === 'claimed' ? 'claimed' : 'failed_pending_merchant',
+    when: 'Apr 28, 2026 · 11:18',
+    tx: outcome === 'claimed' ? '0x9b3c…7a12' : ''
+  });
+  renderRefundHistory();
+
+  if (outcome === 'claimed') {
+    simulateState('claimed');
+    toast('✓ On-chain refund broadcast');
+  } else {
+    simulateState('failed_pending_merchant');
+    toast('On-chain refund hard-failed');
+  }
+  goScreen('send-detail');
+}
+function selectToken(key) {
+  state.token = key;
+  const t = TOKENS[key];
+  // Send page
+  const icon = document.getElementById('send-token-icon');
+  icon.className = 'coin-icon ' + t.cls + ' lg';
+  icon.innerHTML = t.iconLetter + '<span class="chain-mini">E</span>';
+  document.getElementById('send-token-name').textContent = t.chain + ' — ' + key;
+  document.getElementById('send-amount-unit').textContent = key;
+  document.getElementById('send-avail-balance').textContent = fmt(t.balance) + ' ' + key;
+  closeTokenSheet();
+  validateForm();
+}
+
+function onAmountChange() {
+  const v = document.getElementById('send-amount').value.replace(/[^\d.]/g, '');
+  document.getElementById('send-amount').value = v;
+  state.amount = v;
+  validateForm();
+}
+
+function onEmailChange() {
+  state.email = document.getElementById('send-email').value.trim();
+  validateForm();
+}
+
+function onMsgChange() {
+  state.message = document.getElementById('send-message').value;
+  document.getElementById('msg-counter').textContent = state.message.length;
+}
+
+function toggleSkipEmail() {
+  state.skipEmail = !state.skipEmail;
+  const tog = document.getElementById('skip-toggle');
+  const lbl = document.getElementById('skip-label');
+  const emailInput = document.getElementById('send-email');
+  const hint = document.getElementById('email-hint');
+  tog.classList.toggle('active', state.skipEmail);
+  if (state.skipEmail) {
+    lbl.textContent = 'Skipping email — share via link';
+    emailInput.value = '';
+    state.email = '';
+    emailInput.disabled = true;
+    hint.textContent = 'No email — you\'ll get a link & QR card to share anywhere.';
+  } else {
+    lbl.textContent = 'Skip — share via link instead';
+    emailInput.disabled = false;
+    hint.textContent = 'We\'ll email a claim link to your recipient.';
+    hint.classList.remove('error');
+  }
+  validateForm();
+}
+
+function validateForm() {
+  const btn = document.getElementById('send-btn');
+  const hint = document.getElementById('email-hint');
+  const amt = parseFloat(state.amount || '0');
+  let valid = amt > 0 && amt <= SINGLE_LIMIT;
+
+  const avail = document.getElementById('send-avail');
+  const t = TOKENS[state.token];
+  const balText = fmt(t.balance) + ' ' + state.token;
+  if (amt > SINGLE_LIMIT) {
+    avail.classList.add('error');
+    avail.innerHTML = 'Exceeds single-send limit of $500. Available: <span>' + balText + '</span>';
+    valid = false;
+  } else if (amt > t.balance) {
+    avail.classList.add('error');
+    avail.innerHTML = 'Insufficient balance. Available: <span>' + balText + '</span>';
+    valid = false;
+  } else {
+    avail.classList.remove('error');
+    avail.innerHTML = 'Available: <span>' + balText + '</span> · Single-send limit: $500';
+  }
+
+  if (state.destType === 'email' && !state.skipEmail && state.email) {
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(state.email)) {
+      hint.textContent = 'Invalid email format';
+      hint.classList.add('error');
+      valid = false;
+    } else {
+      hint.textContent = 'We\'ll email a claim link to your recipient.';
+      hint.classList.remove('error');
+    }
+  }
+
+  btn.classList.toggle('disabled', !valid);
+  if (state.destType === 'email') {
+    btn.textContent = 'Create Payment Link';
+  } else {
+    btn.textContent = 'Continue';
+  }
+}
+
+function onSubmitSend() {
+  if (document.getElementById('send-btn').classList.contains('disabled')) return;
+  if (state.destType === 'address') { toast('→ Existing send flow (out of scope for this PRD)'); return; }
+
+  // Whether the resulting Payment Link is associated with an email (drives OTP path 5a)
+  state.linkHasEmail = !state.skipEmail && !!state.email;
+
+  // Sync claim landing avatar / sender name (in case scenario switched)
+  document.getElementById('claim-avatar').textContent = state.senderInitial;
+  document.getElementById('claim-from').textContent = state.senderName;
+
+  // Sync share card / detail / claim — using selected token unit
+  const amtFmt = parseFloat(state.amount).toFixed(2);
+  const tk = state.token;
+  document.getElementById('share-amount').textContent = amtFmt;
+  document.getElementById('share-amount-unit').textContent = tk;
+  document.getElementById('dep-amount').textContent = amtFmt + ' ' + tk;
+  document.getElementById('detail-amount').textContent = amtFmt;
+  document.getElementById('detail-amount-unit').textContent = tk;
+  document.getElementById('claim-amount').textContent = amtFmt;
+  document.getElementById('claim-amount-unit').textContent = tk;
+  const ctaAmt = document.getElementById('claim-cta-amount');
+  if (ctaAmt) ctaAmt.textContent = amtFmt + ' ' + tk;
+  document.getElementById('wd-amt-text').textContent = amtFmt + ' ' + tk;
+  document.getElementById('wd-addr-hint').textContent = 'EVM-compatible address only · ' + tk + ' on Ethereum.';
+  document.getElementById('wallet-cta-sub').textContent = 'Send to my own ' + tk + ' wallet · I keep custody';
+  document.getElementById('reg-amount').textContent = amtFmt + ' ' + tk;
+  document.getElementById('reg-success-amount').textContent = amtFmt;
+  document.getElementById('reg-success-unit').textContent = tk;
+  document.getElementById('success-amount').textContent = amtFmt + ' ' + tk;
+  document.getElementById('cancel-amount-text').textContent = amtFmt + ' ' + tk;
+  document.getElementById('wd-receive').textContent = amtFmt + ' ' + tk;
+
+  // Recipient detail row + success copy
+  const recipRow = document.getElementById('detail-recipient-row');
+  if (state.skipEmail || !state.email) {
+    recipRow.innerHTML = '<span class="k">Recipient</span><span class="v" style="color:var(--text)">— Share link manually</span>';
+    document.getElementById('success-subtitle').textContent = 'No email — share the card or link manually.';
+    document.getElementById('detail-resend-btn').style.display = 'none';
+    document.getElementById('dep-step3-sub').textContent = 'Link will be ready to share.';
+  } else {
+    recipRow.innerHTML = '<span class="k">Recipient</span><span class="v" style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span id="detail-recipient-text">' + state.email + '</span><span id="detail-email-status" class="email-badge delivered" style="font-size:11px;padding:2px 8px;border-radius:50px;font-weight:500;letter-spacing:0">✓ Delivered</span></span>';
+    document.getElementById('success-subtitle').textContent = 'Email sent to ' + state.email + '. Share the card or link anywhere.';
+    document.getElementById('detail-resend-btn').style.display = '';
+    document.getElementById('dep-step3-sub').textContent = 'Email will be sent to ' + state.email + '.';
+  }
+
+  // message
+  const msgEl = document.getElementById('share-message');
+  const claimMsgBubble = document.getElementById('claim-message-bubble');
+  if (state.message.trim()) {
+    msgEl.textContent = '"' + state.message.trim() + '"';
+    msgEl.style.display = 'inline-block';
+    document.getElementById('claim-message-text').textContent = state.message.trim();
+    claimMsgBubble.style.display = 'block';
+  } else {
+    msgEl.style.display = 'none';
+    claimMsgBubble.style.display = 'none';
+  }
+
+  resetDepositScreen();
+  goScreen('send-deposit');
+
+  // Default auto-advance: funding succeeds after ~1.6s, then jump to success
+  clearDepositTimers();
+  depositTimers.push(setTimeout(() => {
+    markFundingDone();
+    depositTimers.push(setTimeout(() => goScreen('send-success'), 700));
+  }, 1600));
+}
+
+function resetDepositScreen() {
+  document.getElementById('dep-page-title').textContent = 'Creating Payment Link…';
+  document.getElementById('dep-page-sub').textContent = 'Funding a one-time link wallet from your AllScale balance.';
+  document.getElementById('dep-icon').style.background = 'var(--green-bg)';
+  document.getElementById('dep-icon').style.color = 'var(--green)';
+  document.getElementById('dep-icon').innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>';
+  document.getElementById('dep-title').textContent = 'Funding link wallet';
+  document.getElementById('dep-completion-sub').innerHTML = 'Sending <b id="dep-amount">' + (state.amount ? parseFloat(state.amount).toFixed(2) + ' ' + state.token : '100.00 USDT') + '</b> from your AllScale wallet.';
+  document.getElementById('dep-step2-sub').textContent = 'Confirming on-chain transfer…';
+  // step2 dot back to active
+  const step = document.getElementById('dep-step-fund');
+  step.className = 'status-step active';
+  step.querySelector('.step-dot').className = 'step-dot active';
+  step.querySelector('.step-dot').textContent = '2';
+  step.querySelector('.label').textContent = 'Funding wallet';
+  // step3 back to pending
+  const stepLink = document.getElementById('dep-step-link');
+  stepLink.className = 'status-step';
+  stepLink.querySelector('.step-dot').className = 'step-dot pending';
+  stepLink.querySelector('.step-dot').textContent = '3';
+  stepLink.querySelector('.label').textContent = 'Generate claim link';
+  document.getElementById('dep-cta').style.display = 'none';
+  document.getElementById('dep-cta').textContent = 'Continue';
+  document.getElementById('dep-cta').onclick = () => goScreen('send-success');
+}
+
+function markFundingDone() {
+  const step = document.getElementById('dep-step-fund');
+  step.classList.remove('active');
+  step.classList.add('done');
+  step.querySelector('.step-dot').classList.remove('active');
+  step.querySelector('.step-dot').classList.add('done');
+  step.querySelector('.step-dot').textContent = '✓';
+  step.querySelector('.label').textContent = 'Wallet funded';
+  step.querySelector('.sub').textContent = 'Confirmed on-chain.';
+}
+
+function simulateDeposit(s) {
+  clearDepositTimers();
+  if (s === 'success') {
+    markFundingDone();
+    // step3 → done
+    const stepLink = document.getElementById('dep-step-link');
+    stepLink.className = 'status-step done';
+    const dot = stepLink.querySelector('.step-dot');
+    dot.className = 'step-dot done';
+    dot.textContent = '✓';
+    stepLink.querySelector('.label').textContent = 'Claim link generated';
+    document.getElementById('dep-step3-sub').textContent = state.email && !state.skipEmail ? 'Email sent to ' + state.email + '.' : 'Link is ready to share.';
+    document.getElementById('dep-title').textContent = 'Link ready';
+    document.getElementById('dep-completion-sub').innerHTML = 'Your claim link is live and ready to share.';
+    document.getElementById('dep-cta').style.display = '';
+    document.getElementById('dep-cta').textContent = 'View link';
+    toast('✓ Funding succeeded');
+  } else if (s === 'pending') {
+    document.getElementById('dep-step2-sub').textContent = 'Still waiting for on-chain confirmation… (≥ 5 min)';
+    document.getElementById('dep-completion-sub').innerHTML = 'Waiting for the on-chain transfer to confirm. This usually takes seconds but can take longer in network congestion.';
+    document.getElementById('dep-title').textContent = 'Funding still pending';
+    toast('Funding stuck in pending');
+  } else if (s === 'failed') {
+    // §6.4.5: hard-fail → status rolls back, internal alert. No "support" wording shown to user.
+    const step = document.getElementById('dep-step-fund');
+    step.className = 'status-step active';
+    const dot = step.querySelector('.step-dot');
+    dot.className = 'step-dot active';
+    dot.style.background = '';
+    dot.style.color = '';
+    dot.style.border = '';
+    dot.textContent = '2';
+    step.querySelector('.label').textContent = 'Still confirming…';
+    step.querySelector('.sub').textContent = 'On-chain transfer didn\'t confirm. Retrying automatically.';
+    document.getElementById('dep-icon').style.background = 'var(--orange-bg)';
+    document.getElementById('dep-icon').style.color = 'var(--orange)';
+    document.getElementById('dep-icon').innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+    document.getElementById('dep-title').textContent = 'Funding is taking longer than usual';
+    document.getElementById('dep-completion-sub').innerHTML = 'We\'re retrying automatically. The link will activate once the transfer confirms — no action needed from you.';
+    document.getElementById('dep-cta').style.display = '';
+    document.getElementById('dep-cta').textContent = 'Back to dashboard';
+    document.getElementById('dep-cta').onclick = () => goScreen('dashboard');
+    toast('Funding retrying — link state rolled back');
+  }
+}
+
+function loadScenario(type) {
+  // Mode 3 — original-address refund — uses its own screen, not send-create
+  if (type === 'merchant-onchain') {
+    state.scenario = 'merchant-onchain';
+    goScreen('merchant-onchain');
+    return;
+  }
+
+  goScreen('send-create');
+  setDest('email');
+  document.getElementById('skip-toggle').classList.remove('active');
+  state.skipEmail = false;
+  state.scenario = (type === 'merchant-refund') ? 'merchant-refund' : 'p2p';
+  document.getElementById('skip-label').textContent = 'Skip — share via link instead';
+
+  // Reset email-related UI state
+  const emailInput = document.getElementById('send-email');
+  const skipToggle = document.getElementById('skip-toggle');
+  const banner = document.getElementById('scenario-banner');
+
+  if (type === 'merchant-refund') {
+    // Mode 1/2 — merchant refund via Payment Link
+    state.senderName = 'AllScale';
+    state.senderInitial = 'A';
+    document.getElementById('send-amount').value = '29';
+    emailInput.value = 'refund@buyer.io';
+    emailInput.disabled = true;
+    document.getElementById('send-message').value = 'Refund from your recent purchase.';
+    skipToggle.style.display = 'none';
+    banner.style.display = 'flex';
+    banner.className = 'alert-box info';
+    document.getElementById('scenario-banner-icon').textContent = '↩️';
+    document.getElementById('scenario-banner-title').textContent = 'Merchant refund · via Payment Link (mode 1/2)';
+    document.getElementById('scenario-banner-text').textContent = 'Refund initiated via API. The Sender shown to the recipient is AllScale.';
+  } else {
+    // Reset to P2P defaults
+    state.senderName = 'Yao';
+    state.senderInitial = 'Y';
+    emailInput.disabled = false;
+    skipToggle.style.display = '';
+    banner.style.display = 'none';
+
+    if (type === 'p2p') {
+      document.getElementById('send-amount').value = '100';
+      emailInput.value = 'jane@example.com';
+      document.getElementById('send-message').value = 'Happy birthday 🎂';
+    } else if (type === 'url') {
+      document.getElementById('send-amount').value = '50';
+      emailInput.value = '';
+      document.getElementById('send-message').value = 'Coffee on me ☕';
+      setTimeout(() => toggleSkipEmail(), 100);
+    } else if (type === 'overlimit') {
+      document.getElementById('send-amount').value = '750';
+      emailInput.value = 'jane@example.com';
+      document.getElementById('send-message').value = '';
+    }
+  }
+
+  state.amount = document.getElementById('send-amount').value;
+  state.email = emailInput.value;
+  state.message = document.getElementById('send-message').value;
+  document.getElementById('msg-counter').textContent = state.message.length;
+
+  // Update sender avatar / name on share card
+  document.getElementById('share-avatar').textContent = state.senderInitial;
+  document.getElementById('share-sender-name').textContent = state.senderName;
+
+  validateForm();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHARE CARD ACTIONS
+   ═══════════════════════════════════════════════════════════ */
+function copyLink()   { toast('✓ Link copied'); }
+function downloadCard() { toast('✓ Card downloaded as PNG'); }
+function shareCard()  { toast('Opening native share sheet...'); }
+function resendEmail() {
+  const btn = document.getElementById('detail-resend-btn');
+  if (btn.classList.contains('cooling')) return;
+  toast('✓ Email resent');
+  // Visual rate-limit per §6.4.2: 5min cooldown (using 60s for demo brevity)
+  const COOLDOWN_S = 60;
+  let remaining = COOLDOWN_S;
+  btn.classList.add('cooling');
+  const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  btn.dataset.countdown = `· ${fmt(remaining)}`;
+  btn.querySelector('span') ? null : null;
+  // Replace inner text with "Resend in MM:SS"
+  const orig = btn.innerHTML;
+  btn.innerHTML = `Resend in ${fmt(remaining)}`;
+  const interval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(interval);
+      btn.classList.remove('cooling');
+      btn.innerHTML = orig;
+    } else {
+      btn.innerHTML = `Resend in ${fmt(remaining)}`;
+    }
+  }, 1000);
+}
+
+// Email delivery status simulator (per §6.4.7) — for detail page demo
+function simulateEmailStatus(s) {
+  const badge = document.getElementById('detail-email-status');
+  if (!badge) {
+    toast('Email status only applies to email-mode payments');
+    return;
+  }
+  badge.classList.remove('delivered', 'bounced', 'pending');
+  if (s === 'delivered') {
+    badge.classList.add('delivered');
+    badge.textContent = '✓ Delivered';
+  } else if (s === 'bounced') {
+    badge.classList.add('bounced');
+    badge.textContent = '⚠ Bounced';
+  } else if (s === 'pending') {
+    badge.classList.add('pending');
+    badge.textContent = '⏳ Sending';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DETAIL — STATUS SIMULATION
+   ═══════════════════════════════════════════════════════════ */
+function simulateState(s) {
+  state.detailStatus = s;
+  const pill = document.getElementById('detail-status-pill');
+  const timer = document.getElementById('detail-timer');
+  const active = document.getElementById('detail-active-actions');
+  const finished = document.getElementById('detail-finished-actions');
+  const claimTxRow = document.getElementById('detail-claim-tx-row');
+  const timeKey = document.getElementById('detail-time-key');
+  const timeVal = document.getElementById('detail-time-val');
+  const finishedAlert = document.getElementById('detail-finished-alert');
+  const finishedIcon = document.getElementById('detail-finished-icon');
+  const finishedTitle = document.getElementById('detail-finished-title');
+  const finishedText = document.getElementById('detail-finished-text');
+
+  pill.className = 'status-pill ' + s;
+  finishedAlert.className = 'alert-box';
+
+  if (s === 'awaiting-claim') {
+    pill.innerHTML = '<span class="status-dot pulse"></span><span>Awaiting claim</span>';
+    timer.style.display = '';
+    timer.classList.remove('expired');
+    document.getElementById('detail-countdown').textContent = 'Expires in 71h 58m';
+    timeKey.textContent = 'Expires';
+    timeVal.textContent = 'Apr 30, 2026 · 14:32';
+    claimTxRow.style.display = 'none';
+    active.style.display = '';
+    finished.style.display = 'none';
+  } else if (s === 'claimed') {
+    pill.innerHTML = '<span class="status-dot"></span><span>Claimed</span>';
+    timer.style.display = 'none';
+    timeKey.textContent = 'Claimed';
+    timeVal.textContent = 'Apr 28, 2026 · 09:14';
+    claimTxRow.style.display = '';
+    active.style.display = 'none';
+    finished.style.display = '';
+    finishedAlert.classList.add('success');
+    finishedIcon.textContent = '✓';
+    finishedTitle.textContent = 'Funds claimed';
+    finishedText.textContent = 'The recipient received the payment. This link is no longer active.';
+  } else if (s === 'expired') {
+    pill.innerHTML = '<span class="status-dot"></span><span>Expired · Returned</span>';
+    timer.style.display = '';
+    timer.classList.add('expired');
+    document.getElementById('detail-countdown').textContent = 'Expired · Funds returned';
+    timeKey.textContent = 'Returned';
+    timeVal.textContent = 'Apr 30, 2026 · 15:02';
+    claimTxRow.style.display = 'none';
+    active.style.display = 'none';
+    finished.style.display = '';
+    finishedAlert.classList.add('warn');
+    finishedIcon.textContent = '⏰';
+    finishedTitle.textContent = 'Expired — funds returned';
+    finishedText.textContent = 'No claim within 72h. Funds were returned to your wallet automatically.';
+  } else if (s === 'cancelled') {
+    pill.innerHTML = '<span class="status-dot"></span><span>Cancelled</span>';
+    timer.style.display = 'none';
+    timeKey.textContent = 'Cancelled';
+    timeVal.textContent = 'Apr 27, 2026 · 18:40';
+    claimTxRow.style.display = 'none';
+    active.style.display = 'none';
+    finished.style.display = '';
+    finishedAlert.classList.add('info');
+    finishedIcon.textContent = 'ℹ️';
+    finishedTitle.textContent = 'Cancelled by you';
+    finishedText.textContent = 'You cancelled this payment. Funds have been returned to your wallet.';
+  } else if (s === 'failed_pending_merchant') {
+    // §6.2.5: mode 3 hard fail. Funds still in merchant wallet — merchant must choose: retry or switch to Payment Link
+    pill.className = 'status-pill expired';   // re-using red-ish styling
+    pill.innerHTML = '<span class="status-dot"></span><span>Action needed · On-chain refund failed</span>';
+    timer.style.display = 'none';
+    timeKey.textContent = 'Failed';
+    timeVal.textContent = 'Apr 28, 2026 · 11:02';
+    claimTxRow.style.display = 'none';
+    // Mode 3 specific: show original-payer address as recipient
+    document.getElementById('detail-recipient-row').innerHTML = '<span class="k">Refund to</span><span class="v mono">0x742d…F44e</span>';
+    document.getElementById('detail-amount').textContent = '120.00';
+    document.getElementById('detail-amount-unit').textContent = 'USDT';
+    active.style.display = 'none';
+    finished.style.display = '';
+    finishedAlert.classList.add('warn');
+    finishedIcon.textContent = '⚠️';
+    finishedTitle.textContent = 'On-chain refund failed';
+    finishedText.innerHTML = 'The on-chain transfer reverted (likely contract address or gas issue). Funds are still in your wallet — choose how to proceed.';
+    // Replace the default "Send again" button with two mode-3 specific actions
+    const finishedBlock = document.getElementById('detail-finished-actions');
+    let actionRow = document.getElementById('mode3-actions');
+    if (!actionRow) {
+      actionRow = document.createElement('div');
+      actionRow.id = 'mode3-actions';
+      finishedBlock.appendChild(actionRow);
+    }
+    actionRow.style.display = '';
+    actionRow.innerHTML = `
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn-secondary" onclick="mode3Retry()">Retry on-chain</button>
+        <button class="btn-primary" onclick="mode3SwitchToPaymentLink()">Switch to Payment Link</button>
+      </div>`;
+    // hide the default "Send again" button when mode-3 actions are present
+    const defaultBtn = finishedBlock.querySelector('.btn-primary:not(#mode3-actions .btn-primary)');
+    if (defaultBtn && !defaultBtn.closest('#mode3-actions')) defaultBtn.style.display = 'none';
+  }
+
+  // For non-mode3 states, restore the default Send again button
+  if (s !== 'failed_pending_merchant') {
+    const m3 = document.getElementById('mode3-actions');
+    if (m3) m3.style.display = 'none';
+    const finishedBlock = document.getElementById('detail-finished-actions');
+    const defaultBtn = finishedBlock.querySelector('.btn-primary:not(#mode3-actions .btn-primary)');
+    if (defaultBtn) defaultBtn.style.display = '';
+  }
+}
+
+function mode3Retry() {
+  toast('Retrying on-chain refund…');
+  setTimeout(() => { simulateState('claimed'); toast('✓ Retry succeeded'); }, 800);
+}
+function mode3SwitchToPaymentLink() {
+  toast('Switching to Payment Link mode');
+  loadScenario('merchant-refund');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CANCEL SHEET
+   ═══════════════════════════════════════════════════════════ */
+function confirmCancel() {
+  document.getElementById('cancel-overlay').classList.add('open');
+  document.getElementById('cancel-sheet').classList.add('open');
+}
+function closeCancel() {
+  document.getElementById('cancel-overlay').classList.remove('open');
+  document.getElementById('cancel-sheet').classList.remove('open');
+}
+function executeCancel() {
+  closeCancel();
+  simulateState('cancelled');
+  toast('Payment cancelled — funds returned');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CLAIM LANDING — Figma full-screen replica
+   ═══════════════════════════════════════════════════════════ */
+let claimMethod = 'wallet';
+function selectClaimMethod(method) {
+  claimMethod = method;
+  const wallet = document.getElementById('claim-opt-wallet');
+  const allscale = document.getElementById('claim-opt-allscale');
+  const isWallet = method === 'wallet';
+  wallet.classList.toggle('selected', isWallet);
+  wallet.setAttribute('aria-checked', isWallet);
+  wallet.querySelector('.claim-fs-option-radio').classList.toggle('checked', isWallet);
+  wallet.querySelector('.claim-fs-option-radio').innerHTML = isWallet
+    ? '<span class="dot"><svg viewBox="0 0 12 8"><polyline points="1 4 5 7 11 1"/></svg></span>'
+    : '<span class="ring"></span>';
+  allscale.classList.toggle('selected', !isWallet);
+  allscale.setAttribute('aria-checked', !isWallet);
+  allscale.querySelector('.claim-fs-option-radio').classList.toggle('checked', !isWallet);
+  allscale.querySelector('.claim-fs-option-radio').innerHTML = !isWallet
+    ? '<span class="dot"><svg viewBox="0 0 12 8"><polyline points="1 4 5 7 11 1"/></svg></span>'
+    : '<span class="ring"></span>';
+}
+function executeClaim() {
+  if (claimMethod === 'wallet') goWalletPath();
+  else enterRegister();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECEIVER — PATH 5a (Withdraw to my wallet)
+   ═══════════════════════════════════════════════════════════ */
+
+// Entry from claim landing — gate on email OTP if Sender provided email
+function goWalletPath() {
+  if (state.linkHasEmail) {
+    document.getElementById('otp-email').textContent = state.email || 'friend@example.com';
+    state.otpCode = '';
+    document.getElementById('otp-code').value = '';
+    validateOtp();
+    goScreen('claim-otp');
+  } else {
+    goScreen('claim-wallet-input');
+  }
+}
+
+function onOtpCodeChange() {
+  state.otpCode = document.getElementById('otp-code').value.replace(/[^\d]/g, '');
+  document.getElementById('otp-code').value = state.otpCode;
+  validateOtp();
+}
+function validateOtp() {
+  document.getElementById('otp-btn').classList.toggle('disabled', state.otpCode.length !== 6);
+}
+function executeOtp() {
+  if (document.getElementById('otp-btn').classList.contains('disabled')) return;
+  goScreen('claim-wallet-input');
+}
+
+const ADDR_RE = /^0x[a-fA-F0-9]{40}$/;
+
+function onAddressChange() {
+  const v = document.getElementById('wd-address').value.trim();
+  state.recipientAddress = v;
+  state.addressValid = ADDR_RE.test(v);
+  const hint = document.getElementById('wd-addr-hint');
+  const input = document.getElementById('wd-address');
+  if (v === '') {
+    hint.textContent = 'EVM-compatible address only · ' + state.token + ' on Ethereum.';
+    hint.classList.remove('error');
+    input.style.borderColor = '';
+  } else if (state.addressValid) {
+    hint.textContent = '✓ Valid EVM address';
+    hint.classList.remove('error');
+    input.style.borderColor = 'var(--green)';
+  } else if (/^[Tt][a-zA-Z0-9]{30,}$/.test(v)) {
+    // Tron-style addresses get a specific message per §4.2.1
+    hint.textContent = 'This payment is on EVM chains. Please enter a 0x-prefix wallet address.';
+    hint.classList.add('error');
+    input.style.borderColor = 'var(--red)';
+  } else {
+    hint.textContent = 'Invalid wallet address. Must start with 0x and be 42 characters.';
+    hint.classList.add('error');
+    input.style.borderColor = 'var(--red)';
+  }
+  validateWithdraw();
+}
+
+function toggleConfirm() {
+  state.confirmed = !state.confirmed;
+  document.getElementById('confirm-box').classList.toggle('checked', state.confirmed);
+  validateWithdraw();
+}
+function validateWithdraw() {
+  const btn = document.getElementById('withdraw-btn');
+  btn.classList.toggle('disabled', !(state.addressValid && state.confirmed));
+}
+function executeWithdraw() {
+  if (document.getElementById('withdraw-btn').classList.contains('disabled')) return;
+  const addr = state.recipientAddress;
+  const short = addr.slice(0, 6) + '…' + addr.slice(-4);
+  document.getElementById('success-to').textContent = short;
+  document.getElementById('success-from').textContent = state.senderName + ' via AllScale';
+  // Route through processing screen, auto-transition to success after 2s
+  // (demo override buttons on processing screen can interrupt this)
+  goScreen('claim-processing');
+  if (state.claimingTimer) clearTimeout(state.claimingTimer);
+  state.claimingTimer = setTimeout(() => {
+    if (document.getElementById('screen-claim-processing').classList.contains('active')) {
+      goScreen('claim-wallet-success');
+    }
+  }, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECEIVER — REGISTER & CLAIM
+   ═══════════════════════════════════════════════════════════ */
+function onCodeChange() {
+  state.regCode = document.getElementById('reg-code').value.replace(/[^\d]/g, '');
+  document.getElementById('reg-code').value = state.regCode;
+  validateRegister();
+}
+function onPassChange() {
+  state.regPass = document.getElementById('reg-pass').value;
+  validateRegister();
+}
+function validateRegister() {
+  const btn = document.getElementById('reg-btn');
+  const valid = state.regCode.length === 6 && state.regPass.length >= 8;
+  btn.classList.toggle('disabled', !valid);
+}
+function executeRegister() {
+  if (document.getElementById('reg-btn').classList.contains('disabled')) return;
+  // Set register-success page title to "Welcome to AllScale" (new user)
+  document.querySelector('#screen-claim-register-success .completion-title').textContent = 'Welcome to AllScale';
+  document.querySelector('#screen-claim-register-success .completion-sub').textContent = 'Your wallet is ready and your funds have arrived.';
+  goScreen('claim-register-success');
+}
+
+// 5b login path — for existing AS users (per §6.3 Step 5b dual flow)
+function onLoginPassChange() {
+  const pass = document.getElementById('login-pass').value;
+  document.getElementById('login-btn').classList.toggle('disabled', pass.length < 8);
+}
+function executeLogin() {
+  if (document.getElementById('login-btn').classList.contains('disabled')) return;
+  // Reuse register-success screen but set title for "welcome back" flow
+  document.querySelector('#screen-claim-register-success .completion-title').textContent = 'Welcome back';
+  document.querySelector('#screen-claim-register-success .completion-sub').textContent = 'Signed in successfully · funds delivered to your wallet.';
+  goScreen('claim-register-success');
+}
+
+// 5b entry — set up email field based on link mode (email-attached vs pure URL)
+function enterRegister() {
+  const emailInput = document.getElementById('reg-email');
+  const hint = document.getElementById('reg-email-hint');
+  if (state.linkHasEmail) {
+    // Email-attached mode: prefill + readonly + must match
+    emailInput.value = state.email || 'friend@example.com';
+    emailInput.setAttribute('readonly', 'readonly');
+    hint.textContent = 'Must match the email this link was sent to.';
+  } else {
+    // Pure URL mode: editable + any email allowed (per §10.4)
+    emailInput.value = '';
+    emailInput.removeAttribute('readonly');
+    emailInput.setAttribute('placeholder', 'your@email.com');
+    hint.textContent = 'Pick any email — we\'ll route you to login or registration accordingly.';
+  }
+  // Reset banner
+  document.getElementById('reg-existing-banner').style.display = 'none';
+  goScreen('claim-register');
+}
+
+// 5b register email change — pure URL mode allows any email; mock detection of "existing" accounts
+function onRegEmailChange() {
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const banner = document.getElementById('reg-existing-banner');
+  // Mock: emails ending with @allscale.io trigger "existing user" detection
+  // (in production, this would be an API call to check account existence)
+  if (email.endsWith('@allscale.io') || email === 'existing@example.com') {
+    banner.style.display = 'flex';
+    document.getElementById('login-email').textContent = email;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
+function openWithdrawPicker() {
+  document.getElementById('wdpick-overlay').classList.add('open');
+  document.getElementById('wdpick-sheet').classList.add('open');
+}
+function closeWithdrawPicker() {
+  document.getElementById('wdpick-overlay').classList.remove('open');
+  document.getElementById('wdpick-sheet').classList.remove('open');
+}
+
+function toggleAnnotations() {
+  const on = document.body.classList.toggle('show-annotations');
+  document.getElementById('anno-toggle-1').classList.toggle('active', on);
+  document.getElementById('anno-toggle-2').classList.toggle('active', on);
+}
+
+function toast(text) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity .25s, transform .25s';
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(8px)';
+    setTimeout(() => t.remove(), 260);
+  }, 1800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FAKE QR (deterministic-looking pattern)
+   ═══════════════════════════════════════════════════════════ */
+function renderFakeQR() {
+  const svg = document.getElementById('qr-svg');
+  if (!svg) return;
+  const size = 25;
+  function rand(x, y) { return ((x * 9301 + y * 49297 + 7 * 233280) % 233280) / 233280; }
+  let bg = '<rect width="100" height="100" fill="white"/>';
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const inFinder = (x < 7 && y < 7) || (x >= size-7 && y < 7) || (x < 7 && y >= size-7);
+      const inFinderInner = (x >= 2 && x <= 4 && y >= 2 && y <= 4) ||
+                            (x >= size-5 && x <= size-3 && y >= 2 && y <= 4) ||
+                            (x >= 2 && x <= 4 && y >= size-5 && y <= size-3);
+      let on;
+      if (inFinder) {
+        const onFinderRing = ((x < 7 && y < 7) && (x === 0 || x === 6 || y === 0 || y === 6)) ||
+                             ((x >= size-7 && y < 7) && (x === size-7 || x === size-1 || y === 0 || y === 6)) ||
+                             ((x < 7 && y >= size-7) && (x === 0 || x === 6 || y === size-7 || y === size-1));
+        on = inFinderInner || onFinderRing;
+      } else {
+        on = rand(x, y) > 0.55;
+      }
+      if (on) bg += '<rect x="' + (x * 4) + '" y="' + (y * 4) + '" width="4" height="4" fill="#0C3124"/>';
+    }
+  }
+  svg.innerHTML = bg;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COUNTDOWN
+   ═══════════════════════════════════════════════════════════ */
+const countdownStart = Date.now();
+const TOTAL_MS = 72 * 60 * 60 * 1000;
+function updateCountdowns() {
+  if (state.detailStatus !== 'awaiting-claim') return;
+  const remaining = TOTAL_MS - (Date.now() - countdownStart);
+  if (remaining <= 0) return;
+  const h = Math.floor(remaining / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const txt = 'Expires in ' + h + 'h ' + String(m).padStart(2, '0') + 'm';
+  const a = document.getElementById('detail-countdown');
+  const b = document.getElementById('claim-countdown');
+  if (a) a.textContent = txt;
+  if (b) b.textContent = txt;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  renderRecent();
+  renderDashboardRefundsPreview();
+  renderRefundsList('all');
+  renderFakeQR();
+  updateCountdowns();
+  setInterval(updateCountdowns, 30000);
+  setDest('email');
+  validateForm();
+});
+</script>
+
+</body>
+</html>

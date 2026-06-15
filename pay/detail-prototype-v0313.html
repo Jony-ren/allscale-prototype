@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale · Detail Pages — v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #FDFFFE;
+  --surface:     #FAFBFA;
+  --surface2:    #F2F8F5;
+  --border:      #E5EEEA;
+  --border2:     #d4e5dd;
+  --text:        #0C3124;
+  --text2:       #6B7A6C;
+  --text3:       #A8B5A9;
+  --accent:      #1A9E4A;
+  --accent-soft: rgba(26,158,74,0.10);
+  --accent-bg:   #E8F5EE;
+  --green:       #12d16b;
+  --green-soft:  rgba(18,209,107,0.10);
+  --orange:      #f59e0b;
+  --orange-soft: rgba(245,158,11,0.10);
+  --red:         #ef4444;
+  --red-soft:    rgba(239,68,68,0.08);
+  --blue:        #60a5fa;
+  --blue-soft:   rgba(96,165,250,0.10);
+  --radius-pill: 999px;
+  --radius-card: 16px;
+  --radius-sm:   10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #181c1a; color: var(--text); font-size: 14px; line-height: 1.5;
+  padding: 48px 40px 100px; overflow-x: auto;
+}
+
+/* ── Canvas ── */
+.canvas { display: flex; flex-direction: column; gap: 80px; }
+.section-title {
+  font-size: 11px; font-weight: 600; color: #556; letter-spacing: 0.1em;
+  text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.section-title::after { content:''; flex:1; height:1px; background:#2a2e2c; }
+.frames-row { display: flex; gap: 20px; align-items: flex-start; flex-wrap: nowrap; }
+.frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
+.frame-tag {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px; padding: 5px 12px;
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ft-id     { font-weight: 600; color: #aab; font-size: 11px; }
+.ft-status { color: #778; }
+.ft-role   { color: #8ab; }
+
+/* ── Phone ── */
+.phone {
+  width: 375px; height: 820px;
+  background: var(--bg); border-radius: 46px;
+  border: 10px solid #1c201e; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05);
+  position: relative;
+}
+.phone::before {
+  content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:110px; height:28px; background:#1c201e;
+  border-radius: 0 0 18px 18px; z-index:20;
+}
+.p-status {
+  height:44px; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 24px 6px; flex-shrink:0;
+  font-size:12px; font-weight:600; color:var(--text);
+}
+.p-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:4px 16px 10px; flex-shrink:0;
+}
+.p-back {
+  width:34px; height:34px; border-radius:50%; background:var(--surface2);
+  border:1px solid var(--border); display:flex; align-items:center;
+  justify-content:center; cursor:pointer; font-size:15px; color:var(--text);
+}
+.p-more {
+  width:34px; height:34px; border-radius:50%; background:var(--surface2);
+  border:1px solid var(--border); display:flex; align-items:center;
+  justify-content:center; cursor:pointer; font-size:11px; color:var(--text2); letter-spacing:1.5px;
+}
+.p-spacer { width:34px; height:34px; }
+.p-body { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+.p-body::-webkit-scrollbar { width:3px; }
+.p-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.p-footer {
+  padding:10px 20px 24px; border-top:1px solid var(--border);
+  background:var(--bg); flex-shrink:0;
+  display:flex; flex-direction:column; gap:8px;
+}
+
+/* ── Amount ── */
+.amount-block { text-align:center; padding:10px 24px 16px; }
+.amount-main { font-size:34px; font-weight:600; letter-spacing:-0.03em; color:var(--text); line-height:1.15; }
+.amount-main.pos { color:var(--accent); }
+.amount-main.neg { color:var(--red); }
+.amount-fiat { font-size:13px; color:var(--text2); margin-top:2px; }
+
+/* ── Counterparty ── */
+.cp-block { display:flex; align-items:center; justify-content:center; gap:7px; padding:0 24px 16px; }
+.cp-dir { font-size:12px; font-weight:500; color:var(--text2); }
+.cp-avatar {
+  width:28px; height:28px; border-radius:50%; background:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.cp-avatar.gray { background:var(--surface2); border:1px solid var(--border2); color:var(--text2); }
+.cp-avatar.system { background:var(--accent-soft); border:1px solid var(--border2); color:var(--accent); font-size:12px; }
+.cp-name { font-size:13.5px; font-weight:500; color:var(--text); }
+.cp-addr { font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; }
+
+/* ── Fields ── */
+.sect-div { height:1px; background:var(--border); margin:0 20px; }
+.fields { padding:0 20px; }
+.frow {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 0; border-bottom:1px solid var(--border); gap:16px; min-height:44px;
+}
+.frow:last-child { border-bottom:none; }
+.fl { font-size:13px; color:var(--text2); flex-shrink:0; }
+.fv { font-size:13px; color:var(--text); text-align:right; display:flex; align-items:center; gap:5px; justify-content:flex-end; flex-wrap:wrap; }
+.fv.mono { font-family:'DM Mono',monospace; font-size:11.5px; word-break:break-all; }
+.copy { color:var(--text3); font-size:12px; cursor:pointer; }
+.fv-contact { display:flex; align-items:center; gap:6px; }
+.fv-av { width:22px; height:22px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; flex-shrink:0; }
+.fv-av.gray { background:var(--surface2); border:1px solid var(--border2); color:var(--text2); }
+.fv-av.sys  { background:var(--accent-soft); border:1px solid var(--border2); color:var(--accent); }
+.hash-link { color:var(--blue); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+
+/* ── Status chips ── */
+.chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:var(--radius-pill); border:1px solid; font-size:12px; font-weight:500; }
+.chip .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.chip-ok   { color:#1A9E4A; background:var(--accent-bg);  border-color:rgba(26,158,74,0.25); }
+.chip-fail { color:var(--red);   background:var(--red-soft);   border-color:rgba(239,68,68,0.3); }
+.chip-proc { color:var(--blue);  background:var(--blue-soft);  border-color:rgba(96,165,250,0.3); }
+.chip-cncl { color:var(--text3); background:transparent;       border-color:var(--border2); }
+.chip-over { color:var(--orange);background:var(--orange-soft);border-color:rgba(245,158,11,0.3); }
+
+/* ── Progress bar ── */
+.prog-block { padding:16px 20px 4px; }
+.prog-title { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:14px; }
+.prog-steps { display:flex; flex-direction:column; }
+.p-step { display:flex; gap:12px; }
+.p-step-left { display:flex; flex-direction:column; align-items:center; width:14px; flex-shrink:0; margin-top:4px; }
+.p-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; border:2px solid var(--border2); background:var(--bg); }
+.p-dot.done   { background:var(--accent); border-color:var(--accent); }
+.p-dot.curr   { background:var(--bg); border-color:var(--orange); box-shadow:0 0 0 3px rgba(245,158,11,0.15); }
+.p-dot.closed { background:var(--bg); border-color:var(--text3); }
+.p-dot.fail   { background:var(--red); border-color:var(--red); }
+.p-line { width:2px; flex:1; min-height:20px; background:var(--border); }
+.p-line.done { background:var(--accent); }
+.p-step-right { flex:1; padding-bottom:16px; }
+.p-step-right:last-child { padding-bottom:8px; }
+.p-step-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.p-step-name { font-size:13px; font-weight:500; color:var(--text); }
+.p-step-name.muted { color:var(--text3); font-weight:400; }
+.p-step-time { font-size:11px; color:var(--text2); white-space:nowrap; flex-shrink:0; }
+.p-step-time.pending { color:var(--orange); }
+
+/* ── Amount Breakdown ── */
+.bdown-block { padding:14px 20px; background:var(--surface2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.bdown-title { font-size:10.5px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; }
+.bdown-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; }
+.bdl { font-size:12.5px; color:var(--text2); }
+.bdv { font-size:12.5px; color:var(--text); font-weight:500; }
+.bdown-sep { height:1px; background:var(--border); margin:7px 0; }
+.bdown-total .bdl { color:var(--text); font-weight:600; font-size:13px; }
+.bdown-total .bdv { color:var(--text); font-weight:600; font-size:13px; }
+
+/* ── Refund block ── */
+.refund-block { padding:14px 20px; background:rgba(239,68,68,0.04); border-top:1px solid rgba(239,68,68,0.12); border-bottom:1px solid rgba(239,68,68,0.12); }
+.refund-title { font-size:10.5px; font-weight:600; color:var(--red); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; }
+.refund-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; }
+.rfl { font-size:12.5px; color:var(--text2); }
+.rfv { font-size:12.5px; color:var(--text); }
+.rfv.proc { color:var(--orange); }
+.rfv.done { color:var(--accent); }
+
+/* ── Buttons (pill) ── */
+.btn-full { width:100%; padding:13px 20px; border-radius:var(--radius-pill); font-size:14px; font-weight:500; font-family:'DM Sans',sans-serif; cursor:pointer; border:none; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; }
+.btn-primary   { background:var(--accent); color:#fff; }
+.btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border2); }
+.btn-ghost     { background:transparent; color:var(--text2); border:1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+<!-- ══════════════════════════════════════
+     CHECKOUT DETAIL — 9 种
+══════════════════════════════════════ -->
+<div>
+<div class="section-title">Checkout Detail — 9 种</div>
+<div class="frames-row">
+
+<!-- CD-1 VIEWED 商家 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-1</span><span class="ft-status">VIEWED</span><span class="ft-role">商家 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">—</div><span class="cp-name" style="color:var(--text2)">No payment received</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 15 8:02 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Processing</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CD-2 TWR+ON_CHAIN 商家 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-2</span><span class="ft-status">TWR + ON_CHAIN</span><span class="ft-role">商家 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">?</div><span class="cp-addr">0xA3f4...8b2c</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time pending">Pending...</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Processing</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Gross Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.5%)</span><span class="bdv">1.00 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Net Amount</span><span class="bdv">199.00 USDT</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CD-3 CONFIRMED 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-3</span><span class="ft-status">CONFIRMED · Successful</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil's Store</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Successful</span><span class="p-step-time">Aug 16 12:05 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Transaction Detail</button></div>
+  </div>
+</div>
+
+<!-- CD-4 FAILED 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-4</span><span class="ft-status">FAILED · Failed</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil's Store</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot fail"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+      <div class="refund-block">
+        <div class="refund-title">Refund</div>
+        <div class="refund-row"><span class="rfl">Status</span><span class="rfv proc">Processing</span></div>
+        <div class="refund-row"><span class="rfl">Amount</span><span class="rfv">200.07 USDT</span></div>
+        <div class="refund-row"><span class="rfl">Refund to</span><span class="rfv mono" style="font-size:11px">0xA3f4...8b2c</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Transaction Detail</button></div>
+  </div>
+</div>
+
+<!-- CD-5 CONFIRMED 商家 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-5</span><span class="ft-status">CONFIRMED · Successful</span><span class="ft-role">商家</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+199.00 USDT</div><div class="amount-fiat">+$188.68 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">?</div><span class="cp-addr">0xA3f4...8b2c</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Successful</span><span class="p-step-time">Aug 16 12:05 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Gross Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.5%)</span><span class="bdv">1.00 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Net Amount</span><span class="bdv">199.00 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Transaction Detail</button></div>
+  </div>
+</div>
+
+<!-- CD-6 FAILED 商家 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-6</span><span class="ft-status">FAILED · Failed</span><span class="ft-role">商家</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">?</div><span class="cp-addr">0xA3f4...8b2c</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot fail"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Gross Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.5%)</span><span class="bdv">— USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Net Amount</span><span class="bdv">— USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Transaction Detail</button></div>
+  </div>
+</div>
+
+<!-- CD-7 REJECTED/UNDERPAID 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-7</span><span class="ft-status">REJECTED / UNDERPAID</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−50.00 USDT</div><div class="amount-fiat">−$49.97 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil's Store</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot fail"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">50.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.02 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">50.03 USDT</span></div>
+      </div>
+      <div class="refund-block">
+        <div class="refund-title">Refund</div>
+        <div class="refund-row"><span class="rfl">Status</span><span class="rfv proc">Processing</span></div>
+        <div class="refund-row"><span class="rfl">Amount</span><span class="rfv">50.03 USDT</span></div>
+        <div class="refund-row"><span class="rfl">Refund to</span><span class="rfv mono" style="font-size:11px">0xA3f4...8b2c</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Transaction Detail</button></div>
+  </div>
+</div>
+
+<!-- CD-8 REJECTED/UNDERPAID 商家 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-8</span><span class="ft-status">REJECTED / UNDERPAID</span><span class="ft-role">商家</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">50.00 USDT</div><div class="amount-fiat">$49.97 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">?</div><span class="cp-addr">0xA3f4...8b2c</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot fail"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Gross Amount</span><span class="bdv">50.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.5%)</span><span class="bdv">0.00 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Net Amount</span><span class="bdv">0.00 USDT</span></div>
+      </div>
+      <div class="refund-block">
+        <div class="refund-title">Refund</div>
+        <div class="refund-row"><span class="rfl">Status</span><span class="rfv done">Completed</span></div>
+        <div class="refund-row"><span class="rfl">Amount</span><span class="rfv">50.03 USDT</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CD-9 CANCELED/TIMEOUT 商家 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">CD-9</span><span class="ft-status">CANCELED / TIMEOUT</span><span class="ft-role">商家</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray">—</div><span class="cp-name" style="color:var(--text2)">No payment received</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Initiated</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 15 8:02 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot closed"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Canceled</span><span class="p-step-time">Aug 16 8:02 AM</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-cncl"><span class="dot"></span>Canceled</span></span></div>
+        <div class="frow"><span class="fl">Order Name</span><span class="fv">Summer Tee</span></div>
+        <div class="frow"><span class="fl">Order ID</span><span class="fv mono">CHK-250815-001</span></div>
+        <div class="frow"><span class="fl">Rate</span><span class="fv">1 USDT = $0.9994</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Order Detail</button></div>
+  </div>
+</div>
+
+</div></div>
+
+<!-- ══════════════════════════════════════
+     INVOICE DETAIL — 10 种
+══════════════════════════════════════ -->
+<div>
+<div class="section-title">Invoice Detail — 10 种</div>
+<div class="frames-row">
+
+<!-- ID-1 SENT/ACK 发送方 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-1</span><span class="ft-status">SENT / ACKNOWLEDGED</span><span class="ft-role">发送方 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">In Progress</span><span class="p-step-time">—</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Sent</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-ghost">Copy payment link</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-2 SENT/ACK 接收方 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-2</span><span class="ft-status">SENT / ACKNOWLEDGED</span><span class="ft-role">接收方 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">In Progress</span><span class="p-step-time">—</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Sent</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-primary">Pay This Invoice</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-3 PROCESSING 发送方 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-3</span><span class="ft-status">PROCESSING</span><span class="ft-role">发送方 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time pending">Pending...</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Processing</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-ghost">Copy payment link</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-4 PROCESSING 接收方 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-4</span><span class="ft-status">PROCESSING</span><span class="ft-role">接收方 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot curr"></div><div class="p-line"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time pending">Pending...</span></div></div>
+          </div>
+          <div class="p-step">
+            <div class="p-step-left"><div class="p-dot"></div></div>
+            <div class="p-step-right"><div class="p-step-row"><span class="p-step-name muted">Completed</span><span class="p-step-time">—</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Processing</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-ghost">Download Invoice</button></div>
+  </div>
+</div>
+
+<!-- ID-5 PAID 发送方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-5</span><span class="ft-status">PAID · Successful</span><span class="ft-role">发送方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+200.00 USDT</div><div class="amount-fiat">+$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Successful</span><span class="p-step-time">Aug 16 12:05 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-ghost">Copy payment link</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-6 FAILED 发送方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-6</span><span class="ft-status">FAILED · Failed</span><span class="ft-role">发送方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot fail"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-ghost">Copy payment link</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-7 PAID 接收方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-7</span><span class="ft-status">PAID · Successful</span><span class="ft-role">接收方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Successful</span><span class="p-step-time">Aug 16 12:05 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-ghost">Download Invoice</button></div>
+  </div>
+</div>
+
+<!-- ID-8 FAILED 接收方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-8</span><span class="ft-status">FAILED · Failed</span><span class="ft-role">接收方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Aug 16 12:03 AM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot fail"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Failed</span><span class="p-step-time">Aug 16 12:08 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-fail"><span class="dot"></span>Failed</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-ghost">Download Invoice</button></div>
+  </div>
+</div>
+
+<!-- ID-9 OVERDUE 发送方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-9</span><span class="ft-status">OVERDUE</span><span class="ft-role">发送方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Sep 15 11:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot closed"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Overdue</span><span class="p-step-time">Sep 16 12:00 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-over"><span class="dot"></span>Overdue</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv" style="color:var(--red)">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer">
+      <button class="btn-full btn-ghost">Copy payment link</button>
+      <button class="btn-full btn-ghost">Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID-10 OVERDUE 接收方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">ID-10</span><span class="ft-status">OVERDUE</span><span class="ft-role">接收方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main">200.00 USDT</div><div class="amount-fiat">$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields"><div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div></div>
+      <div class="prog-block">
+        <div class="prog-title">Progress Tracking</div>
+        <div class="prog-steps">
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Sent</span><span class="p-step-time">Aug 15 7:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot done"></div><div class="p-line done"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Processing</span><span class="p-step-time">Sep 15 11:59 PM</span></div></div></div>
+          <div class="p-step"><div class="p-step-left"><div class="p-dot closed"></div></div><div class="p-step-right"><div class="p-step-row"><span class="p-step-name">Overdue</span><span class="p-step-time">Sep 16 12:00 AM</span></div></div></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-over"><span class="dot"></span>Overdue</span></span></div>
+        <div class="frow"><span class="fl">Reference Code</span><span class="fv mono">INV-250815-007</span></div>
+        <div class="frow"><span class="fl">Due Date</span><span class="fv" style="color:var(--red)">Sep 15 2025</span></div>
+        <div class="frow"><span class="fl">Memo</span><span class="fv" style="color:var(--text2);font-style:italic">Thanks for the business!</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-ghost">Download Invoice</button></div>
+  </div>
+</div>
+
+</div></div>
+
+<!-- ══════════════════════════════════════
+     ACTIVITY DETAIL — 9 种
+══════════════════════════════════════ -->
+<div>
+<div class="section-title">Activity Detail — 9 种</div>
+<div class="frames-row">
+
+<!-- AD-1 Deposit Successful 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-1</span><span class="ft-status">Deposit · Successful</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+200.00 USDT</div><div class="amount-fiat">+$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Deposit</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:03</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0xA3f4...8b2c <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD-2 Withdraw Processing 用户 [···] -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-2</span><span class="ft-status">Withdraw · Processing</span><span class="ft-role">用户 ···</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar gray" style="font-size:9px">?</div><span class="cp-addr">0x6d40...7F9K</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Withdraw</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-proc"><span class="dot"></span>Processing</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:03</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x6d40...7F9K <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD-3 Withdraw Completed/Failed 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-3</span><span class="ft-status">Withdraw · Completed/Failed</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar gray" style="font-size:9px">?</div><span class="cp-addr">0x6d40...7F9K</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Withdraw</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:05</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x6d40...7F9K <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD-4 Refund Successful 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-4</span><span class="ft-status">Refund · Successful</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+50.03 USDT</div><div class="amount-fiat">+$50.01 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar system">A</div><span class="cp-name">AllScale System</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Refund</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:10</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0x0A11...5C4E <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0xA3f4...8b2c <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x9f2a...d731</span> <span class="copy">⧉</span></span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Order Detail</button></div>
+  </div>
+</div>
+
+<!-- AD-5 Rewards Successful 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-5</span><span class="ft-status">Rewards · Successful</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+10.00 USDT</div><div class="amount-fiat">+$9.99 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar system">A</div><span class="cp-name">AllScale System</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Rewards</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:03</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0x0A11...5C4E <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x7c4e...a820</span> <span class="copy">⧉</span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD-6 Checkout terminal 用户 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-6</span><span class="ft-status">Checkout · 终态</span><span class="ft-role">用户</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil's Store</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:05</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0xC9e8...1A3F <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Order Detail</button></div>
+  </div>
+</div>
+
+<!-- AD-7 Checkout terminal 商家 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-7</span><span class="ft-status">Checkout · 终态</span><span class="ft-role">商家</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+199.00 USDT</div><div class="amount-fiat">+$188.68 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar gray" style="font-size:9px">?</div><span class="cp-addr">0xA3f4...8b2c</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Checkout</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:05</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0xA3f4...8b2c <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Gross Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.5%)</span><span class="bdv">1.00 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Net Amount</span><span class="bdv">199.00 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Order Detail</button></div>
+  </div>
+</div>
+
+<!-- AD-8 Invoice terminal 发送方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-8</span><span class="ft-status">Invoice · 终态</span><span class="ft-role">发送方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main pos">+200.00 USDT</div><div class="amount-fiat">+$188.87 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">FROM</span><div class="cp-avatar">M</div><span class="cp-name">Maria</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:05</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0xD5f7...9B2E <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0x1644...8b79 <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Invoice Detail</button></div>
+  </div>
+</div>
+
+<!-- AD-9 Invoice terminal 接收方 -->
+<div class="frame-wrap">
+  <div class="frame-tag"><span class="ft-id">AD-9</span><span class="ft-status">Invoice · 终态</span><span class="ft-role">接收方</span></div>
+  <div class="phone">
+    <div class="p-status"><span>9:41</span><span>●●●</span></div>
+    <div class="p-nav"><div class="p-back">←</div><div class="p-spacer"></div></div>
+    <div class="p-body">
+      <div class="amount-block"><div class="amount-main neg">−200.07 USDT</div><div class="amount-fiat">−$188.94 USD</div></div>
+      <div class="cp-block"><span class="cp-dir">TO</span><div class="cp-avatar">K</div><span class="cp-name">Khalil</span></div>
+      <div class="sect-div"></div>
+      <div class="fields">
+        <div class="frow"><span class="fl">Payment Type</span><span class="fv">Invoice</span></div>
+        <div class="frow"><span class="fl">Status</span><span class="fv"><span class="chip chip-ok"><span class="dot"></span>Successful</span></span></div>
+        <div class="frow"><span class="fl">Transaction Date</span><span class="fv">Aug 23 2025, 23:05</span></div>
+        <div class="frow"><span class="fl">Chain</span><span class="fv">BNB Chain</span></div>
+        <div class="frow"><span class="fl">From</span><span class="fv mono">0xA3f4...8b2c <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">To</span><span class="fv mono">0xE3a1...7C5D <span class="copy">⧉</span></span></div>
+        <div class="frow"><span class="fl">Transaction Hash</span><span class="fv mono"><span class="hash-link">0x2d99...c061</span> <span class="copy">⧉</span></span></div>
+      </div>
+      <div class="bdown-block">
+        <div class="bdown-title">Amount Breakdown</div>
+        <div class="bdown-row"><span class="bdl">Amount</span><span class="bdv">200.00 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Service Fee (0.03%)</span><span class="bdv">0.06 USDT</span></div>
+        <div class="bdown-row"><span class="bdl">Gas Fee</span><span class="bdv">0.01 USDT</span></div>
+        <div class="bdown-sep"></div>
+        <div class="bdown-row bdown-total"><span class="bdl">Total</span><span class="bdv">200.07 USDT</span></div>
+      </div>
+    </div>
+    <div class="p-footer"><button class="btn-full btn-secondary">See Invoice Detail</button></div>
+  </div>
+</div>
+
+</div></div>
+
+</div>
+</body>
+</html>

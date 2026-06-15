@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Prototypes</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fdfffe;
+    color: #0c3124;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+
+  .main-inner {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0c3124;
+    margin-bottom: 6px;
+  }
+
+  .page-subtitle {
+    font-size: 14px;
+    color: #83968f;
+    margin-bottom: 40px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #83968f;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5eeea;
+  }
+
+  .list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .list a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: #FAFBFA;
+    border-radius: 18px;
+    text-decoration: none;
+    color: #0c3124;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+
+  .list a:hover { border-color: #009859; }
+
+  .item-left { display: flex; flex-direction: column; gap: 4px; }
+
+  .item-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #0c3124;
+    letter-spacing: -0.02em;
+  }
+
+  .item-meta {
+    font-size: 13px;
+    color: #83968f;
+  }
+
+  .item-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .item-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #f2f8f5;
+    color: #009859;
+  }
+
+  .arrow { color: #83968f; font-size: 18px; }
+</style>
+</head>
+<body>
+
+  <div class="main-inner">
+    <div class="page-title">Prototypes</div>
+    <div class="page-subtitle">原型索引</div>
+
+    <div id="foundation" class="section-label">Foundation</div>
+    <ul class="list">
+      <li>
+        <a href="design-system/ui-ds.html">
+          <div class="item-left">
+            <div class="item-name">Design System — Tokens</div>
+            <div class="item-meta">Colors · Typography · Spacing · Radius · Shadow · Motion · Z-index · Components</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+    <div id="checkout" class="section-label">Checkout</div>
+    <ul class="list">
+      <li>
+        <a href="checkout/passkey.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Add Passkey</div>
+            <div class="item-meta">v0604 · Inline passkey list in Security · multi-step Add flow · Rename / Delete · Polanyi UX + dev notes</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/invoice-overview.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Invoice Overview</div>
+            <div class="item-meta">v0528 · Invoice page + Overview modal (line/bar chart · calendar · day detail · dev notes)</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/payment-link.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Payment Link</div>
+            <div class="item-meta">Jony's hifi</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/onramp-prototype.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — On-ramp (Unlimit fiat)</div>
+            <div class="item-meta">v0511 · PRD EGEMd15K · Buyer mobile + Order Detail + Admin · 高保真</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/checkout-onramp.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Card &amp; Local Payments (on-ramp v0.9.2)</div>
+            <div class="item-meta">v0611 · 高保真 · 付款法币 / 收款链 / provider · IP→当地货币 · Activity / Store settings</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/interaction.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Interaction</div>
+            <div class="item-meta">v0508 · Invoice · Wallet · Pay · Dashboard · iOS bounce scroll</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/p3-prototype.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — P3 Dev Review</div>
+            <div class="item-meta">v0330 · mobile + desktop</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">Latest</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="checkout/swidge-demo.html">
+          <div class="item-left">
+            <div class="item-name">Checkout — Swidge 多链支付</div>
+            <div class="item-meta">v0331 · Scan to Pay · Connect Wallet</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+    <div id="pay" class="section-label">Pay</div>
+    <ul class="list">
+      <li>
+        <a href="pay/send-by-link-demo.html">
+          <div class="item-left">
+            <div class="item-name">Pay — Payment Link</div>
+            <div class="item-meta">v0428 · Proj Richmond MVP · sender dashboard + receiver claim + share card · USDT/USDC</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="pay/kyc-demo.html">
+          <div class="item-left">
+            <div class="item-name">Pay — KYC Verification</div>
+            <div class="item-meta">v0417 · Sumsub integration · Tier 1/2/3 + KYB · tier upgrade flow</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="pay/offramp-dakota-demo.html">
+          <div class="item-left">
+            <div class="item-name">Pay — Off-Ramp P1 (Dakota)</div>
+            <div class="item-meta">v0504 · USDC · ACH/Fedwire/SWIFT · personal + business · first-time AMR · 6 edge cases</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">Latest</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="pay/offramp-demo.html">
+          <div class="item-left">
+            <div class="item-name">Pay — Off-Ramp (Bison, 旧版)</div>
+            <div class="item-meta">v0417 · Bison Bank · 已被 Dakota P1 替代，保留作为 P2 参考</div>
+          </div>
+          <div class="item-right">
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="pay/multi-stablecoin-demo.html">
+          <div class="item-left">
+            <div class="item-name">Pay — Multi-Stablecoin Support</div>
+            <div class="item-meta">v0408 · USDC support · wallet / deposit / withdraw / checkout</div>
+          </div>
+          <div class="item-right">
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="pay/detail-prototype-v0313.html">
+          <div class="item-left">
+            <div class="item-name">Pay — Transaction Detail</div>
+            <div class="item-meta">v0313 · detail states</div>
+          </div>
+          <div class="item-right">
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+    <div id="payroll" class="section-label">Payroll</div>
+    <ul class="list">
+      <li>
+        <a href="payroll/invoice-detail-privacy-demo.html">
+          <div class="item-left">
+            <div class="item-name">Payroll — Invoice Detail Privacy</div>
+            <div class="item-meta">v0612 · Settings 开关 · invoice 带/不带成员明细两种版式</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="payroll/no-fixed-cycle-demo.html">
+          <div class="item-left">
+            <div class="item-name">Payroll — No Fixed Pay Cycle</div>
+            <div class="item-meta">v0612 · Admin frequency option · 空状态与字段口径 · Start a payroll run 按需发起 · Monthly 对比</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="payroll/payroll-approval-demo.html">
+          <div class="item-left">
+            <div class="item-name">Payroll — Approval Sequencing</div>
+            <div class="item-meta">现状 vs 改后 · 审批/超时流转</div>
+          </div>
+          <div class="item-right">
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+    <div id="ballx" class="section-label">Ballx</div>
+    <ul class="list">
+      <li>
+        <a href="Ballx/project/connection-request.html">
+          <div class="item-left">
+            <div class="item-name">Ballx — Connection Request</div>
+            <div class="item-meta">v0513 · Wallet connection · approve / reject</div>
+          </div>
+          <div class="item-right">
+            <span class="item-badge">New</span>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+</body>
+</html>

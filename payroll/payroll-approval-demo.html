@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payroll Approval Demo — Before / After</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{ --green:#0EA56E; --green-dark:#0B8E5F; --amber:#E08A1E; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif; }
+  .phone{ width:390px; height:760px; border-radius:38px; box-shadow:0 24px 60px rgba(0,0,0,.18); border:10px solid #111827; background:#fff; overflow:hidden; position:relative;}
+  .phone-scroll{ height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .phone-scroll::-webkit-scrollbar{ display:none;}
+  .btn-green{ background:var(--green);} .btn-green:hover{ background:var(--green-dark);}
+  .pin{ font-size:11px; line-height:1.35;}
+  .fade-in{ animation:fade .35s ease;}
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .toast{ animation:toastin .3s ease;}
+  @keyframes toastin{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<div class="max-w-6xl mx-auto px-5 py-8">
+  <!-- Header / toggle -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Payroll 发薪审批 — 现状 vs 改后</h1>
+    <p class="text-sm text-slate-500 mt-1">基于线上截图还原。界面英文为产品文案，<span class="text-slate-700 font-medium">蓝色批注是给你看的讲解</span>。点卡片、按钮可交互。</p>
+    <div class="inline-flex mt-4 bg-white rounded-full p-1 shadow-sm border border-slate-200">
+      <button id="tab-before" class="px-5 py-2 rounded-full text-sm font-semibold transition">🔴 现状 Before（有 bug）</button>
+      <button id="tab-after"  class="px-5 py-2 rounded-full text-sm font-semibold transition">🟢 改后 After（方案）</button>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-8 items-start">
+    <!-- Phone -->
+    <div class="phone shrink-0 mx-auto lg:mx-0">
+      <div class="phone-scroll" id="screen"></div>
+    </div>
+
+    <!-- Explanation panel -->
+    <div class="flex-1 w-full">
+      <div id="explain" class="space-y-4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modal-card" class="bg-white w-full sm:w-[390px] rounded-t-3xl sm:rounded-3xl max-h-[80vh] overflow-y-auto fade-in"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-xl toast max-w-[340px] text-center"></div>
+
+<script>
+/* ---------------- mock data ---------------- */
+const members = [
+  {n:"Jane Doe",  i:"J", amt:164.38},
+  {n:"Bob Smith", i:"B", amt:131.50},
+  {n:"Alice Wang",i:"A", amt:136.98},
+  {n:"Grace Liu", i:"G", amt:186.30},
+  {n:"Emma Zheng",i:"E", amt:191.78},
+  {n:"Liam Park", i:"L", amt:142.05},
+  {n:"Noah Kim",  i:"N", amt:158.20},
+  {n:"Mia Chen",  i:"M", amt:151.44},
+  {n:"Owen Diaz", i:"O", amt:147.80},
+];
+const TOTAL = members.reduce((s,m)=>s+m.amt,0); // 1411.43-ish; UI uses 1,205.43 from screenshot
+const SHOWN_TOTAL = "1,205.43";
+
+// Before: a pile of missed cycles, all Timeout
+const beforeRecent = [
+  {d:"May 12, 2026", st:"Timeout"},
+  {d:"May 13, 2026", st:"Timeout"},
+  {d:"May 14, 2026", st:"Timeout"},
+  {d:"May 15, 2026", st:"Timeout"},
+  {d:"May 16, 2026", st:"Timeout"},
+  {d:"May 17, 2026", st:"Timeout"},
+  {d:"May 18, 2026", st:"Timeout"},
+  {d:"May 19, 2026", st:"Timeout"},
+  {d:"May 20, 2026", st:"Timeout"},
+];
+
+let mode = 'before';
+// after-mode dynamic state
+let afterState; // 'overdue' | 'paid' | 'skipped'
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+function money(v){ return "$"+v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function bell(){ return `
+  <div class="flex items-center justify-between px-5 pt-6 pb-3">
+    <h2 class="text-[28px] font-extrabold text-slate-900">Payroll</h2>
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-emerald-50 grid place-items-center text-sm font-semibold text-emerald-700">C</div>
+      <div class="w-9 h-9 rounded-full bg-emerald-50 grid place-items-center">🔔</div>
+    </div>
+  </div>`;
+}
+
+function tile(label,val,danger){ return `
+  <div class="flex-1 rounded-2xl ${danger?'bg-amber-50':'bg-slate-50'} px-4 py-3">
+    <div class="text-base ${danger?'text-amber-600':'text-slate-400'}">${danger?'⏱':'💳'}</div>
+    <div class="text-sm text-slate-600 mt-1">${label}</div>
+    <div class="text-sm ${danger?'text-amber-600 font-semibold':'text-slate-400'}">${val}</div>
+  </div>`;
+}
+
+/* ---------------- BEFORE screen ---------------- */
+function renderBefore(){
+  const rows = beforeRecent.map((r,idx)=>`
+    <button onclick="openSummary('${r.d}')" class="w-full flex items-center justify-between bg-slate-50 rounded-2xl px-4 py-3 mb-3 text-left hover:bg-slate-100 transition">
+      <span class="text-[15px] text-slate-700">${r.d}</span>
+      <span class="text-right">
+        <span class="block text-[15px] font-semibold text-slate-800">$0.00</span>
+        <span class="block text-xs" style="color:var(--amber)">Timeout</span>
+      </span>
+    </button>`).join("");
+
+  $("#screen").innerHTML = `
+    ${bell()}
+    <div class="px-5">
+      <!-- pending card -->
+      <div class="relative rounded-3xl border border-slate-200 p-5 shadow-sm">
+        <span class="absolute -top-3 right-4 pin bg-blue-600 text-white px-2 py-1 rounded-md shadow">下一期照常生成了 ↑</span>
+        <div class="flex items-center gap-2 text-sm text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pending approval</div>
+        <div class="flex items-center justify-between mt-1">
+          <div class="text-[34px] font-extrabold text-slate-900">$${SHOWN_TOTAL}</div>
+          <div class="text-sm text-slate-500">Edit →</div>
+        </div>
+        <div class="text-xs text-slate-400 mt-1">Due: 2026-06-10</div>
+        <div class="flex items-center justify-between text-xs text-slate-400 mt-3 mb-1"><span>Approved</span><span>0/9</span></div>
+        <div class="h-1 rounded-full bg-slate-100"></div>
+        <button class="btn-green w-full text-white font-semibold rounded-full py-3 mt-4">✓ Approve for all</button>
+        <button class="w-full bg-slate-50 text-slate-700 font-medium rounded-full py-3 mt-3">⤓ Download invoice</button>
+      </div>
+
+      <!-- tiles -->
+      <div class="flex gap-3 mt-4">
+        ${tile("Ready to pay","0",false)}
+        ${tile("Overdue","9",true)}
+      </div>
+
+      <!-- recent -->
+      <div class="mt-5 mb-2 flex items-center gap-2">
+        <h3 class="text-lg font-bold text-slate-800">Recent</h3>
+        <span class="pin bg-blue-600 text-white px-2 py-0.5 rounded-md">9 期全黄，点进去救不回来 ↓</span>
+      </div>
+      ${rows}
+      <div class="h-6"></div>
+    </div>`;
+}
+
+/* ---------------- AFTER screen ---------------- */
+function renderAfter(){
+  let card, tiles, recentRows, banner="";
+
+  if(afterState==='overdue'){
+    banner = `<div class="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 mb-4 text-[13px] text-amber-700">
+      <b>Past due · still actionable.</b> This cycle missed its pay date but stays open until you approve or skip it.</div>`;
+    card = `
+      <div class="relative rounded-3xl border border-emerald-200 p-5 shadow-sm">
+        <span class="absolute -top-3 right-4 pin bg-emerald-600 text-white px-2 py-1 rounded-md shadow">最早未结清期置顶，仍可操作</span>
+        <div class="flex items-center gap-2 text-sm text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pending approval</div>
+        <div class="flex items-center justify-between mt-1">
+          <div class="text-[34px] font-extrabold text-slate-900">$${SHOWN_TOTAL}</div>
+          <div class="text-sm text-slate-500">Edit →</div>
+        </div>
+        <div class="text-xs text-slate-400 mt-1">Due: 2026-06-10 <span class="text-amber-600">· past due</span></div>
+        <div class="flex items-center justify-between text-xs text-slate-400 mt-3 mb-1"><span>Approved</span><span>0/9</span></div>
+        <div class="h-1 rounded-full bg-slate-100"></div>
+        <button onclick="doApprove()" class="btn-green w-full text-white font-semibold rounded-full py-3 mt-4">✓ Approve for all</button>
+        <button onclick="doSkip()" class="w-full text-slate-500 font-medium rounded-full py-2.5 mt-2 text-sm underline decoration-slate-300">Skip this cycle</button>
+      </div>
+      <div class="relative flex items-center justify-between bg-slate-50 rounded-2xl px-4 py-3 mt-3 opacity-80">
+        <span class="absolute -top-2 right-3 pin bg-blue-600 text-white px-2 py-0.5 rounded-md">下一期照常生成，排在下面</span>
+        <span class="text-[14px] text-slate-600">Jun 11, 2026 · Next cycle</span>
+        <span class="text-xs text-slate-400">Pending approval · queued</span>
+      </div>`;
+    tiles = `${tile("Ready to pay","0",false)}${tile("Overdue","1",true)}`;
+    recentRows = afterRecentRows([{d:"Jun 09, 2026",st:"Paid"},{d:"Jun 08, 2026",st:"Paid"},{d:"Jun 07, 2026",st:"Paid"}]);
+  }
+
+  if(afterState==='paid'){
+    banner = `<div class="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 mb-4 text-[13px] text-emerald-700">
+      <b>Cycle paid.</b> Jun 10 is settled. The next cycle (Jun 11) moved to the top.</div>`;
+    card = pendingNextCard("Cycles are generated on the regular calendar; the oldest unsettled one is always shown first");
+    tiles = `${tile("Ready to pay","0",false)}${tile("Overdue","0",false)}`;
+    recentRows = afterRecentRows([{d:"Jun 10, 2026",st:"Paid"},{d:"Jun 09, 2026",st:"Paid"},{d:"Jun 08, 2026",st:"Paid"}]);
+  }
+
+  if(afterState==='skipped'){
+    banner = `<div class="rounded-2xl bg-slate-100 border border-slate-200 px-4 py-3 mb-4 text-[13px] text-slate-600">
+      <b>Cycle skipped.</b> Jun 10 was intentionally skipped. The next cycle (Jun 11) moved to the top.</div>`;
+    card = pendingNextCard("Cycles are generated on the regular calendar; the oldest unsettled one is always shown first");
+    tiles = `${tile("Ready to pay","0",false)}${tile("Overdue","0",false)}`;
+    recentRows = afterRecentRows([{d:"Jun 10, 2026",st:"Skipped"},{d:"Jun 09, 2026",st:"Paid"},{d:"Jun 08, 2026",st:"Paid"}]);
+  }
+
+  $("#screen").innerHTML = `
+    ${bell()}
+    <div class="px-5">
+      ${banner}
+      ${card}
+      <div class="flex gap-3 mt-4">${tiles}</div>
+      <div class="mt-5 mb-2 flex items-center gap-2">
+        <h3 class="text-lg font-bold text-slate-800">Recent</h3>
+        <span class="pin bg-emerald-600 text-white px-2 py-0.5 rounded-md">错过的期可救回，不再死成 Timeout</span>
+      </div>
+      ${recentRows}
+      <div class="h-6"></div>
+    </div>`;
+}
+
+function pendingNextCard(note){
+  return `
+    <div class="relative rounded-3xl border border-slate-200 p-5 shadow-sm fade-in">
+      <span class="absolute -top-3 right-4 pin bg-emerald-600 text-white px-2 py-1 rounded-md shadow">上期结清，下一期自动到顶</span>
+      <div class="flex items-center gap-2 text-sm text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pending approval</div>
+      <div class="flex items-center justify-between mt-1">
+        <div class="text-[34px] font-extrabold text-slate-900">$${SHOWN_TOTAL}</div>
+        <div class="text-sm text-slate-500">Edit →</div>
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Due: 2026-06-11</div>
+      <div class="flex items-center justify-between text-xs text-slate-400 mt-3 mb-1"><span>Approved</span><span>0/9</span></div>
+      <div class="h-1 rounded-full bg-slate-100"></div>
+      <button onclick="showToast('这是正常的新一期审批流程（演示到此）。点下方「重新演示」可回到错过发薪日的场景。')" class="btn-green w-full text-white font-semibold rounded-full py-3 mt-4">✓ Approve for all</button>
+      <button class="w-full bg-slate-50 text-slate-700 font-medium rounded-full py-3 mt-3">⤓ Download invoice</button>
+      <button onclick="resetAfter()" class="w-full text-emerald-700 font-medium rounded-full py-2.5 mt-2 text-sm">↺ 重新演示</button>
+      <p class="text-[11px] text-slate-400 mt-3 text-center">${note}</p>
+    </div>`;
+}
+
+function afterRecentRows(list){
+  const color = st => st==='Paid' ? 'color:var(--green)' : st==='Skipped' ? 'color:#94a3b8' : 'color:var(--amber)';
+  return list.map(r=>`
+    <div class="w-full flex items-center justify-between bg-slate-50 rounded-2xl px-4 py-3 mb-3">
+      <span class="text-[15px] text-slate-700">${r.d}</span>
+      <span class="text-right">
+        <span class="block text-[15px] font-semibold text-slate-800">${r.st==='Skipped'?'$0.00':'$'+SHOWN_TOTAL}</span>
+        <span class="block text-xs" style="${color(r.st)}">${r.st}</span>
+      </span>
+    </div>`).join("");
+}
+
+/* ---------------- interactions ---------------- */
+function openSummary(date){
+  const rows = members.map(m=>`
+    <div class="flex items-center justify-between py-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-emerald-50 grid place-items-center text-sm font-semibold text-emerald-700">${m.i}</div>
+        <div>
+          <div class="text-[15px] text-slate-800">${m.n}</div>
+          <span class="text-[11px] px-2 py-0.5 rounded" style="background:#FEF3E2;color:var(--amber)">Timeout</span>
+        </div>
+      </div>
+      <div class="text-[15px] text-slate-700">${money(m.amt)}</div>
+    </div>`).join("");
+
+  $("#modal-card").innerHTML = `
+    <div class="p-5">
+      <h3 class="text-2xl font-extrabold text-slate-900">Payroll summary</h3>
+      <div class="rounded-2xl border border-slate-200 p-4 mt-4">
+        <div class="text-sm" style="color:var(--amber)">● Timeout</div>
+        <div class="text-4xl font-extrabold text-slate-900 mt-1">$0.00</div>
+        <div class="text-sm text-slate-400 mt-1">${date}</div>
+        <button class="w-full bg-slate-50 text-slate-700 font-medium rounded-full py-3 mt-4">⤓ Download invoice</button>
+        <p class="pin text-blue-600 mt-3 bg-blue-50 rounded-lg px-3 py-2">⚠️ 只有 Download invoice。没有审批、没有打款、没有任何出口 —— 这一期救不回来，目前只能让开发改数据库。</p>
+      </div>
+      <h4 class="text-lg font-bold text-slate-800 mt-5 mb-1">Payroll list</h4>
+      <p class="pin text-blue-600 mb-2">注意：汇总显示 $0.00，但每个员工的应发金额其实都还在 ↓（数据没丢，只是界面没给出口）</p>
+      ${rows}
+      <button onclick="closeModal()" class="w-full bg-slate-900 text-white font-semibold rounded-full py-3 mt-4">Close</button>
+    </div>`;
+  $("#modal").classList.remove("hidden");
+}
+function closeModal(){ $("#modal").classList.add("hidden"); }
+$("#modal").addEventListener("click",e=>{ if(e.target.id==='modal') closeModal(); });
+
+function doApprove(){ afterState='paid'; renderAfter(); showToast("✅ 审批并打款成功 → 本期 Paid。下一期（Jun 11）排到顶部。"); }
+function doSkip(){ afterState='skipped'; renderAfter(); showToast("⏭ 本期已显式跳过（Cancelled）。下一期（Jun 11）排到顶部。"); }
+function resetAfter(){ afterState='overdue'; renderAfter(); showToast("↺ 已重置到「错过发薪日」场景。"); }
+
+let toastTimer;
+function showToast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.remove("hidden");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.add("hidden"),3200);
+}
+
+/* ---------------- explanation panel ---------------- */
+function renderExplain(){
+  if(mode==='before'){
+    $("#explain").innerHTML = `
+      <div class="bg-white rounded-2xl border border-slate-200 p-5">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">🔴 现状：两个 bug 叠加</h3>
+        <ol class="mt-3 space-y-3 text-sm text-slate-600 list-decimal pl-5">
+          <li><b>下一期照常生成。</b> 系统不看上一期有没有批，到点就生成新一期。Daily 周期下每天堆一期，截图里堆了 <b>9 期全是 Timeout</b>。</li>
+          <li><b>错过的期是死胡同。</b> 点 Recent 里任意一条 Timeout 进去看看 —— 弹窗里<b>只有 Download invoice</b>，审批/打款全没有，救不回来，只能让开发改库。</li>
+        </ol>
+        <p class="mt-3 text-sm text-slate-500">👉 点上面卡片下方任意一条 <span style="color:var(--amber)">Timeout</span> 记录，看弹窗。</p>
+      </div>
+      <div class="bg-blue-50 rounded-2xl border border-blue-200 p-5">
+        <p class="text-sm text-blue-800">关键一句：HR 来晚时，列表顶上是<b>下一期</b>，一点 Approve 就把下一期批了，本期被跳过；本期变 Timeout 后又点不了 —— 这一轮工资就这么没了。</p>
+      </div>`;
+  } else {
+    $("#explain").innerHTML = `
+      <div class="bg-white rounded-2xl border border-slate-200 p-5">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">🟢 改后（方案 B）：置顶 + 可恢复</h3>
+        <ul class="mt-3 space-y-3 text-sm text-slate-600 list-disc pl-5">
+          <li><b>最早未结清期固定置顶（前端）。</b> 周期照常生成，但主卡片永远是最早没处理完的那期 —— HR 点 Approve 不可能点错期。下一期排在下面等着。</li>
+          <li><b>错过发薪日不再变 Timeout 死掉。</b> 本期进入可恢复的 Overdue，永远有两个出口：
+            <div class="mt-2 space-y-1">
+              <div>① <b>Approve for all</b> → 补审批 + 补打款（按原金额补发）</div>
+              <div>② <b>Skip this cycle</b> → 显式跳过这一轮</div>
+            </div>
+          </li>
+          <li><b>发薪日保持原日历。</b> 落后多期就按日期顺序逐期处理追平，后续发薪日不后移。</li>
+        </ul>
+        <p class="mt-3 text-sm text-slate-500">👉 试试点卡片里的 <b style="color:var(--green)">Approve for all</b> 或 <b>Skip this cycle</b>，看下一期怎么排到顶部。</p>
+      </div>
+      <div class="bg-emerald-50 rounded-2xl border border-emerald-200 p-5">
+        <p class="text-sm text-emerald-800">对照看：现状下错过 = 永久丢一轮 + 改库兜底；改后 = 永远能补发或主动跳过，且最早的期永远在最显眼的位置。</p>
+      </div>`;
+  }
+}
+
+/* ---------------- tabs ---------------- */
+function setMode(m){
+  mode=m;
+  const b=$("#tab-before"), a=$("#tab-after");
+  const off="px-5 py-2 rounded-full text-sm font-semibold transition text-slate-500";
+  b.className=off; a.className=off;
+
+  if(m==='before'){
+    b.className="px-5 py-2 rounded-full text-sm font-semibold transition bg-rose-500 text-white";
+    renderBefore();
+  } else {
+    a.className="px-5 py-2 rounded-full text-sm font-semibold transition bg-emerald-600 text-white";
+    afterState='overdue'; renderAfter();
+  }
+  renderExplain();
+  closeModal();
+}
+$("#tab-before").onclick=()=>setMode('before');
+$("#tab-after").onclick=()=>setMode('after');
+setMode('before');
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!--
+  WanPay Daily Summary — email template
+  ---------------------------------------------------------------------------
+  Production target : backend-plutus/i18n/<locale>/email_templates/checkout_wanpay_daily_summary.html
+  Sent              : daily at 00:00 PT to WanPay ops
+  Based on          : checkout_merchant_summary.html (same outer/inner card pattern)
+
+  Placeholders ([x]) are filled by the i18n templating layer, same convention
+  as the other email_templates files. Replace with your engine's syntax if needed.
+
+    [summary_date]            e.g. "May 25, 2026"
+    [name]                    recipient / team name, e.g. "WanPay team"
+    [registered_users]        e.g. "1,247"
+    [registered_users_delta]  e.g. "+18 today"   (whole pill is optional)
+    [users_with_balance]      e.g. "892"
+    [users_with_balance_delta]e.g. "+12 today"
+    [total_balance]           e.g. "$48,652.13 · USDT / USDC"
+    [total_balance_delta]     e.g. "+$3,680.40 today"
+    [deposits_today]          e.g. "31 transactions · $5,820.40"
+    [withdrawals_today]       e.g. "12 transactions · $2,140.00"
+    [report_date]             footer timestamp, e.g. "May 26, 2026 07:00"
+
+  Tested layout: tables + inline styles only, so it renders consistently in
+  Gmail / Outlook / Apple Mail without CSS support surprises.
+-->
+<!doctype html>
+<html
+  lang="en"
+  style="box-sizing: border-box; margin: 0; padding: 0; height: 100%"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>WanPay Daily Summary</title>
+  </head>
+
+  <body
+    style="
+      box-sizing: border-box;
+      margin: 0;
+      height: 100%;
+      background-color: #ffffff;
+      color: #333333;
+      line-height: 1.5;
+      padding: 15px;
+      font-family: &quot;Archivo&quot;, sans-serif;
+      justify-self: center;
+    "
+  >
+    <table
+      style="
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        border: 0;
+      "
+    >
+      <tr>
+        <td style="box-sizing: border-box; margin: 0; padding: 0">
+          <table
+            style="
+              width: 550px;
+              height: auto;
+              border: 0;
+              background-color: #f8f8f8;
+              box-sizing: border-box;
+              margin: 0;
+              padding: 0;
+              border-radius: 15px;
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  box-sizing: border-box;
+                  margin: 0;
+                  padding-left: 18px;
+                  padding-top: 20px;
+                  vertical-align: middle;
+                "
+              >
+                <div class="logo">
+                  <img
+                    src="https://oem-gamma.allscale.io/assets/square-DKKaGYeu.png"
+                    alt="wanpay_email_logo"
+                    style="height: 40px; width: auto; display: block"
+                  />
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  box-sizing: border-box;
+                  margin: 0;
+                  padding-left: 18px;
+                  padding-right: 18px;
+                  padding-bottom: 18px;
+                  vertical-align: top;
+                "
+              >
+                <h1
+                  class="title"
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    color: #2d2d2d;
+                    font-size: 42px;
+                    font-style: normal;
+                    font-weight: 500;
+                    line-height: normal;
+                    letter-spacing: -1.26px;
+                    margin-bottom: 32px;
+                    font-family: &quot;Archivo&quot;, sans-serif;
+                  "
+                >
+                  Daily Summary for [summary_date]
+                </h1>
+
+                <p
+                  class="text"
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 18px;
+                    color: #3b3b3b;
+                    margin-bottom: 24px;
+                    font-family: &quot;Archivo&quot;, sans-serif;
+                  "
+                >
+                  Hello [name],<br /><br />
+
+                  Here's your platform summary for [summary_date].
+                </p>
+
+                <div
+                  style="
+                    background-color: #ffffff;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 24px;
+                    border: 1px solid #eeeeee;
+                  "
+                >
+                  <h2
+                    style="
+                      box-sizing: border-box;
+                      margin: 0;
+                      padding: 0;
+                      color: #2d2d2d;
+                      font-size: 20px;
+                      font-weight: 600;
+                      font-family: &quot;Archivo&quot;, sans-serif;
+                    "
+                  >
+                    Platform Overview
+                  </h2>
+
+                  <table
+                    style="
+                      width: 100%;
+                      border: 0;
+                      border-collapse: collapse;
+                      font-family: &quot;Archivo&quot;, sans-serif;
+                    "
+                  >
+                    <!-- 1 · Registered Users -->
+                    <tr>
+                      <td style="padding: 0">
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 32px;
+                            color: #a7a7a7;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          Registered Users
+                        </p>
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 12px;
+                            color: #2d2d2d;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          [registered_users]<span
+                            style="
+                              display: inline-block;
+                              margin-left: 8px;
+                              padding: 2px 7px;
+                              border-radius: 999px;
+                              background: #e6f7f0;
+                              color: #0f8a5f;
+                              font-size: 12px;
+                              font-weight: 600;
+                              letter-spacing: 0;
+                            "
+                            >[registered_users_delta]</span
+                          >
+                        </p>
+                      </td>
+                    </tr>
+
+                    <!-- 2 · Users with Balance -->
+                    <tr>
+                      <td style="padding: 0">
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 32px;
+                            color: #a7a7a7;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          Users with Balance
+                        </p>
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 12px;
+                            color: #2d2d2d;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          [users_with_balance]<span
+                            style="
+                              display: inline-block;
+                              margin-left: 8px;
+                              padding: 2px 7px;
+                              border-radius: 999px;
+                              background: #e6f7f0;
+                              color: #0f8a5f;
+                              font-size: 12px;
+                              font-weight: 600;
+                              letter-spacing: 0;
+                            "
+                            >[users_with_balance_delta]</span
+                          >
+                        </p>
+                      </td>
+                    </tr>
+
+                    <!-- 3 · Total Platform Balance -->
+                    <tr>
+                      <td style="padding: 0">
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 32px;
+                            color: #a7a7a7;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          Total Platform Balance
+                        </p>
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 12px;
+                            color: #2d2d2d;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          [total_balance]<span
+                            style="
+                              display: inline-block;
+                              margin-left: 8px;
+                              padding: 2px 7px;
+                              border-radius: 999px;
+                              background: #e6f7f0;
+                              color: #0f8a5f;
+                              font-size: 12px;
+                              font-weight: 600;
+                              letter-spacing: 0;
+                            "
+                            >[total_balance_delta]</span
+                          >
+                        </p>
+                      </td>
+                    </tr>
+
+                    <!-- 4 · Deposits Today -->
+                    <tr>
+                      <td style="padding: 0">
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 32px;
+                            color: #a7a7a7;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          Deposits Today
+                        </p>
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 12px;
+                            color: #2d2d2d;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          [deposits_today]
+                        </p>
+                      </td>
+                    </tr>
+
+                    <!-- 5 · Withdrawals Today -->
+                    <tr>
+                      <td style="padding: 0">
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 32px;
+                            color: #a7a7a7;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          Withdrawals Today
+                        </p>
+                        <p
+                          style="
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                            margin-top: 12px;
+                            color: #2d2d2d;
+                            font-family: &quot;Archivo&quot;, sans-serif;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 500;
+                            line-height: normal;
+                            letter-spacing: -0.32px;
+                          "
+                        >
+                          [withdrawals_today]
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <p
+                  class="text"
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 16px;
+                    color: #666666;
+                    margin-bottom: 24px;
+                    font-family: &quot;Archivo&quot;, sans-serif;
+                  "
+                >
+                  This is an automated daily summary.
+                </p>
+
+                <p
+                  class="current-date"
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 15px;
+                    color: #3b3b3b;
+                    margin-top: 4px;
+                    font-family: &quot;Archivo&quot;, sans-serif;
+                  "
+                >
+                  [report_date] (UTC)
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  box-sizing: border-box;
+                  margin: 0;
+                  background-color: #f3f3f3;
+                  border-top: 1px solid #eeeeee;
+                  padding: 16px 24px;
+                  vertical-align: top;
+                  font-family: &quot;Archivo&quot;, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 15px;
+                    color: #a4a4a4;
+                    margin-bottom: 12px;
+                    line-height: 1.4;
+                  "
+                >
+                  Thanks for choosing AllScale. Need help?
+                  <a
+                    href="https://www.allscale.io/contact"
+                    style="
+                      box-sizing: border-box;
+                      margin: 0;
+                      padding: 0;
+                      color: #1a73e8;
+                      text-decoration: none;
+                    "
+                    >Contact us</a
+                  >
+                </p>
+
+                <p
+                  class="disclaimer"
+                  style="
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                    margin-top: 8px;
+                    font-size: 15px;
+                    color: #a4a4a4;
+                    line-height: 1.4;
+                  "
+                >
+                  The content of this email is for informational purposes only
+                  and does not constitute an offer or invitation. Digital
+                  assets, including stablecoins and NFTs, carry a high level of
+                  risk and may result in the loss of your entire investment. If
+                  you are unsure whether trading or holding digital assets is
+                  suitable for you, please consult with legal, tax, or
+                  investment professionals. Certain products may not be
+                  available in some jurisdictions. For more information on
+                  restricted jurisdictions and other details regarding AllScale
+                  services, please refer to the AllScale
+                  <a
+                    href="https://www.allscale.io/agreement"
+                    style="
+                      box-sizing: border-box;
+                      margin: 0;
+                      padding: 0;
+                      color: #1a73e8;
+                      text-decoration: none;
+                    "
+                  >
+                    Terms of Use
+                  </a>
+                  and
+                  <a
+                    href="https://www.allscale.io/policy"
+                    style="
+                      box-sizing: border-box;
+                      margin: 0;
+                      padding: 0;
+                      color: #1a73e8;
+                      text-decoration: none;
+                    "
+                  >
+                    Privacy Policy </a
+                  >.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

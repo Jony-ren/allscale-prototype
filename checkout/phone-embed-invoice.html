@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllScale Pay — Phone Embed</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --as-green:       #009859;
+  --as-card:        #fafbfa;
+  --as-btn-cyan:    #f2f8f5;
+  --as-border-cyan: #e5eeea;
+  --as-dark:        #0C3124;
+  --as-text:        #83968F;
+  --as-brand-light: #12D16B;
+  --red:   #E53E3E;
+  --orange:#F59E0B;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Archivo',sans-serif;background:transparent;
+  color:var(--as-dark);
+  display:flex;align-items:flex-start;justify-content:flex-start;
+  padding:0;margin:0;
+}
+.mono{font-family:'DM Mono',monospace;}
+
+/* ── Phone ───────────────────────────────── */
+.phone{
+  width:393px;border-radius:28px;overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1.5px rgba(255,255,255,.06);
+  display:flex;flex-direction:column;background:var(--as-dark);
+  flex-shrink:0;
+}
+.phone-notch{display:none;}
+.notch{width:120px;height:30px;background:#000;border-radius:0 0 20px 20px;}
+
+/* Shader gradient bg — light version */
+.shader{
+  flex:1;overflow-y:auto;
+  background:#FDFFFE;
+}
+.scroll-content{padding:20px 20px 36px;position:relative;z-index:1;max-width:500px;margin:0 auto;width:100%;}
+
+/* ── Typography ──────────────────────────── */
+.t-title{font-size:32px;font-weight:500;letter-spacing:-.02em;color:#1a1a1a;}
+.t-h1{font-size:58px;font-weight:700;letter-spacing:-.04em;color:#0d0d0d;}
+.t-h5{font-size:28px;font-weight:400;letter-spacing:-.02em;color:#83968f;}
+.t-h6{font-size:20px;font-weight:500;letter-spacing:-.025em;color:#0d0d0d;}
+.t-body-lg{font-size:18px;font-weight:500;letter-spacing:-.02em;}
+.t-body{font-size:16px;font-weight:500;letter-spacing:-.02em;}
+.t-sm{font-size:14px;font-weight:400;}
+.t-caption{font-size:12px;font-weight:400;}
+
+/* ── Checkout header ─────────────────────── */
+.co-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;position:sticky;top:0;z-index:10;background:#FDFFFE;max-width:500px;margin:0 auto;width:100%;}
+.back-btn{width:40px;height:40px;border-radius:50%;background:#F2F8F5;border:none;color:#0C3124;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;}
+.back-btn:hover{background:#E5EEEA;}
+.co-amount-block{text-align:center;margin-bottom:24px;}
+.amount-row{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;}
+.from-badge{display:inline-flex;align-items:center;gap:8px;background:transparent;border-radius:16px;padding:4px 0;margin-top:4px;border:none;}
+.from-badge-label{font-size:12px;font-weight:400;color:#83968f;letter-spacing:0;}
+.from-avatar{width:26px;height:26px;border-radius:50%;background:#e8f0ec;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0C3124;flex-shrink:0;}
+.from-name{font-size:14px;font-weight:400;color:#0d0d0d;letter-spacing:-.01em;}
+
+/* ── Pay method option (PaymentMethodOption) */
+.pay-opt{width:100%;text-align:left;padding:14px;border-radius:12px;display:flex;align-items:center;gap:16px;cursor:pointer;border:1px solid transparent;background:transparent;font-family:'Archivo',sans-serif;transition:background .12s,border-color .12s;}
+.pay-opt.sel{background:#FAFBFA;border-color:#0D0D0D;}
+.pay-opt.sel .t-body-lg,.pay-opt.sel .t-sm{color:#0D0D0D !important;font-weight:400 !important;}
+.pay-opt:not(.sel) .t-body-lg,.pay-opt:not(.sel) .t-sm{color:#83968F !important;font-weight:400 !important;}
+.pay-opt.sel .t-body-lg img{opacity:1;}
+.pay-opt:not(.sel) .t-body-lg img{opacity:0.5;}
+.pay-opt:hover:not(.sel){background:rgba(0,0,0,.03);}
+.radio{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.radio.on{background:#0D0D0D;border:none;}
+.radio.on svg path{stroke:#FFFFFF;}
+.radio.off{border:1.5px solid #83968F;background:transparent;}
+
+/* ── Wallet connected pills ──────────────── */
+.wc-pills{display:none;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.wc-pills.show{display:flex;}
+.wc-pill{display:inline-flex;align-items:center;gap:4px;background:var(--as-dark);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;white-space:nowrap;transition:opacity .15s;border:none;}
+.wc-pill:hover{opacity:.82;}
+.wc-pill.no-click{cursor:default;}
+.wc-pill.no-click:hover{opacity:1;}
+.wc-arr{font-size:10px;opacity:.6;}
+
+/* ── Token chips (multi-token indicator) ─── */
+.token-chips{display:flex;align-items:center;gap:3px;margin-top:5px;flex-wrap:wrap;}
+.tc{font-size:12px;line-height:1;}
+.tc-more{font-size:11px;color:var(--as-text);font-weight:500;}
+
+/* ── Confirm page selectors ──────────────── */
+.conf-sel-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:white;border:1px solid var(--as-border-cyan);cursor:pointer;width:100%;text-align:left;font-family:'Archivo',sans-serif;transition:background .12s;margin-bottom:8px;}
+.conf-sel-row:hover{background:var(--as-btn-cyan);}
+.conf-sel-icon{width:32px;height:32px;border-radius:50%;background:rgba(0,152,89,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.conf-sel-text{flex:1;font-size:16px;font-weight:500;color:var(--as-dark);}
+.conf-sel-chev{color:var(--as-text);font-size:13px;}
+
+/* ── Confirm fee breakdown ───────────────── */
+.conf-fee-box{background:rgba(255,255,255,.85);border:1px solid var(--as-border-cyan);border-radius:14px;overflow:hidden;margin-top:4px;}
+.conf-fee-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--as-border-cyan);}
+.conf-fee-row:last-child{border-bottom:none;}
+.conf-fee-lbl{font-size:14px;color:var(--as-text);}
+.conf-fee-val{font-size:14px;font-weight:500;color:var(--as-dark);}
+.conf-you-pay{background:rgba(0,152,89,.04);}
+.conf-you-pay .conf-fee-lbl{font-size:15px;font-weight:700;color:var(--as-dark);}
+.conf-you-pay .conf-fee-val{font-size:16px;font-weight:700;color:var(--as-dark);}
+
+/* ── Network row (clickable, opens sheet) ── */
+.net-row-inline{display:flex;align-items:center;justify-content:space-between;padding:4px 14px 2px;margin-top:10px;cursor:pointer;}
+.net-row-inline:hover .net-value{text-decoration:underline;}
+.net-label{font-size:14px;color:var(--as-text);}
+.net-value{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--as-dark);}
+.chevron{font-size:16px;color:var(--as-green);}
+.badge-sw{display:inline-flex;align-items:center;background:rgba(0,152,89,.1);border:1px solid rgba(0,152,89,.25);border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;color:var(--as-green);}
+
+/* ── Sheet back btn ──────────────────────── */
+.sheet-back{width:28px;height:28px;border-radius:50%;background:var(--as-btn-cyan);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--as-dark);flex-shrink:0;}
+
+/* ── Quote box ───────────────────────────── */
+.quote-box{background:rgba(255,255,255,.85);border:1px solid var(--as-border-cyan);border-radius:14px;overflow:hidden;margin:12px 0 0;}
+.qt-total{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--as-border-cyan);}
+.qt-expand{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:8px;background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--as-text);border-bottom:1px solid var(--as-border-cyan);font-family:'Archivo',sans-serif;transition:background .12s;}
+.qt-expand:hover{background:rgba(242,248,245,.9);}
+.qt-rows{display:none;}
+.qt-rows.open{display:block;}
+.qt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--as-border-cyan);}
+.qt-row:last-child{border-bottom:none;}
+.qt-lbl{font-size:13px;color:var(--as-text);}
+.qt-lbl.ul{text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px;text-decoration-color:rgba(131,150,143,.4);cursor:pointer;}
+.qt-val{font-size:13px;font-weight:600;color:var(--as-dark);}
+
+/* Timer */
+.timer-pill{display:flex;align-items:center;gap:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:600;color:var(--orange);margin:8px auto 0;width:fit-content;}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Alert banners */
+.alert-info{display:flex;align-items:flex-start;gap:8px;background:rgba(0,152,89,.08);border:1px solid rgba(0,152,89,.2);border-radius:10px;padding:10px 12px;font-size:12px;color:#065F46;line-height:1.55;margin-top:8px;}
+.alert-warn{display:flex;align-items:flex-start;gap:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 12px;font-size:12px;color:#92400E;line-height:1.55;}
+.alert-error{display:flex;align-items:flex-start;gap:8px;background:rgba(229,62,62,.07);border:1px solid rgba(229,62,62,.2);border-radius:10px;padding:10px 12px;font-size:12px;color:#9B1C1C;line-height:1.55;}
+.quote-notif{display:none;margin-top:8px;}
+.quote-notif.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.quote-notif.show{animation:fadeIn .2s ease;}
+
+/* Action button (dark bg, white text) */
+.act-btn{width:100%;height:48px;border-radius:30px;border:none;cursor:pointer;font-size:18px;font-weight:500;letter-spacing:-.02em;font-family:'Archivo',sans-serif;background:#0d0d0d;color:#ffffff;margin-top:8px;transition:opacity .15s;}
+.act-btn:hover{opacity:.88;}
+.act-btn:active{opacity:.75;}
+.act-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── Bottom sheet overlay ─────────────────── */
+.sheet-overlay{position:absolute;inset:0;z-index:50;background:rgba(12,49,36,.45);display:none;align-items:flex-end;}
+.sheet-overlay.open{display:flex;}
+.sheet{width:100%;background:white;border-radius:24px 24px 0 0;max-height:88%;display:flex;flex-direction:column;animation:slideUp .28s cubic-bezier(.4,0,.2,1);}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;background:var(--as-border-cyan);border-radius:999px;margin:12px auto 0;flex-shrink:0;}
+.sheet-hd{padding:12px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--as-border-cyan);flex-shrink:0;}
+.sheet-title{font-size:16px;font-weight:700;color:var(--as-dark);letter-spacing:-.02em;}
+.sheet-x{width:28px;height:28px;border-radius:50%;background:var(--as-btn-cyan);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--as-text);font-size:14px;}
+.sheet-body{flex:1;overflow-y:auto;padding:12px 16px 28px;}
+
+/* Network rows inside sheet */
+.sht-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:background .1s;border:1.5px solid transparent;margin-bottom:2px;}
+.sht-row:hover{background:var(--as-btn-cyan);}
+.sht-row.active{background:var(--as-btn-cyan);border-color:var(--as-green);}
+.ni-wrap{position:relative;width:36px;height:36px;flex-shrink:0;}
+.ni-bg{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.ni-badge{position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:white;border:1px solid var(--as-border-cyan);display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:800;}
+.sht-info{flex:1;}
+.sht-name{font-size:14px;font-weight:600;color:var(--as-dark);}
+.sht-sub{font-size:12px;color:var(--as-text);margin-top:1px;}
+.sht-right{text-align:right;flex-shrink:0;}
+.sht-amt{font-size:14px;font-weight:600;color:var(--as-dark);}
+.sht-usd{font-size:12px;color:var(--as-text);}
+
+/* ── Details ─────────────────────────────── */
+.details{margin-top:16px;background:#fafbfa;border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;gap:16px;}
+.det-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.det-label{font-size:14px;font-weight:400;color:#83968f;}
+.det-value{font-size:14px;font-weight:400;color:#83968f;text-align:right;}
+
+/* ── Processing page ─────────────────────── */
+.proc-page{flex:1;display:flex;flex-direction:column;background:#FDFFFE;}
+.proc-header{position:sticky;top:0;padding:16px 20px;display:flex;align-items:center;background:#FDFFFE;z-index:5;}
+.circle-btn{width:44px;height:44px;border-radius:50%;background:var(--as-btn-cyan);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--as-dark);}
+.proc-body{flex:1;overflow-y:auto;padding:0 20px 16px;display:flex;flex-direction:column;gap:24px;}
+.proc-footer{padding:8px 20px 28px;display:flex;flex-direction:column;gap:8px;background:#FDFFFE;}
+.btn-done{width:100%;height:52px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:500;font-family:'Archivo',sans-serif;background:var(--as-dark);color:var(--as-brand-light);transition:opacity .15s;}
+.btn-done:hover{opacity:.88;}
+.btn-done:disabled{opacity:.4;cursor:not-allowed;}
+.btn-details{width:100%;height:52px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:500;font-family:'Archivo',sans-serif;background:transparent;color:var(--as-dark);text-decoration:underline;}
+
+/* ── AllScale Pay confirm form ── */
+.as-form-label{font-size:12px;color:var(--as-text);margin-bottom:6px;font-weight:500;}
+.as-form-card{background:white;border:1px solid var(--as-border-cyan);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:16px;transition:background .12s;}
+.as-form-card:hover{background:var(--as-btn-cyan);}
+
+/* ── Pay with other tokens button ───────── */
+.pay-other-btn{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--as-green);border-radius:12px;padding:10px 18px;cursor:pointer;background:rgba(0,152,89,.06);margin-top:12px;transition:background .12s;font-family:'Archivo',sans-serif;}
+.pay-other-btn:hover{background:rgba(0,152,89,.13);}
+.pay-other-btn-label{font-size:13px;font-weight:700;color:var(--as-green);letter-spacing:-.01em;}
+
+/* ── QR amount row ───────────────────────── */
+.qr-amt-row{display:flex;align-items:center;gap:6px;margin-top:8px;}
+
+/* ── Copy button ─────────────────────────── */
+.copy-btn{width:34px;height:34px;border-radius:50%;background:var(--as-btn-cyan);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── Addr card ───────────────────────────── */
+.addr-card{background:var(--as-card);border-radius:12px;padding:16px;}
+.addr-lbl{font-size:12px;color:var(--as-text);margin-bottom:6px;}
+.addr-val{font-size:12.5px;font-weight:500;color:var(--as-dark);word-break:break-all;margin-bottom:10px;font-family:'DM Mono',monospace;}
+.addr-copy-btn{width:100%;height:44px;border-radius:999px;border:1.5px solid var(--as-border-cyan);background:white;font-size:13px;font-weight:500;color:var(--as-dark);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font-family:'Archivo',sans-serif;}
+.addr-copy-btn:hover{background:var(--as-btn-cyan);}
+
+/* ── Tips steps ──────────────────────────── */
+.tips-step-row{display:flex;gap:12px;}
+.tips-step-num{width:28px;height:28px;border-radius:50%;background:var(--as-card);border:1px solid var(--as-border-cyan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:500;color:var(--as-dark);}
+.tips-connector{width:1px;height:18px;background:var(--as-green);margin:2px 0 2px 13px;}
+
+/* ── Screen transitions ──────────────────── */
+.phone-screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.phone-screen.active{display:flex;}
+
+/* ── Quote loading skeleton ──────────────── */
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+.skel-line{border-radius:4px;background:linear-gradient(90deg,#e8f0ec 25%,#d4eadf 50%,#e8f0ec 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;}
+.qt-loading-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--as-border-cyan);}
+
+/* ── AllScale Pay confirm (sheet style) ── */
+.as-fee-section{border-top:1px solid var(--as-border-cyan);margin-top:4px;}
+.as-fee-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;}
+.as-fee-label{font-size:14px;color:var(--as-text);}
+.as-fee-val{font-size:14px;font-weight:500;color:var(--as-dark);display:flex;align-items:center;gap:6px;}
+.as-fee-details{display:none;padding-bottom:4px;}
+.as-fee-details.open{display:block;}
+.as-fee-row2{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px;}
+.as-fee-row2-lbl{color:var(--as-text);}
+.as-fee-row2-val{color:var(--as-dark);font-weight:500;}
+.as-skel-fee{display:flex;flex-direction:column;gap:8px;padding:8px 0;}
+
+::-webkit-scrollbar{width:0;}
+
+/* ── Token switcher pill ─────────────────── */
+.token-switch-btn{display:inline-flex;align-items:center;gap:10px;background:#FAFBFA;border:none;border-radius:999px;padding:10px 20px;cursor:pointer;font-size:16px;font-weight:500;color:#0d0d0d;font-family:'Archivo',sans-serif;letter-spacing:-.01em;transition:background .15s, transform .15s;}
+.token-switch-btn:hover{background:#f0f0f0;}
+@keyframes token-pop{0%{transform:scale(1);}40%{transform:scale(1.08);}100%{transform:scale(1);}}
+.token-switch-btn.popping{animation:token-pop .32s cubic-bezier(.34,1.56,.64,1);}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone-pay" style="height:750px;">
+    <div class="phone-notch"><div class="notch"></div></div>
+
+    <!-- ── SCREEN 1: Checkout options ─────── -->
+    <div class="phone-screen active shader" id="scr-checkout" style="overflow-y:auto;">
+      <div class="co-header">
+        <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="from-avatar" style="width:40px;height:40px;font-size:28px;font-weight:500;background:#e8f0ec;color:#0C3124;">A</div>
+      </div>
+      <div class="scroll-content" style="padding-top:0;">
+        <div class="co-amount-block">
+          <div class="t-title" style="margin-bottom:14px;">Pay now</div>
+          <div class="amount-row">
+            <number-flow id="amt-whole" class="t-h1" style="font-size:58px;font-weight:700;letter-spacing:-.04em;color:#0d0d0d;"></number-flow>
+            <number-flow id="amt-frac" class="t-h5" style="font-size:28px;font-weight:400;letter-spacing:-.02em;color:#83968f;" data-prefix="."></number-flow>
+          </div>
+          <!-- Token switcher pill -->
+          <div style="display:flex;justify-content:center;margin-top:12px;">
+            <button class="token-switch-btn" id="token-switch" onclick="toggleToken()">
+              <img id="token-coin-icon" src="../pay/asset/usdc.png" width="24" height="24" style="flex-shrink:0;border-radius:50%;">
+              <span id="token-label">USDC</span>
+              <img src="../pay/asset/switch.svg" width="12" height="12" style="flex-shrink:0;">
+            </button>
+          </div>
+          <div class="from-badge" style="margin-top:14px;">
+            <span class="from-badge-label">From</span>
+            <div class="from-avatar">Y</div>
+            <span class="from-name">yao.wang.yg0113@gmail.com</span>
+          </div>
+        </div>
+
+        <!-- Payment options card -->
+        <div style="background:#fafbfa;border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;gap:16px;">
+          <div class="t-h6" style="color:#0c3124;">Payment method</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <button class="pay-opt sel" id="opt-allscale" onclick="selOpt('allscale')">
+              <div class="radio on" id="r-allscale"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg></div>
+              <div style="flex:1;min-width:0;">
+                <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="assets/allscale-logo.svg" height="22" style="display:block;"></div>
+                <div class="t-sm" style="color:#0d0d0d;">Available: $3,908.56</div>
+              </div>
+            </button>
+            <button class="pay-opt" id="opt-wallet" onclick="selOpt('wallet')">
+              <div class="radio off" id="r-wallet"></div>
+              <div style="flex:1;min-width:0;">
+                <div class="t-body-lg" style="color:#83968f;">Connect Wallet</div>
+                <div class="t-sm" style="color:#83968f;">Make payment with your own wallet</div>
+              </div>
+            </button>
+            <button class="pay-opt" id="opt-scan" onclick="selOpt('scan')">
+              <div class="radio off" id="r-scan"></div>
+              <div style="flex:1;min-width:0;">
+                <div class="t-body-lg" style="color:#83968f;">Scan to Pay</div>
+                <div class="t-sm" style="color:#83968f;">Pay by scanning a QR code</div>
+              </div>
+            </button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="act-btn" id="act-btn-checkout" onclick="goNext()">Next</button>
+            <div style="text-align:center;font-size:12px;color:#83968F;">Powered by AllScale</div>
+          </div>
+        </div>
+
+        <div class="details" style="margin-top:16px;">
+          <div class="t-h6" style="color:#0d0d0d;">Details</div>
+          <div class="det-row"><span class="det-label">Amount</span><span class="det-value" id="det-amount"></span></div>
+          <div class="det-row"><span class="det-label">From</span><span class="det-value" id="det-from"></span></div>
+          <div class="det-row"><span class="det-label">Exchange rate</span><span class="det-value" id="det-rate"></span></div>
+        </div>
+
+        <button style="width:100%;padding:12px 20px;margin-top:12px;background:#FAFBFA;border:none;border-radius:48px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-family:'Archivo',sans-serif;transition:background .12s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#FAFBFA'">
+          <img src="../pay/asset/invoice.svg" width="20" height="20" style="flex-shrink:0;">
+          <span style="font-size:18px;font-weight:500;color:#0d0d0d;letter-spacing:-.02em;">Download invoice</span>
+        </button>
+      </div>
+    </div><!-- /scr-checkout -->
+
+    <!-- ── SCREEN 2: Scan to Pay (QR page) ── -->
+    <div class="phone-screen" id="scr-qr" style="background:#fff;">
+      <div class="proc-header" style="justify-content:space-between;">
+        <button class="circle-btn" onclick="showScreen('scr-checkout')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
+        <span style="font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--as-dark);">Scan to Pay</span>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="proc-body">
+        <!-- Warning -->
+        <div style="background:#FFF9F4;padding:12px 14px;border-radius:12px;display:flex;align-items:flex-start;gap:10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px;"><path d="M12 2L2 20h20L12 2Z" stroke="#FF8D28" stroke-width="1.8" fill="none"/><path d="M12 9v5M12 16.5v.5" stroke="#FF8D28" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div style="font-size:11.5px;color:#FF8D28;line-height:1.6;">
+            <p>Send in ONE transaction only. Do NOT send multiple payments. Only the first payment will be processed.</p>
+            <p style="margin-top:3px;">Please send the exact amount displayed. Overpayments are non-refundable.</p>
+          </div>
+        </div>
+
+        <!-- QR Card -->
+        <div style="background:var(--as-card);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;margin-top:8px;">
+          <!-- Simulated QR code -->
+          <svg width="152" height="152" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="white"/>
+            <rect x="10" y="10" width="42" height="42" rx="4" fill="#000"/><rect x="16" y="16" width="30" height="30" rx="2" fill="white"/><rect x="22" y="22" width="18" height="18" fill="#000"/>
+            <rect x="108" y="10" width="42" height="42" rx="4" fill="#000"/><rect x="114" y="16" width="30" height="30" rx="2" fill="white"/><rect x="120" y="22" width="18" height="18" fill="#000"/>
+            <rect x="10" y="108" width="42" height="42" rx="4" fill="#000"/><rect x="16" y="114" width="30" height="30" rx="2" fill="white"/><rect x="22" y="120" width="18" height="18" fill="#000"/>
+            <rect x="60" y="10" width="6" height="6" fill="#000"/><rect x="72" y="10" width="6" height="6" fill="#000"/><rect x="84" y="10" width="6" height="6" fill="#000"/><rect x="96" y="10" width="6" height="6" fill="#000"/>
+            <rect x="10" y="60" width="6" height="6" fill="#000"/><rect x="10" y="72" width="6" height="6" fill="#000"/><rect x="10" y="84" width="6" height="6" fill="#000"/><rect x="10" y="96" width="6" height="6" fill="#000"/>
+            <rect x="108" y="108" width="16" height="16" fill="#000"/><rect x="111" y="111" width="10" height="10" fill="white"/><rect x="114" y="114" width="4" height="4" fill="#000"/>
+            <rect x="60" y="60" width="6" height="6" fill="#000"/><rect x="72" y="60" width="6" height="6" fill="#000"/><rect x="84" y="66" width="6" height="6" fill="#000"/><rect x="96" y="60" width="6" height="6" fill="#000"/><rect x="60" y="72" width="6" height="6" fill="#000"/><rect x="84" y="72" width="6" height="6" fill="#000"/><rect x="96" y="72" width="6" height="6" fill="#000"/><rect x="60" y="84" width="6" height="6" fill="#000"/><rect x="72" y="78" width="6" height="6" fill="#000"/><rect x="84" y="84" width="6" height="6" fill="#000"/><rect x="60" y="96" width="6" height="6" fill="#000"/><rect x="66" y="102" width="6" height="6" fill="#000"/><rect x="78" y="96" width="6" height="6" fill="#000"/><rect x="90" y="102" width="6" height="6" fill="#000"/><rect x="102" y="96" width="6" height="6" fill="#000"/>
+            <rect x="60" y="108" width="6" height="6" fill="#000"/><rect x="72" y="114" width="6" height="6" fill="#000"/><rect x="60" y="120" width="6" height="6" fill="#000"/><rect x="84" y="108" width="6" height="6" fill="#000"/><rect x="96" y="120" width="6" height="6" fill="#000"/><rect x="84" y="120" width="6" height="6" fill="#000"/>
+            <rect x="108" y="60" width="6" height="6" fill="#000"/><rect x="120" y="60" width="6" height="6" fill="#000"/><rect x="132" y="60" width="6" height="6" fill="#000"/><rect x="108" y="72" width="6" height="6" fill="#000"/><rect x="132" y="72" width="6" height="6" fill="#000"/><rect x="120" y="78" width="6" height="6" fill="#000"/><rect x="108" y="84" width="6" height="6" fill="#000"/><rect x="132" y="84" width="6" height="6" fill="#000"/><rect x="120" y="90" width="6" height="6" fill="#000"/><rect x="108" y="96" width="6" height="6" fill="#000"/><rect x="132" y="96" width="6" height="6" fill="#000"/>
+          </svg>
+          <div style="font-size:14px;font-weight:500;color:var(--as-dark);margin-top:8px;">Scan to pay</div>
+          <!-- Amount row -->
+          <div class="qr-amt-row">
+            <span id="qr-amt-int" style="font-size:38px;font-weight:500;letter-spacing:-.04em;color:var(--as-dark);">100</span>
+            <span id="qr-amt-frac" style="font-size:22px;font-weight:500;letter-spacing:-.02em;color:var(--as-text);">.00 USDT</span>
+            <button class="copy-btn">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6.667 6.667V5C6.667 3.159 8.16 1.667 10 1.667L15 1.667C16.841 1.667 18.333 3.159 18.333 5V10C18.333 11.841 16.841 13.333 15 13.333H13.333M6.667 6.667H5C3.159 6.667 1.667 8.159 1.667 10V15C1.667 16.841 3.159 18.333 5 18.333H10C11.841 18.333 13.333 16.841 13.333 15V13.333M6.667 6.667H10C11.841 6.667 13.333 8.159 13.333 10V13.333" stroke="#009859" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div id="qr-chain-info" style="font-size:13px;color:var(--as-text);margin-top:2px;">on BNB Chain</div>
+          <!-- Paying from (Swidge selector) -->
+          <button class="pay-other-btn" id="qr-paying-btn" onclick="openSheet()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+            <span class="pf-icon" id="qr-net-icon" style="display:none;"></span>
+            <span class="pay-other-btn-label" id="qr-net-name">Pay with other tokens</span>
+            <span id="qr-net-badge" class="badge-sw" style="display:none;">⚡ Swidge</span>
+            <svg class="pf-chevron" viewBox="0 0 6 12" fill="none" style="flex-shrink:0;width:6px;height:12px;"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.28 0.16C-.04.42-.09.9.16 1.22L3.79 5.75.16 10.28C-.09 10.6-.04 11.08.28 11.34.6 11.59 1.08 11.54 1.34 11.22L5.34 6.22C5.55 5.94 5.55 5.56 5.34 5.28L1.34 0.28C1.08-.04.6-.09.28.16Z" fill="var(--as-green)"/></svg>
+          </button>
+        </div>
+
+        <!-- Quote box (appears when Swidge) -->
+        <div id="quote-section" style="display:none;">
+          <div class="quote-box">
+            <div class="qt-total">
+              <span style="font-size:15px;font-weight:600;color:var(--as-dark);">You pay</span>
+              <span id="qt-total-val" style="font-size:17px;font-weight:700;color:var(--as-green);"></span>
+              <div id="qt-total-skel" class="skel-line" style="width:88px;height:16px;display:none;border-radius:4px;"></div>
+            </div>
+            <div id="qt-loading-body" class="qt-loading-body" style="display:none;">
+              <div class="skel-line" style="height:12px;width:100%;"></div>
+              <div class="skel-line" style="height:12px;width:78%;"></div>
+              <div class="skel-line" style="height:12px;width:88%;"></div>
+            </div>
+            <button class="qt-expand" id="qt-expand-btn" onclick="toggleQt()">
+              <svg id="qt-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              <span id="qt-btn-text">See fee breakdown</span>
+            </button>
+            <div class="qt-rows" id="qt-rows">
+              <div class="qt-row" id="qt-rate-row" style="display:none;"><span class="qt-lbl">Rate</span><span class="qt-val" id="qt-rate"></span></div>
+              <div class="qt-row"><span class="qt-lbl">Swidge Fee</span><span class="qt-val" id="qt-bridge"></span></div>
+              <div class="qt-row"><span class="qt-lbl">Platform Fee</span><span class="qt-val" id="qt-platform"></span></div>
+            </div>
+          </div>
+          <div class="timer-pill">
+            <div class="tdot"></div>
+            <span id="qt-timer">Quote refreshes in 30s</span>
+          </div>
+          <div class="quote-notif" id="qt-notif"></div>
+        </div>
+
+        <!-- Recipient address card -->
+        <div class="addr-card" style="margin-top:0;">
+          <div class="addr-lbl">Recipient address</div>
+          <div class="addr-val">0x3f8A4c...b4D7</div>
+          <button class="addr-copy-btn">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6.667 6.667V5C6.667 3.159 8.16 1.667 10 1.667L15 1.667C16.841 1.667 18.333 3.159 18.333 5V10C18.333 11.841 16.841 13.333 15 13.333H13.333M6.667 6.667H5C3.159 6.667 1.667 8.159 1.667 10V15C1.667 16.841 3.159 18.333 5 18.333H10C11.841 18.333 13.333 16.841 13.333 15V13.333M6.667 6.667H10C11.841 6.667 13.333 8.159 13.333 10V13.333" stroke="#009859" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Copy address
+          </button>
+        </div>
+
+        <!-- AllScale logo -->
+        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="assets/allscale-logo.svg" height="20" style="display:block;opacity:.5;"></div>
+      </div>
+    </div><!-- /scr-qr -->
+
+    <!-- ── SCREEN 3: Connect Wallet Tips ───── -->
+    <div class="phone-screen" id="scr-tips" style="background:#fff;">
+      <div class="proc-header" style="justify-content:space-between;">
+        <button class="circle-btn" onclick="showScreen('scr-checkout')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
+        <div style="width:44px;"></div>
+      </div>
+
+      <!-- State 1: How To guide -->
+      <div id="tips-howto">
+        <div class="proc-body">
+          <div style="font-size:14px;font-weight:500;color:var(--as-green);margin-bottom:4px;">Tips</div>
+          <div style="font-size:32px;font-weight:500;letter-spacing:-.04em;color:var(--as-dark);margin-bottom:24px;line-height:1.2;">How to pay by wallet</div>
+          <!-- Wallet icon card -->
+          <div style="background:var(--as-card);border-radius:12px;padding:24px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;aspect-ratio:353/180;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 76 76" fill="none">
+              <path d="M76 60.8C76 69.2 69.2 76 60.8 76H15.2C6.8 76 0 69.2 0 60.8V58.9H15.2C22.5 58.9 28.5 52.9 28.5 45.6C28.5 38.3 22.5 32.3 15.2 32.3H0V30.4C0 22 6.8 15.2 15.2 15.2H76V60.8Z" fill="black"/>
+              <path d="M15.2 38C19.4 38 22.8 41.4 22.8 45.6C22.8 49.8 19.4 53.2 15.2 53.2H0V38H15.2Z" fill="black"/>
+              <path d="M60.8 0C67.2 0 72.6 3.9 74.9 9.5H23.9C26.2 3.9 31.6 0 38 0H60.8Z" fill="black"/>
+            </svg>
+          </div>
+          <!-- Steps -->
+          <div style="display:flex;flex-direction:column;">
+            <div class="tips-step-row"><div class="tips-step-num">1</div><div style="font-size:15px;font-weight:500;color:var(--as-dark);padding-top:4px;">Connect to your Wallet App</div></div>
+            <div class="tips-step-row"><div class="tips-step-num">5</div><div style="font-size:15px;font-weight:500;color:var(--as-dark);padding-top:4px;">Back to payment</div></div>
+          </div>
+        </div>
+        <div class="proc-footer">
+          <button class="btn-done" onclick="connectWallet()">Connect wallet</button>
+        </div>
+      </div>
+
+      <!-- State 2: Wallet connected — select chain/token -->
+      <div id="tips-connected" style="display:none;">
+        <div class="proc-body">
+          <div class="pay-opt sel" style="cursor:default;">
+            <div class="radio on"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                <div>
+                  <div class="t-body-lg" style="color:var(--as-dark);">WalletConnect</div>
+                  <div class="t-sm" style="color:var(--as-green);">0.0000 USDT</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0;">
+                  <button class="wc-pill" id="wc-chain-pill" onclick="openWalletSheet('chain')">🔵 ETH <span class="wc-arr">▾</span></button>
+                  <button class="wc-pill" id="wc-token-pill" onclick="openWalletSheet('token')">USDT <span class="wc-arr">▾</span></button>
+                  <div class="wc-pill no-click">0x6F...a601</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="proc-footer">
+          <button class="btn-done" onclick="goProcessing()">Pay</button>
+        </div>
+      </div>
+    </div><!-- /scr-tips -->
+
+    <!-- ── Sheet overlay (at phone level) ─── -->
+    <div class="sheet-overlay" id="sheet">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div id="sht-step1">
+          <div class="sheet-hd">
+            <span class="sheet-title" id="sht-step1-title">Select network</span>
+            <button class="sheet-x" onclick="closeSheet()">✕</button>
+          </div>
+          <div class="sheet-body" id="sht-chain-body"></div>
+        </div>
+        <div id="sht-step2" style="display:none;">
+          <div class="sheet-hd" style="gap:10px;">
+            <button class="sheet-back" onclick="goChainStep()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            </button>
+            <span class="sheet-title" id="sht-chain-title" style="flex:1;">BNB Chain</span>
+            <button class="sheet-x" onclick="closeSheet()">✕</button>
+          </div>
+          <div id="sht-tron-warn" style="display:none;margin:8px 16px 0;" class="alert-warn"></div>
+          <div class="sheet-body" id="sht-token-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 4: Wallet Confirm Payment ── -->
+    <div class="phone-screen" id="scr-wallet-confirm" style="background:#fff;">
+      <div class="proc-header" style="justify-content:space-between;">
+        <button class="circle-btn" onclick="backFromWcConfirm()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
+        <span style="font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--as-dark);">Connect Wallet</span>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="proc-body">
+        <div style="background:var(--as-card);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;">
+          <div class="qr-amt-row">
+            <span style="font-size:38px;font-weight:500;letter-spacing:-.04em;color:var(--as-dark);">100</span>
+            <span style="font-size:22px;font-weight:500;letter-spacing:-.02em;color:var(--as-text);">.00 USDT</span>
+          </div>
+          <div id="wcc-chain-info" style="font-size:13px;color:var(--as-text);margin-top:2px;">on BNB Chain</div>
+          <button class="pay-other-btn" onclick="openConfSheet()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+            <span class="pf-icon" id="wcc-net-icon" style="display:none;"></span>
+            <span class="pay-other-btn-label" id="wcc-net-name">Pay with other tokens</span>
+            <span id="wcc-net-badge" class="badge-sw" style="display:none;">⚡ Swidge</span>
+            <svg class="pf-chevron" viewBox="0 0 6 12" fill="none" style="flex-shrink:0;width:6px;height:12px;"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.28 0.16C-.04.42-.09.9.16 1.22L3.79 5.75.16 10.28C-.09 10.6-.04 11.08.28 11.34.6 11.59 1.08 11.54 1.34 11.22L5.34 6.22C5.55 5.94 5.55 5.56 5.34 5.28L1.34 0.28C1.08-.04.6-.09.28.16Z" fill="var(--as-green)"/></svg>
+          </button>
+        </div>
+
+        <div id="wcc-quote-section">
+          <div class="quote-box">
+            <div class="qt-total">
+              <span style="font-size:15px;font-weight:600;color:var(--as-dark);">You pay</span>
+              <span id="wcc-you-pay" style="font-size:17px;font-weight:700;color:var(--as-green);">100.00 USDT</span>
+              <div id="wcc-total-skel" class="skel-line" style="width:88px;height:16px;display:none;border-radius:4px;"></div>
+            </div>
+            <div id="wcc-loading-body" class="qt-loading-body" style="display:none;">
+              <div class="skel-line" style="height:12px;width:100%;"></div>
+              <div class="skel-line" style="height:12px;width:78%;"></div>
+              <div class="skel-line" style="height:12px;width:88%;"></div>
+            </div>
+            <button class="qt-expand" id="wcc-expand-btn" onclick="toggleWccQt()">
+              <svg id="wcc-qt-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              <span id="wcc-qt-btn-text">See fee breakdown</span>
+            </button>
+            <div class="qt-rows" id="wcc-qt-rows">
+              <div class="qt-row" id="wcc-rate-row" style="display:none;"><span class="qt-lbl">Rate</span><span class="qt-val" id="wcc-rate"></span></div>
+              <div class="qt-row" id="wcc-bridge-row" style="display:none;"><span class="qt-lbl">Swidge Fee</span><span class="qt-val" id="wcc-bridge"></span></div>
+              <div class="qt-row" id="wcc-platform-row" style="display:none;"><span class="qt-lbl">Platform Fee</span><span class="qt-val" id="wcc-platform"></span></div>
+            </div>
+          </div>
+          <div class="timer-pill" id="wcc-timer-pill" style="display:none;">
+            <div class="tdot"></div>
+            <span id="wcc-timer-text">Quote expires in 2:47</span>
+          </div>
+          <div class="quote-notif" id="wcc-notif"></div>
+        </div>
+      </div>
+      <div class="proc-footer">
+        <button class="btn-done" id="wcc-pay-btn" onclick="goProcessing()">Confirm &amp; Pay</button>
+      </div>
+    </div><!-- /scr-wallet-confirm -->
+
+    <!-- ── AllScale Pay confirm overlay ─── -->
+    <div class="sheet-overlay" id="as-confirm-overlay">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hd">
+          <span class="sheet-title">Confirm Payment</span>
+          <button class="sheet-x" onclick="closeAs2()">✕</button>
+        </div>
+        <div class="sheet-body" style="padding-bottom:8px;">
+          <div class="qt-row"><span class="qt-lbl">Network</span><span class="qt-val" id="as-network" style="text-transform:uppercase;">BSC CHAIN</span></div>
+          <div class="qt-row"><span class="qt-lbl">Amount</span><span class="qt-val" id="as-amount">100.00 USDT</span></div>
+          <div id="as-fees-direct">
+            <div class="qt-row"><span class="qt-lbl">Allscale network fee <span style="opacity:.4;cursor:pointer;">ⓘ</span></span><span class="qt-val" id="as-net-fee">0.00 USDT</span></div>
+            <div class="qt-row"><span class="qt-lbl">Allscale service fee <span style="opacity:.4;cursor:pointer;">ⓘ</span></span><span class="qt-val" id="as-svc-fee">0.00 USDT</span></div>
+          </div>
+          <div id="as-fees-swidge" style="display:none;">
+            <div class="qt-row" style="cursor:pointer;" onclick="toggleAs2Fees()">
+              <span class="qt-lbl" style="display:flex;align-items:center;gap:4px;">Fees <svg id="as2-fee-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg></span>
+              <span class="qt-val" id="as-fees-total">0.53 USDT</span>
+            </div>
+            <div id="as-fees-collapse" style="display:none;">
+              <div class="qt-row" style="padding:4px 14px;border-bottom:none;"><span class="qt-lbl" style="font-size:12px;color:var(--as-text);">Swidge fee</span><span class="qt-val" style="font-size:12px;" id="as-swidge-fee2">0.48 USDT</span></div>
+              <div class="qt-row" style="padding:4px 14px;border-bottom:none;"><span class="qt-lbl" style="font-size:12px;color:var(--as-text);">Network fee</span><span class="qt-val" style="font-size:12px;" id="as-net-fee2">0.00 USDT</span></div>
+              <div class="qt-row" style="padding:4px 14px;"><span class="qt-lbl" style="font-size:12px;color:var(--as-text);">Service fee</span><span class="qt-val" style="font-size:12px;" id="as-svc-fee2">0.05 USDT</span></div>
+            </div>
+          </div>
+          <div id="as-loading-body" style="display:none;">
+            <div class="qt-row"><span class="qt-lbl">Allscale network fee <span style="opacity:.4;">ⓘ</span></span><span class="qt-val" style="color:var(--as-text);font-style:italic;font-weight:400;">Estimating...</span></div>
+            <div class="qt-row"><span class="qt-lbl">Allscale service fee <span style="opacity:.4;">ⓘ</span></span><span class="qt-val" style="color:var(--as-text);font-style:italic;font-weight:400;">Estimating...</span></div>
+          </div>
+          <div style="padding:2px 14px 4px;">
+            <span id="as-timer-text" style="font-size:12px;color:var(--as-text);display:none;">Refresh in 30s</span>
+            <div class="quote-notif" id="as2-notif" style="margin-top:4px;"></div>
+          </div>
+          <div style="height:1px;background:var(--as-border-cyan);margin:6px 0;"></div>
+          <div class="qt-row" style="border-bottom:none;padding-bottom:2px;">
+            <span class="qt-lbl" style="font-weight:600;color:var(--as-dark);">Total (amount + fee)</span>
+            <span style="font-size:15px;font-weight:700;color:var(--as-dark);" id="as-total">—</span>
+          </div>
+          <div class="qt-row" style="border-bottom:none;padding-bottom:2px;">
+            <span class="qt-lbl">Remaining</span>
+            <span class="qt-val" id="as-remaining">—</span>
+          </div>
+          <div class="qt-row" style="border-bottom:none;">
+            <span class="qt-lbl">Balance</span>
+            <span class="qt-val" id="as-balance">—</span>
+          </div>
+        </div>
+        <div style="padding:4px 16px 28px;display:flex;flex-direction:column;gap:8px;">
+          <button class="btn-done" id="as-pay-btn" onclick="goProcessing()">Pay Now</button>
+          <button class="btn-details" onclick="closeAs2()">Back</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /phone-pay -->
+
+<script>
+/* ─── Token switcher ─── */
+let selectedToken = 'USDC';
+const TOKEN_AMOUNTS = {
+  USDC: { whole: 1939, frac: 50, rate: '1 USDC = 1.0003 USDT' },
+  USDT: { whole: 1940, frac: 12, rate: '1 USDT = 0.9997 USDC' }
+};
+
+function toggleToken() {
+  selectedToken = selectedToken === 'USDC' ? 'USDT' : 'USDC';
+
+  // button pop animation
+  const btn = document.getElementById('token-switch');
+  btn.classList.remove('popping');
+  void btn.offsetWidth;
+  btn.classList.add('popping');
+  btn.addEventListener('animationend', () => btn.classList.remove('popping'), { once: true });
+
+  // swap label + icon
+  document.getElementById('token-label').textContent = selectedToken;
+  const icon = document.getElementById('token-coin-icon');
+  if (icon) icon.src = selectedToken === 'USDC' ? '../pay/asset/usdc.png' : '../pay/asset/usdt.png';
+
+  // animate numbers via number-flow
+  const vals = TOKEN_AMOUNTS[selectedToken];
+  const flowWhole = document.getElementById('amt-whole');
+  const flowFrac  = document.getElementById('amt-frac');
+  if (flowWhole?.update) flowWhole.update(vals.whole);
+  if (flowFrac?.update)  flowFrac.update(vals.frac);
+
+  syncActBtn();
+}
+
+/* ─── Payment method select ─── */
+let selectedMethod='allscale';
+function selOpt(which) {
+  selectedMethod=which;
+  document.querySelectorAll('.pay-opt').forEach(o=>o.classList.remove('sel'));
+  document.querySelectorAll('.radio').forEach(r=>{r.classList.remove('on');r.classList.add('off');r.innerHTML='';});
+  const idMap={allscale:'r-allscale',wallet:'r-wallet',scan:'r-scan'};
+  document.getElementById('opt-'+which)?.classList.add('sel');
+  const r=document.getElementById(idMap[which]);
+  if(r){r.classList.remove('off');r.classList.add('on');r.innerHTML='<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg>';}
+}
+
+/* ─── Screen navigation ─── */
+function showScreen(id) {
+  document.querySelectorAll('.phone-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+function goNext() {
+  // no-op in embed — stays on current screen
+}
+
+/* ─── Chain/Token data ─── */
+const chainData=[
+  {id:'bnb',icon:'🟡',name:'BNB Chain',color:'#F3BA2F18',
+   tokens:[
+    {id:'bnb-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'BEP-20 · Same chain · No fee',unit:'USDT',isSwidge:false,balance:'9,100.32 USDT',balanceUSD:'≈$9,100.98',
+      fees:{order:'100.00 USDT',bridge:'—',platform:'—',networkFee:'0.00 USDT',serviceFee:'0.00 USDT',totalFee:'0.00 USDT'}},
+    {id:'bnb-bnb', token:'BNB', badge:'B',badgeSize:'8px',sub:'Bridge + Swap',unit:'BNB',isSwidge:true,balance:'12.50 BNB',balanceUSD:'≈$8,712.50',
+      fees:{rate:'1 BNB ≈ 418.41 USDT',order:'≈0.239 BNB',bridge:'≈0.002 BNB',platform:'≈0.001 BNB',slippage:'≈0.001 BNB',total:'0.243 BNB',
+        swidgeFee:'≈0.002 BNB',networkFee:'0.00 BNB',serviceFee:'≈0.001 BNB',totalFee:'≈0.003 BNB'}}
+   ]},
+  {id:'eth',icon:'🔵',name:'Ethereum',color:'#627EEA18',
+   tokens:[
+    {id:'eth-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'ERC-20 · Cross-chain',unit:'USDT',isSwidge:true,balance:'400.33 USDT',balanceUSD:'≈$400.33',
+      fees:{rate:'1 USDT = 1.00 USDT',order:'100.00 USDT',bridge:'0.48 USDT',platform:'0.05 USDT',slippage:'~0.30 USDT',total:'100.83 USDT',
+        swidgeFee:'0.48 USDT',networkFee:'0.00 USDT',serviceFee:'0.05 USDT',totalFee:'0.53 USDT'}},
+    {id:'eth-eth', token:'ETH', badge:'Ξ',sub:'Bridge + Swap',unit:'ETH',isSwidge:true,balance:'0.038 ETH',balanceUSD:'≈$101.54',
+      fees:{rate:'1 ETH ≈ 2,430.52 USDT',order:'≈0.03759 ETH',bridge:'≈0.00037 ETH',platform:'≈0.00002 ETH',slippage:'≈0.00011 ETH',total:'0.03809 ETH',
+        swidgeFee:'≈0.00037 ETH',networkFee:'0.00 ETH',serviceFee:'≈0.00002 ETH',totalFee:'≈0.00039 ETH'}}
+   ]},
+  {id:'arb',icon:'🔷',name:'Arbitrum',color:'#28A0F018',
+   tokens:[
+    {id:'arb-usdc',token:'USDC',badge:'U',badgeColor:'#2775CA',sub:'Cross-chain · Stablecoin',unit:'USDC',isSwidge:true,balance:'400.33 USDC',balanceUSD:'≈$398.09',
+      fees:{rate:'1 USDC ≈ 1.00 USDT',order:'100.00 USDC',bridge:'0.50 USDC',platform:'0.05 USDC',slippage:'~0.30 USDC',total:'100.85 USDC',
+        swidgeFee:'0.50 USDC',networkFee:'0.00 USDC',serviceFee:'0.05 USDC',totalFee:'0.55 USDC'}}
+   ]},
+  {id:'base',icon:'🔵',name:'Base',color:'#0052FF18',
+   tokens:[
+    {id:'base-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Cross-chain',unit:'USDT',isSwidge:true,balance:'52.10 USDT',balanceUSD:'≈$52.10',
+      fees:{rate:'1 USDT = 1.00 USDT',order:'100.00 USDT',bridge:'0.05 USDT',platform:'0.05 USDT',slippage:'~0.10 USDT',total:'100.25 USDT',
+        swidgeFee:'0.05 USDT',networkFee:'0.00 USDT',serviceFee:'0.05 USDT',totalFee:'0.10 USDT'}}
+   ]}
+];
+
+/* ─── Sheet — 2-step ─── */
+let curNetId='bnb-usdt';
+let qtOpen=false;
+let timerSec=30;
+let selectedChainId=null;
+let sheetContext='scan';
+let wCurChainId='eth';
+let wCurTokenId='eth-usdt';
+
+function openSheet() {
+  sheetContext='scan';
+  goChainStep();
+  document.getElementById('sheet').classList.add('open');
+}
+function openWalletSheet(step) {
+  sheetContext='wallet';
+  if(step==='token') { showTokenStep(wCurChainId); }
+  else { goChainStep(); }
+  document.getElementById('sheet').classList.add('open');
+}
+function updateWalletPills() {
+  const c=chainData.find(x=>x.id===wCurChainId);
+  const t=c.tokens.find(x=>x.id===wCurTokenId);
+  document.getElementById('wc-chain-pill').innerHTML=c.icon+' '+c.name+' <span class="wc-arr">▾</span>';
+  document.getElementById('wc-token-pill').innerHTML=t.token+' <span class="wc-arr">▾</span>';
+}
+function connectWallet() {
+  showScreen('scr-wallet-confirm');
+  wcToken='USDT'; wcChainId='bnb';
+  updateWcConfirm(true);
+  const wccIcon=document.getElementById('wcc-net-icon');
+  wccIcon.textContent=''; wccIcon.style.display='none';
+  document.getElementById('wcc-net-name').textContent='Pay with other tokens';
+  startWcTimer();
+}
+function backFromWcConfirm() {
+  stopWcTimer();
+  document.getElementById('tips-howto').style.display='';
+  document.getElementById('tips-connected').style.display='none';
+  showScreen('scr-tips');
+}
+
+/* ─── Wallet Confirm page ─── */
+let wcToken='USDT';
+let wcChainId='bnb';
+let wcTimerSec=30;
+let wcTimerInterval=null;
+
+function getAllTokenNames() {
+  const seen={};const result=[];
+  chainData.forEach(c=>c.tokens.forEach(t=>{if(!seen[t.token]){seen[t.token]=true;result.push(t);}}));
+  return result;
+}
+function getChainsForToken(tokenName) {
+  return chainData.filter(c=>c.tokens.some(t=>t.token===tokenName));
+}
+function updateWcConfirm(skipLoading) {
+  const c=chainData.find(x=>x.id===wcChainId);
+  if(!c) return;
+  const t=c.tokens.find(x=>x.token===wcToken);
+  if(!t) return;
+  const wccIcon=document.getElementById('wcc-net-icon');
+  wccIcon.innerHTML=`<span style="position:relative;display:inline-flex;align-items:center;"><span style="font-size:15px;font-weight:800;color:${t.badgeColor||'var(--as-dark)'};">${t.badge}</span><span style="position:absolute;bottom:-3px;right:-5px;width:13px;height:13px;border-radius:50%;background:white;border:1px solid var(--as-border-cyan);display:flex;align-items:center;justify-content:center;font-size:8px;">${c.icon}</span></span>`;
+  wccIcon.style.display='inline-flex';
+  document.getElementById('wcc-net-name').textContent=t.token+' · '+c.name;
+  document.getElementById('wcc-net-badge').style.display=t.isSwidge?'':'none';
+  document.getElementById('wcc-chain-info').textContent='on '+c.name;
+  if(t.isSwidge && !skipLoading) {
+    stopWcTimer();
+    setWccLoading(true);
+    setTimeout(()=>{
+      applyWccFees(t);
+      setWccLoading(false);
+      document.getElementById('wcc-timer-pill').style.display='';
+      startWcTimer();
+    },3000);
+  } else {
+    applyWccFees(t);
+    document.getElementById('wcc-timer-pill').style.display=t.isSwidge?'':'none';
+  }
+  wccQtOpen=false;
+  document.getElementById('wcc-qt-rows').classList.remove('open');
+  document.getElementById('wcc-qt-arrow').style.transform='';
+  document.getElementById('wcc-qt-btn-text').textContent='See fee breakdown';
+}
+function applyWccFees(t) {
+  const f=t.fees;
+  document.getElementById('wcc-you-pay').textContent=f.total||f.order;
+  const hasRate=!!f.rate;
+  document.getElementById('wcc-rate-row').style.display=hasRate?'':'none';
+  if(hasRate) document.getElementById('wcc-rate').textContent=f.rate;
+  const showBridge=f.bridge&&f.bridge!=='—';
+  document.getElementById('wcc-bridge-row').style.display=showBridge?'':'none';
+  if(showBridge) document.getElementById('wcc-bridge').textContent=f.bridge;
+  const showPlat=f.platform&&f.platform!=='—';
+  document.getElementById('wcc-platform-row').style.display=showPlat?'':'none';
+  if(showPlat) document.getElementById('wcc-platform').textContent=f.platform;
+  const hasBreakdown=hasRate||showBridge||showPlat;
+  document.getElementById('wcc-expand-btn').style.display=hasBreakdown?'':'none';
+}
+function openConfSheet() {
+  sheetContext='wcconfirm';
+  goChainStep();
+  document.getElementById('sheet').classList.add('open');
+}
+let wcPendingToken=null;
+function selectFlatToken(tokenName) {
+  wcPendingToken=tokenName;
+  sheetContext='wcconfirm-chain';
+  document.getElementById('sht-chain-title').textContent=tokenName;
+  document.getElementById('sht-tron-warn').style.display='none';
+  document.getElementById('sht-step1').style.display='none';
+  document.getElementById('sht-step2').style.display='';
+  renderChainsForToken(tokenName);
+}
+function renderChainsForToken(tokenName) {
+  const chains=getChainsForToken(tokenName);
+  const el=document.getElementById('sht-chain-body');
+  el.innerHTML=chains.map(c=>{
+    const active=c.id===wcChainId;
+    return `<div class="sht-row${active?' active':''}" onclick="selectFlatChain('${c.id}')">
+      <div class="ni-wrap"><div class="ni-bg" style="background:${c.color};">${c.icon}</div></div>
+      <div class="sht-info"><div class="sht-name">${c.name}</div></div>
+      ${active?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`;
+  }).join('');
+}
+function selectFlatChain(chainId) {
+  wcChainId=chainId;
+  if(wcPendingToken){wcToken=wcPendingToken;wcPendingToken=null;}
+  updateWcConfirm();
+  closeSheet();
+}
+function startWcTimer() {
+  wcTimerSec=30; stopWcTimer(); updateWcTimerDisplay();
+  wcTimerInterval=setInterval(()=>{
+    wcTimerSec--;
+    if(wcTimerSec<=0){
+      stopWcTimer();
+      document.getElementById('wcc-timer-pill').style.display='none';
+      showQuoteNotif('wcc-notif','expired');
+      setWccLoading(true);
+      setTimeout(()=>{
+        hideQuoteNotif('wcc-notif');
+        setWccLoading(false);
+        document.getElementById('wcc-timer-pill').style.display='';
+        startWcTimer();
+        showQuoteNotif('wcc-notif','updated',4000);
+      },2000);
+    } else { updateWcTimerDisplay(); }
+  },1000);
+}
+function stopWcTimer(){if(wcTimerInterval){clearInterval(wcTimerInterval);wcTimerInterval=null;}}
+let wccQtOpen=false;
+function toggleWccQt(){
+  wccQtOpen=!wccQtOpen;
+  document.getElementById('wcc-qt-rows').classList.toggle('open',wccQtOpen);
+  document.getElementById('wcc-qt-arrow').style.transform=wccQtOpen?'rotate(180deg)':'';
+  document.getElementById('wcc-qt-btn-text').textContent=wccQtOpen?'Hide fee breakdown':'See fee breakdown';
+}
+function updateWcTimerDisplay(){
+  const m=Math.floor(wcTimerSec/60),s=wcTimerSec%60;
+  const el=document.getElementById('wcc-timer-text');
+  if(el) el.textContent=`Quote expires in ${m}:${s.toString().padStart(2,'0')}`;
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('open');
+}
+let pendingTokenName=null;
+function goChainStep() {
+  document.getElementById('sht-step1').style.display='';
+  document.getElementById('sht-step2').style.display='none';
+  if(sheetContext==='allscale') {
+    document.getElementById('sht-step1-title').textContent='Select network';
+    renderNetworkListAllscale();
+  } else if(sheetContext==='scan' || sheetContext==='wcconfirm') {
+    document.getElementById('sht-step1-title').textContent='Select Token';
+    renderTokenListFirst();
+  } else {
+    document.getElementById('sht-step1-title').textContent='Select network';
+    renderChains();
+  }
+}
+function renderTokenListFirst() {
+  const tokens=getAllTokenNames();
+  const currentToken=sheetContext==='wcconfirm'?wcToken:getCurrentScanToken();
+  const el=document.getElementById('sht-chain-body');
+  el.innerHTML=tokens.map(t=>{
+    const chains=getChainsForToken(t.token);
+    const active=t.token===currentToken;
+    return `<div class="sht-row${active?' active':''}" onclick="selectTokenFirst('${t.token}')">
+      <div class="ni-wrap"><div class="ni-bg" style="background:#f0f5f2;font-size:13px;font-weight:800;color:${t.badgeColor||'var(--as-dark)'};">${t.badge}</div></div>
+      <div class="sht-info"><div class="sht-name">${t.token}</div><div class="sht-sub">${chains.length} network${chains.length>1?'s':''}</div></div>
+      ${active?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`;
+  }).join('');
+}
+function getCurrentScanToken() {
+  const c=chainData.find(x=>x.tokens.some(t=>t.id===curNetId));
+  const t=c?.tokens.find(x=>x.id===curNetId);
+  return t?t.token:'USDT';
+}
+function selectTokenFirst(tokenName) {
+  pendingTokenName=tokenName;
+  const chains=getChainsForToken(tokenName);
+  document.getElementById('sht-chain-title').textContent=tokenName;
+  document.getElementById('sht-tron-warn').style.display='none';
+  document.getElementById('sht-step1').style.display='none';
+  document.getElementById('sht-step2').style.display='';
+  const currentChainId=sheetContext==='wcconfirm'?wcChainId:(chainData.find(c=>c.tokens.some(t=>t.id===curNetId))?.id||'bnb');
+  const el=document.getElementById('sht-token-body');
+  el.innerHTML=chains.map(c=>{
+    const active=c.id===currentChainId;
+    return `<div class="sht-row${active?' active':''}" onclick="selectChainForToken('${c.id}')">
+      <div class="ni-wrap"><div class="ni-bg" style="background:${c.color};">${c.icon}</div></div>
+      <div class="sht-info"><div class="sht-name">${c.name}</div></div>
+      ${active?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`;
+  }).join('');
+}
+function selectChainForToken(chainId) {
+  const c=chainData.find(x=>x.id===chainId);
+  const t=c.tokens.find(x=>x.token===pendingTokenName);
+  if(!t){closeSheet();return;}
+  if(sheetContext==='wcconfirm') {
+    wcChainId=chainId;
+    wcToken=pendingTokenName;
+    updateWcConfirm();
+    closeSheet();
+  } else if(sheetContext==='scan') {
+    selectNet(t.id,c.icon,t.token+' · '+c.name,t.isSwidge,t.fees);
+  }
+  pendingTokenName=null;
+}
+function renderNetworkListAllscale() {
+  const el=document.getElementById('sht-chain-body');
+  const rows=[];
+  chainData.forEach(c=>{
+    const usdtToken=c.tokens.find(t=>t.token==='USDT');
+    if(!usdtToken) return;
+    const active=c.id===as2ChainId;
+    rows.push(`<div class="sht-row${active?' active':''}" onclick="selectAsNetwork('${c.id}','${usdtToken.id}')">
+      <div class="ni-wrap">
+        <div class="ni-bg" style="background:${c.color};">${c.icon}</div>
+        <div class="ni-badge" style="color:#26A17B;">T</div>
+      </div>
+      <div class="sht-info">
+        <div class="sht-name">${c.name}</div>
+        <div class="sht-sub">USDT</div>
+      </div>
+      <div class="sht-right">
+        <div class="sht-amt">${usdtToken.balance}</div>
+        <div class="sht-usd">${usdtToken.balanceUSD}</div>
+      </div>
+    </div>`);
+  });
+  el.innerHTML=rows.join('');
+}
+function selectAsNetwork(chainId, tokenId) {
+  as2ChainId=chainId; as2TokenId=tokenId;
+  closeSheet();
+  openAs2Confirm();
+}
+function showTokenStep(chainId) {
+  selectedChainId=chainId;
+  if(sheetContext==='wallet' && chainId!==wCurChainId) {
+    wCurChainId=chainId;
+    wCurTokenId=chainData.find(x=>x.id===chainId).tokens[0].id;
+  }
+  const c=chainData.find(x=>x.id===chainId);
+  document.getElementById('sht-chain-title').textContent=c.name;
+  document.getElementById('sht-tron-warn').style.display='none';
+  document.getElementById('sht-step1').style.display='none';
+  document.getElementById('sht-step2').style.display='';
+  renderTokens(c);
+}
+function renderChains() {
+  const el=document.getElementById('sht-chain-body');
+  el.innerHTML=chainData.map(c=>`
+    <div class="sht-row${selectedChainId===c.id?' active':''}" onclick="showTokenStep('${c.id}')">
+      <div class="ni-wrap"><div class="ni-bg" style="background:${c.color};">${c.icon}</div></div>
+      <div class="sht-info">
+        <div class="sht-name">${c.name}</div>
+        <div class="sht-sub">${c.tokens.length} token${c.tokens.length>1?'s':''} available</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--as-text)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`).join('');
+}
+function renderTokens(chain) {
+  const activeId=sheetContext==='wallet'?wCurTokenId:sheetContext==='wcconfirm'?(chainData.find(c=>c.id===selectedChainId)?.tokens.find(t=>t.token===wcToken)?.id||''):curNetId;
+  const el=document.getElementById('sht-token-body');
+  el.innerHTML=chain.tokens.map(t=>`
+    <div class="sht-row${activeId===t.id?' active':''}" onclick="selectToken('${chain.id}','${t.id}')">
+      <div class="ni-wrap">
+        <div class="ni-bg" style="background:#f0f5f2;font-size:13px;font-weight:800;color:${t.badgeColor||'var(--as-dark)'};">${t.badge}</div>
+        <div class="ni-badge" style="font-size:9px;">${chain.icon}</div>
+      </div>
+      <div class="sht-info">
+        <div class="sht-name">${t.token}</div>
+      </div>
+      ${activeId===t.id?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--as-green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`).join('');
+}
+function selectToken(chainId, tokenId) {
+  const c=chainData.find(x=>x.id===chainId);
+  const t=c.tokens.find(x=>x.id===tokenId);
+  if(sheetContext==='wallet') {
+    wCurChainId=chainId;
+    wCurTokenId=tokenId;
+    updateWalletPills();
+    closeSheet();
+  } else if(sheetContext==='wcconfirm') {
+    wcChainId=chainId;
+    wcToken=t.token;
+    updateWcConfirm();
+    closeSheet();
+  } else {
+    selectNet(t.id, c.icon, t.token+' · '+c.name, t.isSwidge, t.fees);
+  }
+}
+
+/* ─── AllScale Pay confirm overlay ─── */
+let as2ChainId='bnb', as2TokenId='bnb-usdt';
+let as2TimerSec=30, as2TimerInterval=null;
+let as2FeesOpen=false;
+
+function selectAllscaleToken(chainId, tokenId) {
+  selectAsNetwork(chainId, tokenId);
+}
+function closeAs2() {
+  stopAs2Timer();
+  document.getElementById('as-confirm-overlay').classList.remove('open');
+}
+function openAs2Confirm() {
+  const c=chainData.find(x=>x.id===as2ChainId);
+  if(!c) return;
+  const t=c.tokens.find(x=>x.id===as2TokenId);
+  if(!t) return;
+  const f=t.fees;
+  const unit=t.unit||'USDT';
+  document.getElementById('as-network').textContent=c.name.toUpperCase();
+  document.getElementById('as-amount').textContent=f.total||f.order;
+  document.getElementById('as-balance').textContent=t.balance?('$'+t.balanceUSD?.replace('≈$','')+' '+unit):('—');
+  document.getElementById('as-remaining').textContent='—';
+  as2FeesOpen=false;
+  document.getElementById('as-fees-collapse')&&(document.getElementById('as-fees-collapse').style.display='none');
+  const arrow=document.getElementById('as2-fee-arrow');
+  if(arrow) arrow.style.transform='';
+  document.getElementById('as-confirm-overlay').classList.add('open');
+  if(t.isSwidge) {
+    document.getElementById('as-fees-direct').style.display='none';
+    document.getElementById('as-fees-swidge').style.display='none';
+    document.getElementById('as-loading-body').style.display='';
+    document.getElementById('as-timer-text').style.display='none';
+    document.getElementById('as-total').textContent='—';
+    document.getElementById('as-remaining').textContent='—';
+    document.getElementById('as-pay-btn').disabled=true;
+    stopAs2Timer();
+    setTimeout(()=>{
+      document.getElementById('as-loading-body').style.display='none';
+      document.getElementById('as-fees-swidge').style.display='';
+      document.getElementById('as-fees-total').textContent=f.totalFee||('0.00 '+unit);
+      document.getElementById('as-swidge-fee2').textContent=f.swidgeFee||('0.00 '+unit);
+      document.getElementById('as-net-fee2').textContent=f.networkFee||('0.00 '+unit);
+      document.getElementById('as-svc-fee2').textContent=f.serviceFee||('0.00 '+unit);
+      document.getElementById('as-total').textContent=f.total||f.order;
+      const balNum=parseFloat((t.balance||'0').replace(/[^0-9.]/g,''));
+      const totalNum=parseFloat((f.total||f.order||'0').replace(/[^0-9.]/g,''));
+      const rem=(balNum-totalNum).toFixed(2);
+      document.getElementById('as-remaining').textContent=rem+' '+unit;
+      document.getElementById('as-pay-btn').disabled=false;
+      document.getElementById('as-timer-text').style.display='';
+      startAs2Timer();
+    },3000);
+  } else {
+    document.getElementById('as-fees-direct').style.display='';
+    document.getElementById('as-fees-swidge').style.display='none';
+    document.getElementById('as-loading-body').style.display='none';
+    document.getElementById('as-net-fee').textContent=f.networkFee||('0.00 '+unit);
+    document.getElementById('as-svc-fee').textContent=f.serviceFee||('0.00 '+unit);
+    document.getElementById('as-total').textContent=f.order;
+    const balNum=parseFloat((t.balance||'0').replace(/[^0-9.]/g,''));
+    const totalNum=parseFloat((f.order||'0').replace(/[^0-9.]/g,''));
+    const rem=(balNum-totalNum).toFixed(2);
+    document.getElementById('as-remaining').textContent=rem+' '+unit;
+    document.getElementById('as-timer-text').style.display='none';
+    document.getElementById('as-pay-btn').disabled=false;
+  }
+}
+function toggleAs2Fees() {
+  as2FeesOpen=!as2FeesOpen;
+  document.getElementById('as-fees-collapse').style.display=as2FeesOpen?'':'none';
+  document.getElementById('as2-fee-arrow').style.transform=as2FeesOpen?'rotate(180deg)':'';
+}
+function startAs2Timer() {
+  as2TimerSec=30; stopAs2Timer();
+  document.getElementById('as-timer-text').textContent='Refresh in 30s';
+  as2TimerInterval=setInterval(()=>{
+    as2TimerSec--;
+    if(as2TimerSec<=0){
+      stopAs2Timer();
+      document.getElementById('as-timer-text').style.display='none';
+      showQuoteNotif('as2-notif','expired');
+      document.getElementById('as-fees-swidge').style.display='none';
+      document.getElementById('as-loading-body').style.display='';
+      document.getElementById('as-total').textContent='—';
+      document.getElementById('as-pay-btn').disabled=true;
+      setTimeout(()=>{
+        hideQuoteNotif('as2-notif');
+        const c=chainData.find(x=>x.id===as2ChainId);
+        const t=c?.tokens.find(x=>x.id===as2TokenId);
+        if(t){
+          const f=t.fees;const unit=t.unit||'USDT';
+          document.getElementById('as-loading-body').style.display='none';
+          document.getElementById('as-fees-swidge').style.display='';
+          document.getElementById('as-total').textContent=f.total||f.order;
+          document.getElementById('as-pay-btn').disabled=false;
+        }
+        document.getElementById('as-timer-text').style.display='';
+        startAs2Timer();
+        showQuoteNotif('as2-notif','updated',4000);
+      },2000);
+    } else {
+      document.getElementById('as-timer-text').textContent=`Refresh in ${as2TimerSec}s`;
+    }
+  },1000);
+}
+function stopAs2Timer(){if(as2TimerInterval){clearInterval(as2TimerInterval);as2TimerInterval=null;}}
+
+/* ─── Quote loading helpers ─── */
+function setQtLoading(on) {
+  document.getElementById('qt-total-val').style.display=on?'none':'';
+  document.getElementById('qt-total-skel').style.display=on?'':'none';
+  document.getElementById('qt-loading-body').style.display=on?'':'none';
+  document.getElementById('qt-expand-btn').style.display=on?'none':'';
+  if(on){
+    document.getElementById('qt-rows').classList.remove('open');
+    qtOpen=false;
+    document.getElementById('qt-arrow').style.transform='';
+    document.getElementById('qt-btn-text').textContent='See fee breakdown';
+  }
+}
+function setWccLoading(on) {
+  document.getElementById('wcc-you-pay').style.display=on?'none':'';
+  document.getElementById('wcc-total-skel').style.display=on?'':'none';
+  document.getElementById('wcc-loading-body').style.display=on?'':'none';
+  document.getElementById('wcc-expand-btn').style.display=on?'none':'';
+  document.getElementById('wcc-timer-pill').style.display='none';
+  const btn=document.getElementById('wcc-pay-btn');
+  btn.disabled=on;
+  if(on){
+    document.getElementById('wcc-qt-rows').classList.remove('open');
+    wccQtOpen=false;
+    document.getElementById('wcc-qt-arrow').style.transform='';
+    document.getElementById('wcc-qt-btn-text').textContent='See fee breakdown';
+  }
+}
+
+/* ─── Select network ─── */
+function selectNet(id,icon,label,isSwidge,fees) {
+  curNetId=id;
+  closeSheet();
+  const qrIcon=document.getElementById('qr-net-icon');
+  qrIcon.textContent=icon; qrIcon.style.display='';
+  document.getElementById('qr-net-name').textContent=label;
+  document.getElementById('qr-net-badge').style.display=isSwidge?'':'none';
+  const chainName=label.split(' · ')[1];
+  document.getElementById('qr-chain-info').textContent='on '+chainName;
+  const c2=chainData.find(x=>x.tokens.some(tt=>tt.id===id));
+  const t2=c2?.tokens.find(x=>x.id===id);
+  if(c2&&t2){
+    qrIcon.innerHTML=`<span style="position:relative;display:inline-flex;align-items:center;"><span style="font-size:15px;font-weight:800;color:${t2.badgeColor||'var(--as-dark)'};">${t2.badge}</span><span style="position:absolute;bottom:-3px;right:-5px;width:13px;height:13px;border-radius:50%;background:white;border:1px solid var(--as-border-cyan);display:flex;align-items:center;justify-content:center;font-size:8px;">${c2.icon}</span></span>`;
+    qrIcon.style.display='inline-flex';
+  }
+  if(isSwidge && fees.total) {
+    const parts=fees.total.split(' ');
+    const intPart=parts[0].replace(/[^0-9.≈]/g,'');
+    const dotIdx=intPart.indexOf('.');
+    const wholePart=dotIdx>=0?intPart.slice(0,dotIdx):intPart;
+    const decPart=dotIdx>=0?intPart.slice(dotIdx):'';
+    const unit=parts[1]||'';
+    document.getElementById('qr-amt-int').textContent=wholePart;
+    document.getElementById('qr-amt-frac').textContent=decPart+' '+unit;
+  } else {
+    document.getElementById('qr-amt-int').textContent='100';
+    document.getElementById('qr-amt-frac').textContent='.00 USDT';
+  }
+  const qs=document.getElementById('quote-section');
+  if(isSwidge) {
+    qs.style.display='';
+    setQtLoading(true);
+    setTimeout(()=>{
+      document.getElementById('qt-total-val').textContent=fees.total||'—';
+      const hasRate=!!fees.rate;
+      document.getElementById('qt-rate-row').style.display=hasRate?'':'none';
+      if(hasRate) document.getElementById('qt-rate').textContent=fees.rate;
+      document.getElementById('qt-bridge').textContent=fees.bridge||'—';
+      document.getElementById('qt-platform').textContent=fees.platform||'—';
+      setQtLoading(false);
+      timerSec=30;
+    },3000);
+  } else {
+    qs.style.display='none';
+  }
+  if(!document.getElementById('scr-qr').classList.contains('active')) {
+    showScreen('scr-qr');
+  }
+}
+
+/* ─── Quote toggle ─── */
+function toggleQt() {
+  qtOpen=!qtOpen;
+  document.getElementById('qt-rows').classList.toggle('open',qtOpen);
+  document.getElementById('qt-arrow').style.transform=qtOpen?'rotate(180deg)':'';
+  document.getElementById('qt-btn-text').textContent=qtOpen?'Hide fee breakdown':'See fee breakdown';
+}
+
+/* ─── Go to processing (no-op in embed) ─── */
+function goProcessing() {
+  // In embed context, just show a visual confirmation state
+  showScreen('scr-checkout');
+}
+
+/* ─── Quote notification banners ─── */
+const NOTIF_MSGS={
+  updated:{cls:'alert-info',  icon:'✓', text:'Quote updated. Please review and confirm the new amount.'},
+  expired:{cls:'alert-warn',  icon:'⏳',text:'Your quote has expired. Fetching a new one…'},
+  failed: {cls:'alert-error', icon:'✕', text:'Unable to get a quote at the moment. Please try again later.'}
+};
+function showQuoteNotif(elId, type, autoDismiss) {
+  const el=document.getElementById(elId);
+  if(!el) return;
+  const n=NOTIF_MSGS[type];
+  el.className=`quote-notif show ${n.cls}`;
+  el.innerHTML=`<span style="flex-shrink:0;font-size:13px;">${n.icon}</span><span>${n.text}</span>`;
+  if(autoDismiss) setTimeout(()=>{el.className='quote-notif';},autoDismiss);
+}
+function hideQuoteNotif(elId){
+  const el=document.getElementById(elId);
+  if(el) el.className='quote-notif';
+}
+
+/* ─── Quote countdown (Scan to Pay) ─── */
+setInterval(()=>{
+  timerSec--;
+  if(timerSec<=0){
+    timerSec=30;
+    const qs=document.getElementById('quote-section');
+    if(qs.style.display!=='none') {
+      setQtLoading(true);
+      setTimeout(()=>{
+        setQtLoading(false);
+        showQuoteNotif('qt-notif','updated',4000);
+      },2000);
+    }
+  }
+  const el=document.getElementById('qt-timer');
+  if(el) el.textContent=`Quote refreshes in ${timerSec}s`;
+},1000);
+
+function syncActBtn() {
+  const vals = TOKEN_AMOUNTS[selectedToken];
+  const frac2 = String(vals.frac).padStart(2, '0');
+  const amtStr = `${vals.whole.toLocaleString()}.${frac2} ${selectedToken}`;
+  const btn = document.getElementById('act-btn-checkout');
+  if (btn) btn.textContent = `Pay • ${amtStr}`;
+  const detAmt = document.getElementById('det-amount');
+  if (detAmt) detAmt.textContent = amtStr;
+  const detFrom = document.getElementById('det-from');
+  const fromName = document.querySelector('.from-name');
+  if (detFrom && fromName) detFrom.textContent = fromName.textContent;
+  const detRate = document.getElementById('det-rate');
+  if (detRate) detRate.textContent = vals.rate;
+}
+document.addEventListener('DOMContentLoaded', syncActBtn);
+</script>
+
+<script type="module">
+  import 'https://esm.sh/number-flow';
+  const spinTiming = { duration: 600, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' };
+  const opacityTiming = { duration: 350, easing: 'ease' };
+
+  const flowWhole = document.getElementById('amt-whole');
+  const flowFrac  = document.getElementById('amt-frac');
+
+  // initial values
+  flowWhole.spinTiming = spinTiming;
+  flowFrac.spinTiming  = spinTiming;
+  flowWhole.opacityTiming = opacityTiming;
+  flowFrac.opacityTiming  = opacityTiming;
+  flowWhole.format = { useGrouping: true };
+  flowFrac.format  = { minimumIntegerDigits: 2, useGrouping: false };
+  flowFrac.numberPrefix = '.';
+  flowWhole.update(1939);
+  flowFrac.update(50);
+</script>
+</body>
+</html>

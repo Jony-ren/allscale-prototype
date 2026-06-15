@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WanPay · Fiat Deposit (minimal change)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap');
+
+  :root {
+    --phone-w: 393px;
+    --img-h:   927px;
+    --green-900: #013F2D;
+    --green-700: #016B49;
+    --green-600: #027857;
+    --mint-100:  #DDF0E6;
+    --mint-50:   #F1F6F2;
+    --line:      #E3ECE6;
+    --text:      #0A2B22;
+    --muted:     #5F7368;
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #EEF2EF;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+  .row {
+    display: flex; gap: 28px;
+    flex-wrap: wrap; align-items: center; justify-content: center;
+  }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .cap {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--muted); font-weight: 700;
+  }
+
+  .arrow-stack {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.4px; text-transform: uppercase;
+    padding: 0 4px;
+  }
+  .arrow-stack .a { font-size: 28px; color: #8C9A92; line-height: 1; }
+
+  .phone {
+    width: var(--phone-w);
+    height: var(--img-h);
+    background: white;
+    border-radius: 38px;
+    box-shadow: 0 12px 40px rgba(0,40,30,0.12), 0 2px 4px rgba(0,40,30,0.04);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #DDE5DF;
+  }
+
+  .home-img, .deposit-img {
+    width: 100%; height: 100%;
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: var(--phone-w) auto;
+  }
+  .home-img    { background-image: url("asset/home-img.jpg"); }
+  .deposit-img { background-image: url("asset/deposit-img.jpg"); }
+
+  /* Home sliced: top half (banner → Balance) + new actions row + bottom half (Activity → tab bar) */
+  .home-top-slice {
+    width: 100%; height: 224px;
+    background: url("asset/home-img.jpg") no-repeat;
+    background-size: var(--phone-w) auto;
+    background-position: 0 0;
+  }
+  .home-bottom-slice {
+    width: 100%; height: 625px;
+    background: url("asset/home-img.jpg") no-repeat;
+    background-size: var(--phone-w) auto;
+    background-position: 0 -302px;
+  }
+  .home-actions {
+    height: 78px;
+    padding: 15px 20px;
+    background: white;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .ha {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    height: 48px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--mint-50);
+    color: var(--green-900);
+    font-family: inherit;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .ha:active { transform: scale(0.98); }
+  .ha.primary {
+    background: var(--green-700);
+    color: white;
+    border: 0;
+  }
+  .ha-ic { font-size: 16px; line-height: 1; display: inline-flex; }
+
+  .topup-hint {
+    position: absolute;
+    left: 137px; top: 235px;
+    width: 119px; height: 56px;
+    border: 2.5px dashed #02A570;
+    border-radius: 999px;
+    pointer-events: none;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Pulsing hint outlining the Deposit button on Home */
+  .deposit-hint {
+    position: absolute;
+    left: 66px; top: 262px;
+    width: 129px; height: 46px;
+    border: 2.5px dashed #02A570;
+    border-radius: 999px;
+    pointer-events: none;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1);    opacity: 1;   }
+    50%      { transform: scale(1.06); opacity: .5; }
+  }
+
+  /* The new Fiat button — secondary button style (from checkout/interaction.html) */
+  .fiat-btn {
+    position: absolute;
+    left: 50%; transform: translateX(-50%); width: 352px; top: 530px;
+    height: 50px;
+    padding: 0 24px;
+    background: #F2F8F5;
+    border: none;
+    border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #0C3124;
+    font-family: 'Archivo', sans-serif;
+    font-size: 16px; font-weight: 500;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+  }
+  .fiat-btn:hover  { background: #DAEDE4; }
+  .fiat-btn:active { background: #DAEDE4; }
+
+  .fiat-btn .flag-stack { display: inline-flex; align-items: center; }
+  .fiat-btn .flag-stack > * + * { margin-left: -8px; }
+  .flag {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 0 1.5px var(--mint-50), 0 1px 1px rgba(0,0,0,0.08);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1; overflow: hidden;
+  }
+  .fiat-btn .pill {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 2px 7px; border-radius: 999px;
+    background: var(--mint-100); color: var(--green-700);
+    margin-left: 4px;
+  }
+
+  /* Sheet */
+  .sheet-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0, 25, 18, 0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease; z-index: 40;
+  }
+  .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: white;
+    border-top-left-radius: 24px; border-top-right-radius: 24px;
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.2,.7,.25,1);
+    padding: 18px 22px 24px;
+    z-index: 50;
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.12);
+  }
+  .sheet.open { transform: translateY(0); }
+  .grabber { width: 40px; height: 5px; border-radius: 999px; background: #E0E6E2; margin: 0 auto 14px; }
+
+  .sheet h3 { margin: 0; font-size: 17px; color: var(--green-900); }
+  .sub2 { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 18px; }
+  .grid5 .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .big-flag {
+    width: 38px; height: 38px; border-radius: 50%; background: white;
+    box-shadow: 0 0 0 1.5px white, 0 1px 3px rgba(0,0,0,0.15);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .code { font-size: 11px; font-weight: 700; color: var(--green-900); }
+
+  .note {
+    margin-top: 18px;
+    background: var(--mint-50); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 14px;
+  }
+  .note .nt { font-size: 13px; font-weight: 700; color: var(--green-900); }
+  .note .nd { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+  .btn {
+    width: 100%; height: 44px; margin-top: 14px;
+    border-radius: 999px; border: 0;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary { background: var(--green-700); color: white; }
+
+  .meta {
+    max-width: 820px; margin: 28px auto 0;
+    font-size: 12.5px; color: var(--muted); line-height: 1.65;
+  }
+  .meta b { color: var(--text); }
+
+  @media (max-width: 1100px) {
+    .arrow-stack .a { transform: rotate(90deg); }
+  }
+
+  /* ===== Fiat Deposit placeholder page (Phone 3) ===== */
+  .fp-top {
+    padding: 24px 14px 18px;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+  }
+  .fp-back {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 0; background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+    font-size: 22px; color: var(--green-900);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .fp-title {
+    text-align: center;
+    font-size: 17px; font-weight: 700;
+    color: var(--text);
+  }
+  .fp-spacer { width: 40px; height: 40px; }
+
+  .fp-content { padding: 20px 24px 0; position: relative; }
+  .fp-label {
+    font-size: 14px; font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .fp-row {
+    display: flex; align-items: center; gap: 12px;
+    background: white;
+    border-radius: 12px;
+    padding: 8px 10px 8px 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--line);
+  }
+  .fp-cur-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px; font-weight: 700;
+    color: var(--text);
+    transition: background .12s ease;
+  }
+  .fp-cur-pill:hover { background: var(--mint-50); }
+  .fp-cur-pill .fp-flag {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 0 1.5px white, 0 1px 2px rgba(0,0,0,0.12);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; line-height: 1;
+  }
+  .fp-chev { font-size: 11px; color: var(--muted); margin-left: 2px; }
+  .fp-amount {
+    flex: 1; min-width: 0;
+    border: 0; background: transparent;
+    font-size: 22px; font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    outline: none;
+    font-family: inherit;
+    padding-right: 6px;
+  }
+
+  .fp-cur-menu {
+    position: absolute;
+    left: 24px; right: 24px;
+    margin-top: 8px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,40,30,0.14);
+    overflow: hidden;
+    z-index: 30;
+  }
+  .fp-cur-opt {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    background: white;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .fp-cur-opt + .fp-cur-opt { border-top: 1px solid var(--line); }
+  .fp-cur-opt:hover { background: var(--mint-50); }
+  .fp-cur-opt .fp-flag {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 0 1.5px white, 0 1px 2px rgba(0,0,0,0.12);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .fp-cur-opt .fp-code { font-size: 14px; font-weight: 700; min-width: 38px; text-align: left; }
+  .fp-cur-name { font-size: 12px; color: var(--muted); }
+
+  .fp-cta {
+    position: absolute;
+    left: 24px; right: 24px;
+    bottom: 56px;
+    height: 54px;
+    border: 0;
+    border-radius: 999px;
+    background: #C4CCC8;
+    color: white;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: not-allowed;
+  }
+
+  /* ===== Daily data report email mockup ===== */
+  .section-divider {
+    height: 1px; background: #DCE3DE; margin: 56px 0 36px;
+  }
+  .section-h {
+    font-size: 22px; margin: 0 0 4px; color: var(--text);
+  }
+
+  .email-client {
+    max-width: 700px;
+    margin: 22px auto 0;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0,40,30,0.07);
+  }
+
+  .email-toolbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    background: #FAFCFB;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px; color: var(--muted);
+  }
+  .email-toolbar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .email-toolbar .dot.r { background: #FF6259; }
+  .email-toolbar .dot.y { background: #FFC130; }
+  .email-toolbar .dot.g { background: #29C940; }
+  .email-toolbar .label { margin-left: auto; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; font-size: 10px; }
+
+  .email-headers {
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid var(--line);
+    background: white;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .email-headers .hrow { display: flex; gap: 12px; line-height: 1.7; }
+  .email-headers .hk { color: var(--muted); font-weight: 600; width: 68px; flex-shrink: 0; }
+  .email-headers .hv { flex: 1; min-width: 0; word-break: break-word; }
+  .email-headers .subject { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+
+  /* Body — faithfully mirrors backend-plutus/i18n/.../checkout_merchant_summary.html */
+  .email-body {
+    background: #ffffff;
+    padding: 24px 16px;
+    font-family: "Archivo", -apple-system, sans-serif;
+  }
+  .email-card {
+    width: 100%; max-width: 550px;
+    margin: 0 auto;
+    background: #f8f8f8;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .email-logo {
+    padding: 20px 18px 0;
+  }
+  .email-logo .brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Archivo", sans-serif;
+    font-weight: 700; font-size: 18px; color: var(--green-900);
+    letter-spacing: -0.3px;
+  }
+  .email-logo .brand .dot {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--green-700); color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+
+  .email-content { padding: 0 18px 18px; }
+  .email-title {
+    font-family: "Archivo", sans-serif;
+    color: #2d2d2d;
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.96px;
+    margin: 16px 0 24px;
+  }
+  .email-greeting {
+    font-family: "Archivo", sans-serif;
+    font-size: 16px;
+    color: #3b3b3b;
+    margin: 0 0 20px;
+    line-height: 1.55;
+  }
+
+  .email-summary {
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 12px;
+    padding: 4px 20px 24px;
+  }
+  .email-summary h2 {
+    font-family: "Archivo", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d2d2d;
+    margin: 18px 0 0;
+  }
+  .email-metric { padding-top: 22px; }
+  .email-metric .label {
+    font-family: "Archivo", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #a7a7a7;
+    letter-spacing: -0.28px;
+  }
+  .email-metric .value {
+    font-family: "Archivo", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2d2d2d;
+    letter-spacing: -0.32px;
+    margin-top: 8px;
+  }
+  .email-metric .value .delta {
+    font-size: 12px; font-weight: 600;
+    color: var(--green-700); margin-left: 8px;
+    background: var(--mint-100);
+    padding: 2px 7px; border-radius: 999px;
+  }
+  .email-metric .value .split {
+    color: #6b6b6b; font-weight: 400; margin: 0 6px;
+  }
+
+  .email-footer {
+    margin-top: 22px;
+    font-family: "Archivo", sans-serif;
+    font-size: 13px;
+    color: #6b6b6b;
+    line-height: 1.6;
+  }
+  .email-footer a { color: var(--green-700); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>WanPay · Fiat Deposit — flow</h1>
+  <div class="sub">Tap <b>Deposit</b> on home → existing Deposit page with one extra Fiat button below <i>Show QR Code</i>.</div>
+
+  <div class="row">
+
+    <!-- 1. Home with new Top up button -->
+    <div class="col">
+      <div class="cap">1 · Home · new Top up button</div>
+      <div class="phone">
+        <div class="home-top-slice"></div>
+        <div class="home-actions">
+          <button class="ha primary"><span class="ha-ic">⤓</span>Deposit</button>
+          <button class="ha"><span class="ha-ic">+</span>Top up</button>
+          <button class="ha"><span class="ha-ic">↗</span>Withdraw</button>
+        </div>
+        <div class="home-bottom-slice"></div>
+        <div class="topup-hint"></div>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="arrow-stack">
+      <span class="a">→</span>
+      <span>tap Top up</span>
+    </div>
+
+    <!-- 2. Fiat Deposit page -->
+    <div class="col">
+      <div class="cap">2 · Fiat deposit · placeholder</div>
+      <div class="phone">
+        <div class="fp-top">
+          <button class="fp-back">‹</button>
+          <div class="fp-title">Fiat Deposit</div>
+          <div class="fp-spacer"></div>
+        </div>
+
+        <div class="fp-content">
+          <div class="fp-label">You spend</div>
+          <div class="fp-row">
+            <button class="fp-cur-pill" id="curPill" aria-haspopup="listbox">
+              <span class="fp-flag" id="curFlag">🇺🇸</span>
+              <span class="fp-code" id="curCode">USD</span>
+              <span class="fp-chev">▾</span>
+            </button>
+            <input class="fp-amount" type="text" value="100.00" readonly />
+          </div>
+
+          <div class="fp-cur-menu" id="curMenu" hidden>
+            <button class="fp-cur-opt" data-flag="🇬🇲" data-code="GMD" data-name="Gambian Dalasi">
+              <span class="fp-flag">🇬🇲</span><span class="fp-code">GMD</span>
+              <span class="fp-cur-name">Gambian Dalasi</span>
+            </button>
+            <button class="fp-cur-opt" data-flag="🇳🇬" data-code="NGN" data-name="Nigerian Naira">
+              <span class="fp-flag">🇳🇬</span><span class="fp-code">NGN</span>
+              <span class="fp-cur-name">Nigerian Naira</span>
+            </button>
+            <button class="fp-cur-opt" data-flag="🇺🇸" data-code="USD" data-name="US Dollar">
+              <span class="fp-flag">🇺🇸</span><span class="fp-code">USD</span>
+              <span class="fp-cur-name">US Dollar</span>
+            </button>
+            <button class="fp-cur-opt" data-flag="🇬🇧" data-code="GBP" data-name="British Pound">
+              <span class="fp-flag">🇬🇧</span><span class="fp-code">GBP</span>
+              <span class="fp-cur-name">British Pound</span>
+            </button>
+            <button class="fp-cur-opt" data-flag="🌍" data-code="XOF" data-name="West African CFA">
+              <span class="fp-flag">🌍</span><span class="fp-code">XOF</span>
+              <span class="fp-cur-name">West African CFA</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="fp-cta" disabled>Coming Soon</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="meta">
+    <b>Flow:</b> a new <b>Top up</b> pill sits next to <i>Deposit</i> / <i>Withdraw</i> on home (three buttons share the row). Tap <i>Top up</i> → placeholder page with a currency picker (5 confirmed: GMD · NGN · USD · GBP · XOF) and amount field. CTA is a greyed <i>Coming Soon</i> — no conversion math, no fees, no rate copy. Tap the currency pill on screen 2 to switch. The existing crypto <i>Deposit from wallet</i> page is untouched.
+  </div>
+
+  <div class="section-divider"></div>
+
+  <h2 class="section-h">Daily data report · email to wanpay ops</h2>
+  <div class="sub">
+    Sent every day at 00:00 PT. Visual style reuses the existing AllScale email template
+    (<code>backend-plutus/i18n/en-US/email_templates/checkout_merchant_summary.html</code>) — Archivo font,
+    pale-gray outer card, white inner card with #a7a7a7 label · #2d2d2d value rows.
+  </div>
+
+  <div class="email-client">
+    <div class="email-toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span>Inbox</span>
+      <span class="label">Daily summary</span>
+    </div>
+
+    <div class="email-headers">
+      <div class="subject">WanPay Daily Summary · May 25, 2026</div>
+      <div class="hrow"><span class="hk">From</span><span class="hv">WanPay Reports &lt;noreply@allscale.io&gt;</span></div>
+      <div class="hrow"><span class="hk">To</span><span class="hv">ops@wanpay.io</span></div>
+      <div class="hrow"><span class="hk">Date</span><span class="hv">Mon, May 25 2026, 00:00 PT</span></div>
+    </div>
+
+    <div class="email-body">
+      <div class="email-card">
+        <div class="email-logo">
+          <span class="brand"><span class="dot">W</span>WanPay</span>
+        </div>
+
+        <div class="email-content">
+          <div class="email-title">Daily Summary for May 25, 2026</div>
+
+          <p class="email-greeting">
+            Hello WanPay team,<br><br>
+            Here's your platform summary for May 25, 2026.
+          </p>
+
+          <div class="email-summary">
+            <h2>Platform Overview</h2>
+
+            <div class="email-metric">
+              <div class="label">Registered Users</div>
+              <div class="value">1,247 <span class="delta">+18 today</span></div>
+            </div>
+
+            <div class="email-metric">
+              <div class="label">Users with Balance</div>
+              <div class="value">892 <span class="delta">+12 today</span></div>
+            </div>
+
+            <div class="email-metric">
+              <div class="label">Total Platform Balance</div>
+              <div class="value">$48,652.13 <span class="split">·</span> USDT / USDC <span class="delta">+$3,680.40 today</span></div>
+            </div>
+
+            <div class="email-metric">
+              <div class="label">Deposits Today</div>
+              <div class="value">31 transactions <span class="split">·</span> $5,820.40</div>
+            </div>
+
+            <div class="email-metric">
+              <div class="label">Withdrawals Today</div>
+              <div class="value">12 transactions <span class="split">·</span> $2,140.00</div>
+            </div>
+          </div>
+
+          <p class="email-footer">
+            This is an automated daily summary.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <b>Notes</b> · 5 metrics match the PRD §1 item 7 (registered users / users with balance / total balance / deposits / withdrawals). Numbers above are placeholders. New template would live as <code>checkout_wanpay_daily_summary.html</code> alongside the other ones in <code>i18n/en-US/email_templates/</code>; the layout reuses the AllScale outer/inner card pattern so it works in Gmail / Outlook / Apple Mail without surprises.
+  </div>
+</div>
+
+<script>
+  // Currency picker on Phone 3
+  const pill = document.getElementById('curPill');
+  const menu = document.getElementById('curMenu');
+  const curFlag = document.getElementById('curFlag');
+  const curCode = document.getElementById('curCode');
+
+  pill.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.hidden = !menu.hidden;
+  });
+  menu.querySelectorAll('.fp-cur-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      curFlag.textContent = opt.dataset.flag;
+      curCode.textContent = opt.dataset.code;
+      menu.hidden = true;
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!menu.hidden && !menu.contains(e.target) && e.target !== pill) {
+      menu.hidden = true;
+    }
+  });
+</script>
+
+</body>
+</html>
