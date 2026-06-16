@@ -626,7 +626,7 @@ body{
             <button class="pay-opt" id="opt-allscale" onclick="selOpt('allscale')">
               <div class="radio off" id="r-allscale"></div>
               <div style="flex:1;min-width:0;">
-                <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="assets/allscale-logo.svg" height="22" style="display:block;"></div>
+                <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="../assets/allscale-logo.svg" height="22" style="display:block;"></div>
                 <div class="t-sm" style="color:#0d0d0d;">Sign in to use AllScale wallet</div>
               </div>
             </button>
@@ -673,12 +673,12 @@ body{
       <div id="wp-wallet-scroll-wrap" style="display:none;flex-shrink:0;padding:0 16px;background:#fff;max-width:500px;width:100%;margin:0 auto;position:relative;">
         <div style="display:flex;align-items:center;gap:0;">
           <div style="flex:1;min-width:0;overflow-x:auto;display:flex;gap:8px;align-items:center;-webkit-overflow-scrolling:touch;padding:8px 8px 8px 0;" id="wp-wallet-scroll">
-            <button class="wp-tab active" onclick="selWalletTab(this,'metamask')"><img src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> MetaMask</button>
-            <button class="wp-tab" onclick="selWalletTab(this,'trust')"><img src="assets/wallets-app/trust.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Trust</button>
-            <button class="wp-tab" onclick="selWalletTab(this,'okx')"><img src="assets/wallets-app/okx.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> OKX</button>
-            <button class="wp-tab" onclick="selWalletTab(this,'rainbow')"><img src="assets/wallets-app/rainbow.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Rainbow</button>
-            <button class="wp-tab" onclick="selWalletTab(this,'coinbase')"><img src="assets/wallets-app/coinbase.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Coinbase</button>
-            <button class="wp-tab" onclick="selWalletTab(this,'imtoken')"><img src="assets/wallets-app/imtoken.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> imToken</button>
+            <button class="wp-tab active" onclick="selWalletTab(this,'metamask')"><img src="../assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> MetaMask</button>
+            <button class="wp-tab" onclick="selWalletTab(this,'trust')"><img src="../assets/wallets-app/trust.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Trust</button>
+            <button class="wp-tab" onclick="selWalletTab(this,'okx')"><img src="../assets/wallets-app/okx.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> OKX</button>
+            <button class="wp-tab" onclick="selWalletTab(this,'rainbow')"><img src="../assets/wallets-app/rainbow.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Rainbow</button>
+            <button class="wp-tab" onclick="selWalletTab(this,'coinbase')"><img src="../assets/wallets-app/coinbase.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Coinbase</button>
+            <button class="wp-tab" onclick="selWalletTab(this,'imtoken')"><img src="../assets/wallets-app/imtoken.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> imToken</button>
             <button class="wp-tab" onclick="selWalletTab(this,'phantom')"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23AB9FF2'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>P</text></svg>" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Phantom</button>
             <button class="wp-tab" onclick="selWalletTab(this,'bitget')"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%2300F0B5'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>B</text></svg>" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Bitget</button>
             <button class="wp-tab" onclick="selWalletTab(this,'ledger')"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23000000'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>L</text></svg>" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Ledger</button>
@@ -690,12 +690,12 @@ body{
         </div>
         <!-- Wallet dropdown -->
         <div id="wp-wallet-dropdown" style="display:none;position:absolute;right:16px;top:calc(100% + 4px);z-index:100;background:#fff;border:1px solid #E5EEEA;border-radius:16px;padding:8px;width:220px;box-shadow:0 8px 40px rgba(0,0,0,0.10);max-height:320px;overflow-y:auto;">
-          <div onclick="selWalletFromDropdown('metamask')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/metamask.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">MetaMask</span></div>
-          <div onclick="selWalletFromDropdown('trust')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/trust.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Trust Wallet</span></div>
-          <div onclick="selWalletFromDropdown('okx')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/okx.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">OKX Wallet</span></div>
-          <div onclick="selWalletFromDropdown('rainbow')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/rainbow.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Rainbow</span></div>
-          <div onclick="selWalletFromDropdown('coinbase')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/coinbase.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Coinbase Wallet</span></div>
-          <div onclick="selWalletFromDropdown('imtoken')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/imtoken.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">imToken</span></div>
+          <div onclick="selWalletFromDropdown('metamask')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/metamask.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">MetaMask</span></div>
+          <div onclick="selWalletFromDropdown('trust')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/trust.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Trust Wallet</span></div>
+          <div onclick="selWalletFromDropdown('okx')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/okx.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">OKX Wallet</span></div>
+          <div onclick="selWalletFromDropdown('rainbow')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/rainbow.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Rainbow</span></div>
+          <div onclick="selWalletFromDropdown('coinbase')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/coinbase.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Coinbase Wallet</span></div>
+          <div onclick="selWalletFromDropdown('imtoken')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/imtoken.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">imToken</span></div>
           <div onclick="selWalletFromDropdown('phantom')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><div style="width:28px;height:28px;border-radius:6px;background:#AB9FF2;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">P</div><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Phantom</span></div>
           <div onclick="selWalletFromDropdown('bitget')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><div style="width:28px;height:28px;border-radius:6px;background:#00F0B5;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">B</div><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Bitget Wallet</span></div>
           <div onclick="selWalletFromDropdown('ledger')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><div style="width:28px;height:28px;border-radius:6px;background:#000;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">L</div><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Ledger Live</span></div>
@@ -716,7 +716,7 @@ body{
           <!-- QR Card -->
           <div style="background:var(--as-card);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;margin-top:8px;">
             <!-- QR code -->
-            <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+            <img src="../assets/qr-code.svg" width="172" height="172" style="display:block;">
             <div style="font-size:14px;font-weight:500;color:var(--as-dark);margin-top:8px;">Pay with wallet</div>
             <!-- Amount row -->
             <div class="qr-amt-row">
@@ -739,13 +739,13 @@ body{
                 </button>
               </div>
               <button onclick="showToast('Copied')" style="display:flex;align-items:center;justify-content:center;gap:14px;width:100%;margin-top:12px;padding:14px 0;background:var(--as-green);border:none;border-radius:48px;cursor:pointer;font-size:16px;font-weight:500;color:#FFFFFF;font-family:'Archivo',sans-serif;transition:background .15s;" onmouseover="this.style.background='#00b368'" onmouseout="this.style.background='var(--as-green)'">
-                <img src="assets/copy-white.svg" width="20" height="20" style="display:block;">
+                <img src="../assets/copy-white.svg" width="20" height="20" style="display:block;">
                 Copy address
               </button>
             </div>
             <!-- Pay with other tokens button -->
             <button class="pay-other-btn" id="qr-paying-btn" onclick="switchWpMode('b')" style="margin-top:8px;">
-              <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
+              <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="../assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="../assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
               <span class="pf-icon" id="qr-net-icon" style="display:none;"></span>
               <span class="pay-other-btn-label" id="qr-net-name">Pay with different tokens</span>
               <span id="qr-net-badge" class="badge-sw" style="display:none;"></span>
@@ -761,7 +761,7 @@ body{
           <!-- QR Card for dApp mode -->
           <div style="background:var(--as-card);border-radius:12px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;">
             <!-- QR code -->
-            <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+            <img src="../assets/qr-code.svg" width="172" height="172" style="display:block;">
             <div style="display:flex;align-items:center;gap:6px;margin-top:10px;">
               <span style="font-size:14px;font-weight:500;color:var(--as-dark);">Scan to open payment page</span>
             </div>
@@ -769,7 +769,7 @@ body{
           </div>
 
           <button id="open-wallet-btn" style="width:100%;height:48px;border-radius:999px;border:none;background:#FAFBFA;cursor:pointer;font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;color:var(--as-dark);display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#EDEFED'" onmouseout="this.style.background='#FAFBFA'">
-            <img id="open-wallet-icon" src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;">
+            <img id="open-wallet-icon" src="../assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;">
             <span id="open-wallet-label">Open MetaMask</span>
           </button>
 
@@ -824,7 +824,7 @@ body{
         </div>
 
         <!-- AllScale logo -->
-        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="assets/allscale-logo.svg" height="20" style="display:block;"></div>
+        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="../assets/allscale-logo.svg" height="20" style="display:block;"></div>
       </div>
       <div id="toast-container"></div>
     </div><!-- /scr-qr -->
@@ -888,7 +888,7 @@ body{
         <div style="width:100%;max-width:500px;padding:48px 24px 24px;">
           <!-- Done icon -->
           <div style="display:flex;justify-content:center;margin-bottom:24px;">
-            <img src="assets/done.svg" width="116" height="116">
+            <img src="../assets/done.svg" width="116" height="116">
           </div>
           <!-- Title -->
           <div style="font-size:32px;font-weight:500;color:var(--as-dark);letter-spacing:-.03em;line-height:1.15;margin-bottom:20px;text-align:center;">Payment completed</div>
@@ -1030,7 +1030,7 @@ body{
           <div id="wcc-chain-info" style="font-size:13px;color:var(--as-text);margin-top:2px;display:none;"></div>
           <!-- Paying with — "Pay with other tokens" button -->
           <button class="pay-other-btn" onclick="openConfSheet()">
-            <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
+            <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="../assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="../assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
             <span class="pf-icon" id="wcc-net-icon" style="display:none;"></span>
             <span class="pay-other-btn-label" id="wcc-net-name">Pay with different tokens</span>
             <span id="wcc-net-badge" class="badge-sw" style="display:none;">⚡ Swidge</span>
@@ -1627,28 +1627,28 @@ function updSt(scr) {
 const chainData=[
   {id:'bnb',icon:'🟡',name:'BNB Chain',color:'#F3BA2F18',
    tokens:[
-    {id:'bnb-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'9,100.32 USDT',balanceUSD:'≈$9,100.98',img:'assets/swidge-tokens/usdt-bnb.png',payWhole:100,payFrac:0,
+    {id:'bnb-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'9,100.32 USDT',balanceUSD:'≈$9,100.98',img:'../assets/swidge-tokens/usdt-bnb.png',payWhole:100,payFrac:0,
       fees:{order:'100.00 USDT',bridge:'—',platform:'—',networkFee:'0.00 USDT',serviceFee:'0.00 USDT',totalFee:'0.00 USDT'}},
-    {id:'bnb-bnb', token:'BNB', badge:'B',badgeSize:'8px',sub:'Bridge + Swap',unit:'BNB',isSwidge:true,balance:'12.50 BNB',balanceUSD:'≈$8,712.50',img:'assets/swidge-tokens/bnb-bnb.png',payWhole:100,payFrac:83,payUnit:'USDT',
+    {id:'bnb-bnb', token:'BNB', badge:'B',badgeSize:'8px',sub:'Bridge + Swap',unit:'BNB',isSwidge:true,balance:'12.50 BNB',balanceUSD:'≈$8,712.50',img:'../assets/swidge-tokens/bnb-bnb.png',payWhole:100,payFrac:83,payUnit:'USDT',
       fees:{rate:'1 BNB ≈ 418.41 USDT',order:'100.00 USDT',bridge:'≈0.002 BNB',platform:'≈0.001 BNB',slippage:'≈0.001 BNB',total:'0.243 BNB',
         swidgeFee:'≈0.002 BNB',networkFee:'0.00 BNB',serviceFee:'≈0.001 BNB',totalFee:'≈0.003 BNB'}}
    ]},
   {id:'eth',icon:'🔵',name:'Ethereum',color:'#627EEA18',
    tokens:[
-    {id:'eth-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'400.33 USDT',balanceUSD:'≈$400.33',img:'assets/swidge-tokens/udst-eth.png',payWhole:100,payFrac:0,
+    {id:'eth-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'400.33 USDT',balanceUSD:'≈$400.33',img:'../assets/swidge-tokens/udst-eth.png',payWhole:100,payFrac:0,
       fees:{order:'100.00 USDT',bridge:'—',platform:'—',networkFee:'0.00 USDT',serviceFee:'0.00 USDT',totalFee:'0.00 USDT'}},
-    {id:'eth-eth', token:'ETH', badge:'Ξ',sub:'Bridge + Swap',unit:'ETH',isSwidge:true,balance:'0.038 ETH',balanceUSD:'≈$101.54',img:'assets/swidge-tokens/eth-eth.png',payWhole:0,payFrac:3809,payDecimals:5,
+    {id:'eth-eth', token:'ETH', badge:'Ξ',sub:'Bridge + Swap',unit:'ETH',isSwidge:true,balance:'0.038 ETH',balanceUSD:'≈$101.54',img:'../assets/swidge-tokens/eth-eth.png',payWhole:0,payFrac:3809,payDecimals:5,
       fees:{rate:'1 ETH ≈ 2,430.52 USDT',order:'≈0.03759 ETH',bridge:'≈0.00037 ETH',platform:'≈0.00002 ETH',slippage:'≈0.00011 ETH',total:'0.03809 ETH',
         swidgeFee:'≈0.00037 ETH',networkFee:'0.00 ETH',serviceFee:'≈0.00002 ETH',totalFee:'≈0.00039 ETH'}}
    ]},
   {id:'arb',icon:'🔷',name:'Arbitrum',color:'#28A0F018',
    tokens:[
-    {id:'arb-usdc',token:'USDC',badge:'U',badgeColor:'#2775CA',sub:'Same chain · No fee',unit:'USDC',isSwidge:false,balance:'400.33 USDC',balanceUSD:'≈$398.09',img:'assets/swidge-tokens/usdc-arbitrum.png',payWhole:100,payFrac:0,
+    {id:'arb-usdc',token:'USDC',badge:'U',badgeColor:'#2775CA',sub:'Same chain · No fee',unit:'USDC',isSwidge:false,balance:'400.33 USDC',balanceUSD:'≈$398.09',img:'../assets/swidge-tokens/usdc-arbitrum.png',payWhole:100,payFrac:0,
       fees:{order:'100.00 USDC',bridge:'—',platform:'—',networkFee:'0.00 USDC',serviceFee:'0.00 USDC',totalFee:'0.00 USDC'}}
    ]},
   {id:'base',icon:'🔵',name:'Base',color:'#0052FF18',
    tokens:[
-    {id:'base-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'52.10 USDT',balanceUSD:'≈$52.10',img:'assets/swidge-tokens/usdt-base.png',payWhole:100,payFrac:0,
+    {id:'base-usdt',token:'USDT',badge:'T',badgeColor:'#26A17B',sub:'Same chain · No fee',unit:'USDT',isSwidge:false,balance:'52.10 USDT',balanceUSD:'≈$52.10',img:'../assets/swidge-tokens/usdt-base.png',payWhole:100,payFrac:0,
       fees:{order:'100.00 USDT',bridge:'—',platform:'—',networkFee:'0.00 USDT',serviceFee:'0.00 USDT',totalFee:'0.00 USDT'}}
    ]},
   {id:'poly',icon:'🟣',name:'Polygon',color:'#8247E518',
@@ -1805,12 +1805,12 @@ function selWalletTab(el, wallet) {
   el.classList.add('active');
   // Update hint text + icon
   const names={metamask:'MetaMask',trust:'Trust Wallet',okx:'OKX Wallet',rainbow:'Rainbow',coinbase:'Coinbase Wallet',imtoken:'imToken',phantom:'Phantom',bitget:'Bitget Wallet',ledger:'Ledger Live'};
-  const icons={metamask:'assets/wallets-app/metamask.png',trust:'assets/wallets-app/trust.png',okx:'assets/wallets-app/okx.png',rainbow:'assets/wallets-app/rainbow.png',coinbase:'assets/wallets-app/coinbase.png',imtoken:'assets/wallets-app/imtoken.png',phantom:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23AB9FF2'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>P</text></svg>",bitget:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%2300F0B5'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>B</text></svg>",ledger:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23000000'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>L</text></svg>"};
+  const icons={metamask:'../assets/wallets-app/metamask.png',trust:'../assets/wallets-app/trust.png',okx:'../assets/wallets-app/okx.png',rainbow:'../assets/wallets-app/rainbow.png',coinbase:'../assets/wallets-app/coinbase.png',imtoken:'../assets/wallets-app/imtoken.png',phantom:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23AB9FF2'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>P</text></svg>",bitget:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%2300F0B5'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>B</text></svg>",ledger:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' rx='5' fill='%23000000'/><text x='12' y='17' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white'>L</text></svg>"};
   const hint=document.getElementById('wp-qr-hint');
   if(hint) hint.textContent='Opens in '+(names[wallet]||wallet)+"'s built-in browser";
   const openIcon=document.getElementById('open-wallet-icon');
   const openLabel=document.getElementById('open-wallet-label');
-  if(openIcon) openIcon.src=icons[wallet]||'assets/wallets-app/metamask.png';
+  if(openIcon) openIcon.src=icons[wallet]||'../assets/wallets-app/metamask.png';
   if(openLabel) openLabel.textContent='Open '+(names[wallet]||wallet);
   // Draw fake QR that visually changes per wallet
   drawFakeQR(wallet);

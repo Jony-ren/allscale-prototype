@@ -516,7 +516,7 @@ body{
         <button class="pay-opt sel" id="opt-allscale" onclick="selOpt('allscale')">
           <div class="radio on" id="r-allscale"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M0.38 3.83L3.38 7.33L9.38 0.33" stroke="#12D16B" stroke-linejoin="bevel"/></svg></div>
           <div style="flex:1;min-width:0;">
-            <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="assets/allscale-logo.svg" height="22" style="display:block;"></div>
+            <div class="t-body-lg" style="display:flex;align-items:center;gap:6px;">Pay with <img src="../assets/allscale-logo.svg" height="22" style="display:block;"></div>
             <div class="t-sm" style="color:#0d0d0d;">Sign in to use AllScale wallet</div>
           </div>
         </button>
@@ -639,7 +639,7 @@ function scanSetMode(mode){
 }
 /* 钱包页签：高亮 + 同步 dApp 提示 / Open 按钮（移植 swidge-demo，去掉 canvas 假 QR）*/
 var SCAN_WALLET_NAMES={metamask:'MetaMask',trust:'Trust Wallet',okx:'OKX Wallet',rainbow:'Rainbow',coinbase:'Coinbase Wallet',imtoken:'imToken'};
-var SCAN_WALLET_ICONS={metamask:'assets/wallets-app/metamask.png',trust:'assets/wallets-app/trust.png',okx:'assets/wallets-app/okx.png',rainbow:'assets/wallets-app/rainbow.png',coinbase:'assets/wallets-app/coinbase.png',imtoken:'assets/wallets-app/imtoken.png'};
+var SCAN_WALLET_ICONS={metamask:'../assets/wallets-app/metamask.png',trust:'../assets/wallets-app/trust.png',okx:'../assets/wallets-app/okx.png',rainbow:'../assets/wallets-app/rainbow.png',coinbase:'../assets/wallets-app/coinbase.png',imtoken:'../assets/wallets-app/imtoken.png'};
 function selWalletTab(el, wallet){
   document.querySelectorAll('#onr-scan-ov .wp-tab').forEach(function(t){t.classList.remove('active');});
   if(el) el.classList.add('active');
@@ -749,7 +749,7 @@ function toggleHideAssets(){
         <div class="onr-ext-box">
           <div class="onr-ext-bar">🔒 <span class="onr-ext-host">buy.moonpay.com/…</span><span class="onr-ext-tag">External · not allscale.io</span></div>
           <div class="onr-ext-body">
-            <img src="assets/data-switch/sent-selected.svg" alt="" style="display:block;margin:0 auto 12px;width:32px;height:32px;">
+            <img src="../assets/data-switch/sent-selected.svg" alt="" style="display:block;margin:0 auto 12px;width:32px;height:32px;">
             <div style="font-size:16px;font-weight:600;color:var(--as-dark);line-height:1.4;">Redirecting to payment provider…</div>
           </div>
         </div>
@@ -761,7 +761,7 @@ function toggleHideAssets(){
 
       <!-- ── Panel 3: Result · Waiting（落地页只展示 Waiting）── -->
       <div class="onr-panel" id="onr-waiting">
-        <img src="assets/done.png" class="onr-rs-illus" alt="">
+        <img src="../assets/done.png" class="onr-rs-illus" alt="">
         <div class="onr-rs-head">
           <div class="onr-rs-title">Request Submitted</div>
           <div class="onr-rs-amtgrp">
@@ -849,7 +849,7 @@ function toggleHideAssets(){
     <div class="onr-modal-body">
       <div class="onr-ord-list">
         <div class="onr-ord-row">
-          <div class="onr-ord-icon"><img src="assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
+          <div class="onr-ord-icon"><img src="../assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
           <div class="onr-ord-info">
             <div class="onr-ord-id">ORD-2026-0401 <span class="onr-cl-tag">Card &amp; Local</span></div>
             <div class="onr-ord-date">Apr 1, 2026 · 09:14</div>
@@ -860,18 +860,18 @@ function toggleHideAssets(){
           </div>
         </div>
         <div class="onr-ord-row">
-          <div class="onr-ord-icon"><img src="assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
+          <div class="onr-ord-icon"><img src="../assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
           <div class="onr-ord-info">
             <div class="onr-ord-id">ORD-2026-0328 <span class="onr-cl-tag">Card &amp; Local</span></div>
             <div class="onr-ord-date">Mar 28, 2026 · 22:05</div>
           </div>
           <div class="onr-ord-amt-col">
             <div class="onr-ord-amt">150.00 USDT</div>
-            <div class="onr-ord-status-row"><img src="assets/processing.svg" height="23" style="display:block;"></div>
+            <div class="onr-ord-status-row"><img src="../assets/processing.svg" height="23" style="display:block;"></div>
           </div>
         </div>
         <div class="onr-ord-row">
-          <div class="onr-ord-icon"><img src="assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
+          <div class="onr-ord-icon"><img src="../assets/store-icon.svg" width="44" height="44" style="display:block;"></div>
           <div class="onr-ord-info">
             <div class="onr-ord-id">ORD-2026-0325 <span class="onr-cl-tag">Card &amp; Local</span></div>
             <div class="onr-ord-date">Mar 25, 2026 · 18:30</div>
@@ -959,42 +959,42 @@ function toggleHideAssets(){
     <div class="nw-list" id="nw-list">
       <button class="nw-row" onclick="selectNetwork('BSC (BEP20)', true)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/bnb.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/bnb.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">BSC (BEP20)</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">9,100.32 USDT</div><div class="nw-amt-usd">≈ 9,100.98 USD</div></div>
       </button>
       <button class="nw-row" onclick="selectNetwork('Base', true)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/base.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/base.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">Base</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">400.33 USDT</div><div class="nw-amt-usd">≈ 398.09 USD</div></div>
       </button>
       <button class="nw-row" onclick="selectNetwork('Ethereum', true)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/eth.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/eth.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">Ethereum</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">400.33 USDT</div><div class="nw-amt-usd">≈ 400.33 USD</div></div>
       </button>
       <button class="nw-row nw-row--zero" onclick="selectNetwork('Polygon', false)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Polygon.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/Polygon.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">Polygon</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
       </button>
       <button class="nw-row nw-row--zero" onclick="selectNetwork('Optimism', false)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Optimism.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/Optimism.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">Optimism</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
       </button>
       <button class="nw-row nw-row--zero" onclick="selectNetwork('Arbitrum', false)">
         <div class="nw-left">
-          <div class="nw-icon"><img class="nw-icon-main" src="assets/chain/Arbitrum.png" alt=""><img class="nw-icon-badge" src="assets/usdt.png" alt=""></div>
+          <div class="nw-icon"><img class="nw-icon-main" src="../assets/chain/Arbitrum.png" alt=""><img class="nw-icon-badge" src="../assets/usdt.png" alt=""></div>
           <div class="nw-name-col"><div class="nw-name">Arbitrum</div><div class="nw-token">USDT</div></div>
         </div>
         <div class="nw-amt-col"><div class="nw-amt">0.00</div><div class="nw-amt-usd">≈ 0.00</div></div>
@@ -1007,7 +1007,7 @@ function toggleHideAssets(){
 <div class="onr-sheet-ov" id="onr-submitted-ov" onclick="if(event.target===this)onrClose('onr-submitted-ov')">
   <div class="onr-modal">
     <div class="rs-top">
-      <img src="assets/done.png" class="onr-rs-illus" alt="">
+      <img src="../assets/done.png" class="onr-rs-illus" alt="">
       <div class="onr-rs-head">
         <div class="onr-rs-title">Request Submitted</div>
         <div class="onr-rs-amtgrp">
@@ -1042,7 +1042,7 @@ function toggleHideAssets(){
           <div style="font-size:11.5px;color:var(--as-dark);line-height:1.6;">Send the exact amount to the address below. For other tokens or chains, tap "Pay with different tokens".</div>
         </div>
         <div style="background:var(--as-card);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;margin-top:8px;">
-          <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+          <img src="../assets/qr-code.svg" width="172" height="172" style="display:block;">
           <div style="font-size:14px;font-weight:500;color:var(--as-dark);margin-top:8px;">Pay with wallet</div>
           <div class="qr-amt-row">
             <div style="display:flex;align-items:baseline;gap:0;">
@@ -1058,16 +1058,16 @@ function toggleHideAssets(){
               <button class="copy-btn" onclick="onrToast('Copied')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6.667 6.667V5C6.667 3.159 8.16 1.667 10 1.667L15 1.667C16.841 1.667 18.333 3.159 18.333 5V10C18.333 11.841 16.841 13.333 15 13.333H13.333M6.667 6.667H5C3.159 6.667 1.667 8.159 1.667 10V15C1.667 16.841 3.159 18.333 5 18.333H10C11.841 18.333 13.333 16.841 13.333 15V13.333M6.667 6.667H10C11.841 6.667 13.333 8.159 13.333 10V13.333" stroke="#009859" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
             </div>
             <button onclick="onrToast('Copied')" style="display:flex;align-items:center;justify-content:center;gap:14px;width:100%;margin-top:12px;padding:14px 0;background:var(--as-green);border:none;border-radius:48px;cursor:pointer;font-size:16px;font-weight:500;color:#FFFFFF;font-family:'Archivo',sans-serif;transition:background .15s;" onmouseover="this.style.background='#00b368'" onmouseout="this.style.background='var(--as-green)'">
-              <img src="assets/copy-white.svg" width="20" height="20" style="display:block;">Copy address
+              <img src="../assets/copy-white.svg" width="20" height="20" style="display:block;">Copy address
             </button>
           </div>
           <button class="pay-other-btn" onclick="scanSetMode('b')" style="margin-top:8px;">
-            <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
+            <span style="display:inline-flex;align-items:center;flex-shrink:0;"><img src="../assets/chain/eth.png" width="24" height="24" style="display:block;border-radius:50%;"><img src="../assets/chain/bnb.png" width="24" height="24" style="display:block;border-radius:50%;margin-left:-8px;"></span>
             <span class="pay-other-btn-label">Pay with different tokens</span>
             <svg class="pf-chevron" viewBox="0 0 6 12" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.28 0.16C-.04.42-.09.9.16 1.22L3.79 5.75.16 10.28C-.09 10.6-.04 11.08.28 11.34.6 11.59 1.08 11.54 1.34 11.22L5.34 6.22C5.55 5.94 5.55 5.56 5.34 5.28L1.34 0.28C1.08-.04.6-.09.28.16Z" fill="#0C3124"/></svg>
           </button>
         </div>
-        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="assets/allscale-logo.svg" height="20" style="display:block;"></div>
+        <div style="display:flex;align-items:center;justify-content:center;margin:16px 0 8px;"><img src="../assets/allscale-logo.svg" height="20" style="display:block;"></div>
       </div>
 
       <!-- ═══ MODE B: Pay with different tokens（dApp QR + 钱包页签）═══ -->
@@ -1075,31 +1075,31 @@ function toggleHideAssets(){
         <div id="wp-wallet-scroll-wrap" style="flex-shrink:0;padding:0 0 8px;position:relative;">
           <div style="display:flex;align-items:center;gap:0;">
             <div style="flex:1;min-width:0;overflow-x:auto;display:flex;gap:8px;align-items:center;-webkit-overflow-scrolling:touch;padding:8px 8px 8px 8px;" id="wp-wallet-scroll">
-              <button class="wp-tab active" onclick="selWalletTab(this,'metamask')"><img src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> MetaMask</button>
-              <button class="wp-tab" onclick="selWalletTab(this,'trust')"><img src="assets/wallets-app/trust.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Trust</button>
-              <button class="wp-tab" onclick="selWalletTab(this,'okx')"><img src="assets/wallets-app/okx.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> OKX</button>
-              <button class="wp-tab" onclick="selWalletTab(this,'rainbow')"><img src="assets/wallets-app/rainbow.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Rainbow</button>
-              <button class="wp-tab" onclick="selWalletTab(this,'coinbase')"><img src="assets/wallets-app/coinbase.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Coinbase</button>
-              <button class="wp-tab" onclick="selWalletTab(this,'imtoken')"><img src="assets/wallets-app/imtoken.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> imToken</button>
+              <button class="wp-tab active" onclick="selWalletTab(this,'metamask')"><img src="../assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> MetaMask</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'trust')"><img src="../assets/wallets-app/trust.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Trust</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'okx')"><img src="../assets/wallets-app/okx.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> OKX</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'rainbow')"><img src="../assets/wallets-app/rainbow.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Rainbow</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'coinbase')"><img src="../assets/wallets-app/coinbase.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> Coinbase</button>
+              <button class="wp-tab" onclick="selWalletTab(this,'imtoken')"><img src="../assets/wallets-app/imtoken.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;"> imToken</button>
             </div>
             <button id="wp-all-btn" class="wp-tab" onclick="event.stopPropagation();toggleWalletDropdown()" style="flex-shrink:0;background:transparent;color:#0C3124;gap:6px;padding:0 16px;">All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           </div>
           <div id="wp-wallet-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:100;background:#fff;border:1px solid #E5EEEA;border-radius:16px;padding:8px;width:220px;box-shadow:0 8px 40px rgba(0,0,0,0.10);max-height:320px;overflow-y:auto;">
-            <div onclick="selWalletFromDropdown('metamask')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/metamask.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">MetaMask</span></div>
-            <div onclick="selWalletFromDropdown('trust')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/trust.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Trust Wallet</span></div>
-            <div onclick="selWalletFromDropdown('okx')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/okx.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">OKX Wallet</span></div>
-            <div onclick="selWalletFromDropdown('rainbow')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/rainbow.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Rainbow</span></div>
-            <div onclick="selWalletFromDropdown('coinbase')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/coinbase.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Coinbase Wallet</span></div>
-            <div onclick="selWalletFromDropdown('imtoken')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="assets/wallets-app/imtoken.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">imToken</span></div>
+            <div onclick="selWalletFromDropdown('metamask')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/metamask.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">MetaMask</span></div>
+            <div onclick="selWalletFromDropdown('trust')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/trust.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Trust Wallet</span></div>
+            <div onclick="selWalletFromDropdown('okx')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/okx.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">OKX Wallet</span></div>
+            <div onclick="selWalletFromDropdown('rainbow')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/rainbow.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Rainbow</span></div>
+            <div onclick="selWalletFromDropdown('coinbase')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/coinbase.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">Coinbase Wallet</span></div>
+            <div onclick="selWalletFromDropdown('imtoken')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F2F8F5'" onmouseout="this.style.background='transparent'"><img src="../assets/wallets-app/imtoken.png" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0;"><span style="font-size:15px;font-weight:500;color:#0C3124;letter-spacing:-0.02em;line-height:1;">imToken</span></div>
           </div>
         </div>
         <div style="background:var(--as-card);border-radius:12px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;">
-          <img src="assets/qr-code.svg" width="172" height="172" style="display:block;">
+          <img src="../assets/qr-code.svg" width="172" height="172" style="display:block;">
           <div style="display:flex;align-items:center;gap:6px;margin-top:10px;"><span style="font-size:14px;font-weight:500;color:var(--as-dark);">Scan to open payment page</span></div>
           <div style="font-size:12px;color:var(--as-text);margin-top:3px;" id="wp-qr-hint">Opens in MetaMask's built-in browser</div>
         </div>
         <button id="open-wallet-btn" onclick="onrToast('Opening wallet…')" style="width:100%;height:48px;border-radius:999px;border:none;background:#FAFBFA;cursor:pointer;font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;color:var(--as-dark);display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#EDEFED'" onmouseout="this.style.background='#FAFBFA'">
-          <img id="open-wallet-icon" src="assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;">
+          <img id="open-wallet-icon" src="../assets/wallets-app/metamask.png" width="24" height="24" style="display:block;border-radius:4px;flex-shrink:0;">
           <span id="open-wallet-label">Open MetaMask</span>
         </button>
         <div style="background:var(--as-card);border-radius:12px;padding:16px;margin-top:10px;">
