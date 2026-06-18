@@ -9291,7 +9291,7 @@ initUI();
         <li><b>Save where?</b> —— 两个 tile：This device / Another device</li>
         <li><b>(Other only) Which one?</b> —— Phone-Tablet-Key / Desktop tile</li>
         <li><b>(Other only) Reach for your device / Look at your desktop</b> —— 引导性文案 + Continue</li>
-        <li><b>Pick a different manager</b> —— 显示当前已绑定 passkey card（仅显示 iCloud Keychain 一条）+ 副标题文案 + <b>Continue Anyway</b> 主按钮 + <b>Cancel</b> Secondary（点 Cancel 关闭弹窗，回 Security）</li>
+        <li><b>Pick a different manager</b> —— 显示当前已绑定 passkey card（仅显示 iCloud Keychain 一条）+ 副标题文案 + <b>Cancel</b> 主按钮 + <b>Continue Anyway</b> Secondary（点 Cancel 关闭弹窗，回 Security）</li>
         <li><b>(Other only) QR scan</b> —— <code>assets/qr-code-circle.svg</code> 200×200 + Phone/Tablet 与 Security Key 双说明</li>
         <li><b>Name your passkey</b> —— 默认名 <code>AllScale M/D/YYYY at HH:MM AM/PM</code> + Add passkey → Touch ID toast → <b>关闭弹窗 + Success toast</b></li>
       </ol>
@@ -9590,8 +9590,8 @@ initUI();
       '<div class="npk-sheet-title">Pick a different manager</div>' +
       '<div class="npk-sheet-sub">You already have a passkey in iCloud Keychain. Save this one in another password manager for backup access.</div>' +
       boundCards +
-      '<button class="npk-btn-primary" id="npk-avoid-cta">Continue Anyway</button>' +
-      '<button class="npk-btn-secondary" id="npk-avoid-cancel" style="margin-top:10px">Cancel</button>';
+      '<button class="npk-btn-primary" id="npk-avoid-cancel">Cancel</button>' +
+      '<button class="npk-btn-secondary" id="npk-avoid-cta" style="margin-top:10px">Continue Anyway</button>';
     document.getElementById('npk-avoid-cta').onclick = function () { gotoStep(flow.dest === 'other' ? stepQR : stepName); };
     document.getElementById('npk-avoid-cancel').onclick = function () { npkClose('add'); };
   }
