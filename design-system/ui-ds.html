@@ -51,11 +51,10 @@
     margin-bottom: 6px; color: #fff;
   }
   .brand-mark {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--brand-light), var(--accent));
+    width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    color: #0C3124; font-size: 16px; font-weight: 800; letter-spacing: -.04em;
   }
+  .brand-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .brand-name {
     font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: #fff;
   }
@@ -343,6 +342,25 @@
   .ds-dd-item.danger { color: var(--red); }
   .ds-dd-item.danger:hover { background: var(--accent-light); }
 
+  /* Toast — bottom-center transient confirmation */
+  .ds-toast {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-2xl); padding: 12px 18px;
+    font-family: var(--font-sans); font-size: 15px; font-weight: var(--weight-medium);
+    color: var(--text); letter-spacing: var(--tracking-snug);
+    box-shadow: var(--shadow-lg); white-space: nowrap; max-width: 92vw;
+  }
+  .ds-toast img { width: 18px; height: 18px; display: block; flex-shrink: 0; }
+  /* live demo: fixed at bottom-center, slides up + fades */
+  .ds-toast-live {
+    position: fixed; left: 50%; bottom: 28px; z-index: var(--z-toast);
+    transform: translateX(-50%) translateY(12px);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  }
+  .ds-toast-live.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   /* Input */
   .ds-input {
     width: 100%; background: var(--bg-white); border: 1.5px solid var(--border);
@@ -411,6 +429,27 @@
   .bp-spec { display: inline-flex; align-items: baseline; gap: 6px; font-size: 12px; color: var(--text-2); background: var(--surface-2); border-radius: var(--radius-full); padding: 5px 12px; }
   .bp-spec b { color: var(--accent); font-weight: var(--weight-semibold); font-family: var(--font-mono); font-size: 11.5px; }
   @media (max-width: 720px) { .bp-cols { grid-template-columns: 1fr; } }
+
+  /* ─── BRAND / LOGOS ─── */
+  .logo-group { margin-bottom: 8px; }
+  .logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .logo-card { border-radius: var(--radius-xl); overflow: hidden; background: var(--bg-white); border: 1px solid var(--border); }
+  .logo-preview { display: flex; align-items: center; justify-content: center; height: 132px; padding: 28px 32px; }
+  .logo-card[data-bg="light"] .logo-preview { background: var(--surface); }
+  .logo-card[data-bg="dark"]  .logo-preview { background: #0C3124; }
+  .logo-preview img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+  .logo-card[data-form="mark"] .logo-preview img { max-height: 76px; }
+  .logo-missing { display: none; font-family: var(--font-mono); font-size: 10px; line-height: 1.5; color: var(--text-3); text-align: center; padding: 0 8px; }
+  .logo-card[data-bg="dark"] .logo-missing { color: rgba(255,255,255,.6); }
+  .logo-preview.is-missing img { display: none; }
+  .logo-preview.is-missing .logo-missing { display: block; }
+  .logo-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--border); }
+  .logo-label { display: flex; flex-direction: column; gap: 2px; }
+  .logo-label b { font-size: 13px; font-weight: var(--weight-semibold); color: var(--text); letter-spacing: -.01em; }
+  .logo-label span { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); letter-spacing: var(--tracking-wide); }
+  .logo-dl { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-family: var(--font-sans); font-size: 12px; font-weight: var(--weight-medium); color: var(--text); background: var(--surface-2); border: none; border-radius: var(--radius-full); padding: 8px 13px; cursor: pointer; transition: background var(--dur-fast) var(--ease-standard); }
+  .logo-dl:hover { background: var(--accent-light); color: var(--accent); }
+  .logo-dl svg { width: 13px; height: 13px; }
 
   /* ─── BADGES ─── */
   .ds-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 9px; font-family: var(--font-sans); font-size: 14px; font-weight: var(--weight-regular); letter-spacing: -0.02em; line-height: 1; height: 23px; box-sizing: border-box; white-space: nowrap; }
@@ -552,18 +591,77 @@
   .btn-note { display: flex; align-items: center; gap: 8px; justify-content: flex-end; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); text-align: right; }
   .btn-note .dot { width: 11px; height: 11px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.05); }
   .btn-note .op { color: var(--accent-2); }
+
+  /* ─── REFERENCE — embedded spec doc + one-click download ─── */
+  .md-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .md-download {
+    display: inline-flex; align-items: center; gap: 9px;
+    height: var(--btn-h); padding: 0 24px;
+    background: var(--accent); color: #fff; border: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-sans); font-size: 15px;
+    font-weight: var(--weight-medium); letter-spacing: var(--tracking-snug);
+    cursor: pointer; transition: background var(--dur-fast);
+  }
+  .md-download:hover { background: var(--accent-hover); }
+  .md-download svg { width: 18px; height: 18px; }
+  .md-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: var(--btn-h); padding: 0 22px;
+    background: var(--surface-2); color: var(--text); border: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-sans); font-size: 15px;
+    font-weight: var(--weight-medium); letter-spacing: var(--tracking-snug);
+    cursor: pointer; transition: background var(--dur-fast);
+  }
+  .md-toggle:hover { background: var(--surface-3); }
+  .md-toggle .md-toggle-caret { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-standard); }
+  .md-toggle[aria-expanded="true"] .md-toggle-caret { transform: rotate(180deg); }
+  .md-filename { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); letter-spacing: var(--tracking-wide); }
+
+  .md-doc {
+    background: var(--bg-white); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); padding: 48px 52px; margin-top: 28px;
+    font-size: 15px; color: var(--text); line-height: 1.65;
+  }
+  .md-doc > :first-child { margin-top: 0; }
+  .md-doc h1 { font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin: 8px 0 16px; }
+  .md-doc h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 44px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .md-doc h3 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin: 28px 0 10px; }
+  .md-doc h4 { font-size: 15px; font-weight: 600; margin: 22px 0 8px; }
+  .md-doc p { margin: 0 0 14px; }
+  .md-doc ul, .md-doc ol { margin: 0 0 16px; padding-left: 22px; }
+  .md-doc li { margin: 5px 0; }
+  .md-doc li > strong:first-child { color: var(--text); }
+  .md-doc a { color: var(--accent-2); text-decoration: none; border-bottom: 1px solid var(--border-strong); transition: color var(--dur-fast); }
+  .md-doc a:hover { color: var(--accent); border-color: var(--accent); }
+  .md-doc strong { font-weight: 600; }
+  .md-doc em { font-style: italic; color: var(--text-2); }
+  .md-doc code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); color: var(--accent-2); padding: 1.5px 6px; border-radius: 5px; }
+  .md-doc pre.md-code { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; overflow-x: auto; margin: 0 0 16px; }
+  .md-doc pre.md-code code { background: none; color: var(--text); padding: 0; font-size: 12px; line-height: 1.6; }
+  .md-doc hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  .md-doc blockquote { margin: 0 0 16px; padding: 12px 18px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--text-2); }
+  .md-doc blockquote p { margin: 0; }
+  .md-table-wrap { overflow-x: auto; margin: 0 0 20px; }
+  .md-doc table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .md-doc th, .md-doc td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .md-doc thead th { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-2); font-weight: 500; background: var(--surface-2); white-space: nowrap; }
+  .md-doc tbody tr:hover { background: var(--surface); }
+  .md-doc tbody tr:last-child td { border-bottom: none; }
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <a class="sidebar-back" href="../index.html">‹ All prototypes</a>
   <div class="brand-logo">
-    <span class="brand-mark">A</span>
+    <span class="brand-mark"><img src="assets/logo/AllScale-icon-BlackBG.png" alt="AllScale"></span>
     <span class="brand-name">AllScale</span>
   </div>
   <div class="sidebar-sub">Design System · Foundation</div>
   <nav class="sidebar-nav" id="sidebar-nav">
+    <a href="#reference">Reference</a>
+    <a href="#brand">Logo</a>
     <a href="#colors">Colors</a>
     <a href="#typography">Typography</a>
     <a href="#spacing">Spacing</a>
@@ -583,9 +681,48 @@
 
 <main class="content">
 
+  <!-- ─────────── REFERENCE — embedded spec + download ─────────── -->
+  <section id="reference">
+    <div class="sec-tag">01 · Reference</div>
+    <div class="sec-label">The written spec</div>
+    <div class="sec-desc">The complete design-system document — philosophy, tokens, and component laws. Download it as Markdown, or expand to read it inline. Hand it to a designer, a teammate, or an AI agent.</div>
+    <div class="md-actions">
+      <button class="md-download" id="md-download" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Download design-system.md
+      </button>
+      <button class="md-toggle" id="md-toggle" type="button" aria-expanded="false" aria-controls="md-doc">
+        <span class="md-toggle-label">Read full spec</span>
+        <svg class="md-toggle-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <span class="md-filename">design-system.md · Markdown</span>
+    </div>
+    <div class="md-doc" id="md-doc" hidden></div>
+  </section>
+
+  <hr class="sec-divider">
+
+  <!-- ─────────── BRAND / LOGOS ─────────── -->
+  <section id="brand">
+    <div class="sec-tag">02 · Brand</div>
+    <div class="sec-label">Logo</div>
+    <div class="sec-desc">The AllScale logo in its full wordmark and the compact <strong>All</strong> mark, across four treatments. Each tile shows the original PNG 1:1; <strong>Download PNG</strong> saves that exact file unchanged. Use the brand (dark-green + green) lockup by default; reverse / white on dark or photographic backgrounds.</div>
+
+    <div class="logo-group">
+      <div class="subhead" style="margin-top:0;">Wordmark</div>
+      <div class="logo-grid" id="logo-grid-wordmark"></div>
+    </div>
+    <div class="logo-group">
+      <div class="subhead">Mark</div>
+      <div class="logo-grid" id="logo-grid-mark"></div>
+    </div>
+  </section>
+
+  <hr class="sec-divider">
+
   <!-- ─────────── COLORS ─────────── -->
   <section id="colors">
-    <div class="sec-tag">01 · Palette</div>
+    <div class="sec-tag">03 · Palette</div>
     <div class="sec-label">Colors</div>
     <div class="sec-desc">Click any swatch to copy its hex. Names follow the AllScale Figma library; <code style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);background:var(--surface-2);padding:1px 6px;border-radius:5px;">EXT</code> marks tokens we extend beyond it.</div>
 
@@ -633,7 +770,7 @@
 
   <!-- ─────────── TYPOGRAPHY ─────────── -->
   <section id="typography">
-    <div class="sec-tag">02 · Type</div>
+    <div class="sec-tag">04 · Type</div>
     <div class="sec-label">Typography</div>
 
     <div class="specimen">
@@ -665,7 +802,7 @@
 
   <!-- ─────────── SPACING ─────────── -->
   <section id="spacing">
-    <div class="sec-tag">03 · Rhythm</div>
+    <div class="sec-tag">05 · Rhythm</div>
     <div class="sec-label">Spacing</div>
     <div class="sec-desc">The gap between things, made visible.</div>
     <div class="specimen"><div class="space-list" id="space-list"></div></div>
@@ -675,7 +812,7 @@
 
   <!-- ─────────── RADIUS ─────────── -->
   <section id="radius">
-    <div class="sec-tag">04 · Corners</div>
+    <div class="sec-tag">06 · Corners</div>
     <div class="sec-label">Radius</div>
     <div class="radius-grid" id="radius-grid"></div>
   </section>
@@ -684,7 +821,7 @@
 
   <!-- ─────────── SHADOW ─────────── -->
   <section id="shadow">
-    <div class="sec-tag">05 · Elevation</div>
+    <div class="sec-tag">07 · Elevation</div>
     <div class="sec-label">Shadow</div>
     <div class="shadow-grid">
       <div class="shadow-demo" style="box-shadow: var(--shadow-sm);"><div class="shadow-name">--shadow-sm</div><div class="shadow-val">0 2px 8px rgba(0,0,0,0.06)</div></div>
@@ -699,7 +836,7 @@
 
   <!-- ─────────── SIZES ─────────── -->
   <section id="sizes">
-    <div class="sec-tag">06 · Dimensions</div>
+    <div class="sec-tag">08 · Dimensions</div>
     <div class="sec-label">Sizes</div>
     <div class="specimen"><div class="row-list">
       <div class="row"><code>--btn-h</code><span class="vl">50px</span><span class="ds">Primary button</span></div>
@@ -716,7 +853,7 @@
 
   <!-- ─────────── MOTION ─────────── -->
   <section id="motion">
-    <div class="sec-tag">07 · Easing</div>
+    <div class="sec-tag">09 · Easing</div>
     <div class="sec-label">Motion</div>
     <div class="sec-desc">Easing carries meaning. Spring for arrivals, ease-out for panels, standard for everything else.</div>
     <div class="specimen"><div class="row-list">
@@ -842,7 +979,7 @@
 
   <!-- ─────────── BREAKPOINTS ─────────── -->
   <section id="breakpoints">
-    <div class="sec-tag">08 · Responsive</div>
+    <div class="sec-tag">10 · Responsive</div>
     <div class="sec-label">Breakpoints</div>
     <div class="sec-desc">Named modal responsive laws (<code>W0xxA</code>). Each modal declares <strong>one</strong> breakpoint at <code>633px</code> — desktop ≥634px, compact ≤633px — and drops the canonical back/close header for a centered title. No 768px sheet fallback. Reference: <code>checkout/checkout-onramp.html</code>.</div>
 
@@ -917,7 +1054,7 @@
 
   <!-- ─────────── COMPONENTS ─────────── -->
   <section id="components">
-    <div class="sec-tag">09 · UI</div>
+    <div class="sec-tag">11 · UI</div>
     <div class="sec-label">Components</div>
     <div class="sec-desc">Built from the tokens above. Hover to feel the interaction.</div>
 
@@ -1049,7 +1186,49 @@
         <li>Do NOT set <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">overflow: hidden</code> on the menu — items already round their own corners</li>
       </ul>
     </div>
+
+    <div class="subhead">Toast — transient confirmation, bottom-center, auto-dismiss</div>
+    <div class="ex-card" style="padding: 28px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px; padding: 6px 0 14px;">
+        <div class="ds-toast">
+          <img src="../assets/check.svg" width="18" height="18" alt="">
+          Wallet address saved
+        </div>
+        <button class="ds-btn-ghost" id="toast-demo-btn" style="font-family:var(--font-sans);font-size:13px;font-weight:var(--weight-medium);color:var(--text);background:var(--surface-2);border:none;border-radius:var(--radius-full);padding:9px 16px;cursor:pointer;">Show toast ↗</button>
+      </div>
+      <button class="code-toggle" data-target="code-toast"><span class="pm">+</span> Code</button>
+      <pre class="code" id="code-toast">&lt;div class="ds-toast"&gt;&lt;img src="assets/check.svg" width="18" height="18"&gt; Wallet address saved&lt;/div&gt;
+
+<span class="c-key">/* Spec */</span>
+.ds-toast { background: <span class="c-key">var(--surface)</span>; border: 1px solid <span class="c-key">var(--border)</span>;
+            border-radius: <span class="c-key">var(--radius-2xl)</span>; padding: 12px 18px;
+            font-size: 15px; font-weight: <span class="c-key">var(--weight-medium)</span>;
+            color: <span class="c-key">var(--text)</span>; letter-spacing: <span class="c-key">var(--tracking-snug)</span>;
+            box-shadow: <span class="c-key">var(--shadow-lg)</span>; display: inline-flex;
+            align-items: center; gap: 10px; }
+
+<span class="c-key">/* Positioning + show/hide */</span>
+.toast-live { position: fixed; left: 50%; bottom: 28px; z-index: <span class="c-key">var(--z-toast)</span>;
+              transform: translateX(-50%) translateY(12px); opacity: 0;
+              transition: opacity <span class="c-key">var(--dur-base)</span> <span class="c-key">var(--ease-out)</span>,
+                          transform <span class="c-key">var(--dur-base)</span> <span class="c-key">var(--ease-out)</span>; }
+.toast-live.show { opacity: 1; transform: translateX(-50%) translateY(0); }</pre>
+      <div style="font-size:11px;color:var(--text-3);margin-top:10px;letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:var(--weight-medium);">Rules</div>
+      <ul style="font-size:13px;color:var(--text-2);line-height:1.6;margin:6px 0 0 18px;padding:0;">
+        <li>Surface fill (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--surface)</code>), <strong>1px</strong> border, <strong>28px</strong> radius (<code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--radius-2xl)</code>), <strong>12×18</strong> padding, <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--shadow-lg)</code> elevation</li>
+        <li>Text: <strong>15px</strong> medium, <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--text)</code>, snug tracking; optional leading icon/dot with <strong>10px</strong> gap</li>
+        <li>Position: <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">fixed</code>, bottom-center, <strong>28px</strong> from bottom, <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--z-toast)</code> (1000)</li>
+        <li>Motion: slide up <strong>12px</strong> + fade in over <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--dur-base)</code> with <code style="font-family:var(--font-mono);color:var(--accent-2);font-size:11.5px;">var(--ease-out)</code>; auto-dismiss after ~2.5s</li>
+        <li>One toast at a time. Keep copy to a short outcome (“Saved”, “Wallet address saved”) — not errors that need action</li>
+      </ul>
+    </div>
   </section>
+
+  <!-- live toast element (triggered by the demo button) -->
+  <div class="ds-toast ds-toast-live" id="toast-live" role="status" aria-live="polite">
+    <img src="../assets/check.svg" width="18" height="18" alt="">
+    Wallet address saved
+  </div>
 
   <hr class="sec-divider">
 
@@ -1189,7 +1368,7 @@
 
   <!-- ─────────── BADGES ─────────── -->
   <section id="badges">
-    <div class="sec-tag">10 · Status</div>
+    <div class="sec-tag">12 · Status</div>
     <div class="sec-label">Badges</div>
     <div class="sec-desc">State communicated through color + icon, not text alone.</div>
 
@@ -1291,11 +1470,11 @@
 
   <!-- ─────────── USAGE ─────────── -->
   <section id="usage">
-    <div class="sec-tag">11 · Integration</div>
+    <div class="sec-tag">13 · Integration</div>
     <div class="sec-label">Usage</div>
     <div class="sec-desc">Link once. Reference variables instead of hard-coded values.</div>
     <button class="code-toggle open" data-target="code-usage"><span class="pm">+</span> Show example</button>
-    <pre class="code open" id="code-usage">&lt;link rel="stylesheet" href="../design-system/tokens.css"&gt;
+    <pre class="code open" id="code-usage">&lt;link rel="stylesheet" href="../ui-design-system/tokens.css"&gt;
 
 .card {
   background: <span class="c-key">var(--surface)</span>;
@@ -1317,35 +1496,44 @@
   <!-- ─────────── PHILOSOPHY ─────────── -->
   <section id="philosophy" class="hero">
     <div class="sec-tag">00 · Philosophy</div>
-    <h1>A quiet system for AllScale.</h1>
-    <p class="lede">Tokens, components, and motion — designed so the interface fades, and the user's task surfaces.</p>
+    <h1>Users shouldn't have to think.</h1>
+    <p class="lede">Our job isn't to make AllScale beautiful — it's to make it intuitive, obvious, trustworthy, and efficient. Every decision should reduce cognitive load.</p>
 
     <div class="principles">
       <div class="principle">
-        <div class="pnum">01 · TACIT FIRST</div>
-        <h3>Felt before thought.</h3>
-        <p>Every interaction should be understood through embodied intuition — within seconds, without instructions.</p>
+        <div class="pnum">01 · CLARITY OVER CREATIVITY</div>
+        <h3>Obvious beats clever.</h3>
+        <p>Simple beats impressive; familiar beats novel. If a user has to stop and ask <em>what does this mean?</em> the design has failed.</p>
       </div>
       <div class="principle">
-        <div class="pnum">02 · SUBSIDIARY → FOCAL</div>
-        <h3>Look <em>through</em>, not <em>at</em>.</h3>
-        <p>A great interface disappears. The user's focus belongs on their goal — never on the chrome.</p>
+        <div class="pnum">02 · MENTAL MODELS</div>
+        <h3>Recognition over recall.</h3>
+        <p>Users should instantly know where they are, what they can do, and what happens next. Reach for established patterns — never hidden functionality.</p>
       </div>
       <div class="principle">
-        <div class="pnum">03 · INEFFABILITY</div>
-        <h3>Show, don't describe.</h3>
-        <p>Replace tooltips and helper text with visual metaphor, motion, rhythm, and spatial relationship.</p>
+        <div class="pnum">03 · ONE PRIMARY ACTION</div>
+        <h3>One goal per screen.</h3>
+        <p>Define the user goal, the business goal, and a single primary action. Remove anything that competes with it.</p>
       </div>
       <div class="principle">
-        <div class="pnum">04 · PERSONAL COMMITMENT</div>
-        <h3>Trust, care, made for me.</h3>
-        <p>Every element should reinforce that this app exists to help — quietly, on the user's behalf.</p>
+        <div class="pnum">04 · RUTHLESS SIMPLICITY</div>
+        <h3>Can this be removed?</h3>
+        <p>Reduce choices, steps, fields, and clicks. Always ask that <em>before</em> asking “can this be improved?”</p>
+      </div>
+      <div class="principle">
+        <div class="pnum">05 · SAY WHAT HAPPENS</div>
+        <h3>Label the outcome.</h3>
+        <p>Buttons and copy describe exactly what happens — <em>Pay Invoice</em>, not <em>Continue</em>. Users scan; give them hierarchy, not jargon.</p>
+      </div>
+      <div class="principle">
+        <div class="pnum">06 · TRUST OVER DELIGHT</div>
+        <h3>Money is always explicit.</h3>
+        <p>Communicate balances, fees, status, and risk clearly. Never hide financial information — users must know what happened, what is happening, and what will happen.</p>
       </div>
     </div>
 
     <div class="polanyi-quote">
-      “We know more than we can tell.” — Michael Polanyi.
-      After every screen, you should be able to imagine the user thinking: <em>this interface understands me.</em>
+      Users do not want to think. The moment someone stops to ask <em>“what do I click?”</em> — the design has failed.
     </div>
   </section>
 
@@ -1389,6 +1577,48 @@
     rg.appendChild(card);
   });
 
+  // ── Brand / Logos: each card shows the original PNG 1:1 and downloads it unchanged ─
+  (function () {
+    var DIR = 'assets/logo/';
+    var groups = [
+      { form: 'wordmark', items: [
+        { name: 'Brand',    bg: 'light', file: 'AllScale.png' },
+        { name: 'Black',    bg: 'light', file: 'AllScale-Black.png' },
+        { name: 'White',    bg: 'dark',  file: 'AllScale-White.png' },
+        { name: 'Reversed', bg: 'dark',  file: 'AllScale-BlackBG.png' }
+      ]},
+      { form: 'mark', items: [
+        { name: 'Brand',    bg: 'light', file: 'AllScale-icon.png' },
+        { name: 'Black',    bg: 'light', file: 'AllScale-icon-Black.png' },
+        { name: 'White',    bg: 'dark',  file: 'AllScale-icon-White.png' },
+        { name: 'Reversed', bg: 'dark',  file: 'AllScale-icon-BlackBG.png' }
+      ]}
+    ];
+    groups.forEach(function (g) {
+      var grid = document.getElementById('logo-grid-' + g.form);
+      if (!grid) return;
+      g.items.forEach(function (t) {
+        var card = document.createElement('div');
+        card.className = 'logo-card';
+        card.setAttribute('data-bg', t.bg);
+        card.setAttribute('data-form', g.form);
+        card.innerHTML =
+          '<div class="logo-preview">' +
+            '<img src="' + DIR + t.file + '" alt="AllScale ' + g.form + ' — ' + t.name + '" loading="lazy" ' +
+                 'onerror="this.closest(\'.logo-preview\').classList.add(\'is-missing\')">' +
+            '<span class="logo-missing">' + t.file + '<br>— missing in assets/logo/</span>' +
+          '</div>' +
+          '<div class="logo-foot">' +
+            '<span class="logo-label"><b>' + t.name + '</b><span>' + g.form.toUpperCase() + '</span></span>' +
+            '<a class="logo-dl" href="' + DIR + t.file + '" download="' + t.file + '">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>' +
+              'PNG</a>' +
+          '</div>';
+        grid.appendChild(card);
+      });
+    });
+  })();
+
   // ── Click-to-copy (tacit: click → copied, no tooltip needed) ─
   document.querySelectorAll('.color-card[data-copy]').forEach(el => {
     el.addEventListener('click', async () => {
@@ -1409,6 +1639,19 @@
       target.classList.toggle('open');
     });
   });
+
+  // ── Toast demo: slide up + fade in, auto-dismiss ───────────
+  (function () {
+    var btn = document.getElementById('toast-demo-btn');
+    var toast = document.getElementById('toast-live');
+    if (!btn || !toast) return;
+    var timer;
+    btn.addEventListener('click', function () {
+      clearTimeout(timer);
+      toast.classList.add('show');
+      timer = setTimeout(function () { toast.classList.remove('show'); }, 2500);
+    });
+  })();
 
   // ── Number-flow demo: code panel + one-click copy ──────────
   (function () {
@@ -1488,6 +1731,426 @@
     flowWhole.update(vals.whole);
     flowFrac.update(vals.frac);
   });
+</script>
+
+<!-- ─── Source of truth for the Reference section (rendered + downloaded from here) ─── -->
+<script type="text/markdown" id="ds-md-source">
+# AllScale — UI Design System & Design Principles
+
+A single reference for designing and building AllScale product UI. It pairs **how to think**
+(design philosophy) with **what to use** (the concrete token system + component laws).
+
+- **Visual reference:** [`ui-ds.html`](./ui-ds.html) — live component gallery
+- **Token source of truth:** [`tokens.css`](./tokens.css) — link it and use the CSS variables
+- **Brand:** Archivo type, AllScale green `#009859`, deep-green ink `#0C3124`, generous whitespace, soft cards, pill buttons
+
+---
+
+# PART 1 — Design Philosophy
+
+You are a **Senior Staff Product Designer** with 15+ years designing world-class SaaS, fintech,
+developer tools, and consumer products. Your job is **not** to make interfaces look beautiful — it
+is to make them **intuitive, obvious, trustworthy, and efficient.**
+
+## Core philosophy
+Users do not want to think. Every decision should **reduce cognitive load.** If a user has to stop
+and ask *“What does this mean? What do I click? What happens next? Where am I?”* — the design has failed.
+
+- Clarity over creativity
+- Obvious beats clever
+- Simple beats impressive
+- Familiar beats novel
+
+## Mental model principles
+Design around the user's mental model. They should instantly understand: **(1) where they are,
+(2) what they can do, (3) what happens next.**
+
+- Use established patterns before inventing new ones
+- Avoid surprising interactions, hidden functionality, and anything that requires memory
+- **Recognition beats recall**
+
+## Screen design rules
+Every screen has **one primary goal** and **one primary action.** Everything else is secondary.
+Before designing any screen, explicitly define:
+
+- **User goal**
+- **Business goal**
+- **Primary action**
+
+Remove anything that competes with the primary action. If an element doesn't help the user reach
+the primary goal, question whether it should exist.
+
+## Content & copy rules
+Users **scan**, they don't read. Use clear headings, short paragraphs, bullets, and strong
+hierarchy. Avoid marketing jargon, clever wording, and ambiguous labels.
+
+**Button labels must say exactly what happens.**
+
+| Good | Bad |
+|---|---|
+| Create Wallet | Continue |
+| Pay Invoice | Start |
+| Download Report | Explore |
+| Invite Team Member | Unlock Potential |
+
+## Visual hierarchy rules
+The eye should know where to look first. Build hierarchy with **size, weight, spacing, and
+position** — not decoration. Important things should feel important; secondary things secondary.
+Avoid visual noise. **Whitespace is a tool.**
+
+## Simplicity rules
+Reduce choices, steps, fields, clicks, and decisions wherever possible.
+Always ask **“Can this be removed?”** *before* asking **“Can this be improved?”**
+
+## Forms & inputs
+Forms should feel effortless. Only ask for what is truly necessary. Use sensible defaults, inline
+validation, and helpful examples. Never make users guess formatting. Errors must explain **what
+happened, why, and how to fix it.**
+
+## Tables & dashboards
+Admin users want to **monitor, find issues, and take action.** Surface important metrics, alerts,
+and actionable items. Avoid decorative charts. Every chart must answer **“So what?”**
+
+## Fintech rules
+**Trust > delight.** Always clearly communicate money movement, balances, fees, status, and risks.
+Never hide financial information. Use explicit language — users must always know **what happened,
+what is happening, and what will happen.**
+
+## AI product rules
+AI must **reduce work**, never added just because it's available. First ask **“What user problem
+does this solve?”** Prefer suggestions, automation, summarization, and acceleration. Avoid
+unnecessary AI interactions, excessive prompting, and AI-for-marketing.
+
+## Output format (use for every feature request)
+First:
+1. User Goal
+2. Business Goal
+3. Primary Action
+4. User Journey
+5. UX Risks
+
+Then:
+6. Information Architecture
+7. Screen Structure
+8. Interaction Design
+9. Edge Cases
+10. Final UI Recommendation
+
+Always justify decisions with **usability principles**, not aesthetics.
+
+---
+
+# PART 2 — Design Tokens
+
+Link the stylesheet and reference variables; never hard-code values that exist as tokens.
+```html
+<link rel="stylesheet" href="tokens.css">
+```
+```css
+.foo { background: var(--surface); color: var(--text); padding: var(--space-6); border-radius: var(--radius-lg); }
+```
+
+## Color — Surface
+| Token | Hex | Use |
+|---|---|---|
+| `--bg` | `#FDFFFE` | page background |
+| `--bg-white` | `#FFFFFF` | pure white |
+| `--surface` | `#FAFBFA` | card background |
+| `--surface-2` | `#F2F8F5` | button-cyan / hover / selected pill |
+| `--surface-3` | `#E5EEEA` | mid-filled chip |
+
+## Color — Border
+| Token | Hex | Use |
+|---|---|---|
+| `--border` | `#E5EEEA` | default card / row border |
+| `--border-gray` | `#E4E4E4` | neutral gray border |
+| `--border-strong` | `#C5DDD4` | emphasized border |
+
+## Color — Text
+| Token | Hex | Use |
+|---|---|---|
+| `--text` | `#0C3124` | primary text (AllScale Dark) |
+| `--text-2` | `#83968F` | secondary text |
+| `--text-3` | `#B0C4BB` | tertiary / placeholder |
+
+## Color — Brand
+| Token | Hex | Use |
+|---|---|---|
+| `--accent` | `#009859` | **AllScale Green** — primary accent |
+| `--accent-hover` | `#0CAA67` | hover |
+| `--accent-2` | `#087E4C` | pressed / dark accent |
+| `--accent-light` | `#F2F8F5` | tinted-green surface (input focus, selected pill) |
+| `--brand-light` | `#12D16B` | brand light green (welcome banner) |
+
+## Color — Status
+Each status has three roles: bright fill (`*`), tinted background (`*-soft`), legible text on the tint (`*-text`).
+
+| Status | Fill | Soft bg | Text |
+|---|---|---|---|
+| Warning / Orange | `--orange #F59E0B` | `--orange-soft` | `--warning-text #B45309` |
+| Error / Red | `--red #E53E3E` | `--red-soft` | `--error-text #C53030` |
+| Success / Green | `--green #009859` | `--green-soft` | `--success-text #047857` |
+| Info / Blue | `--info #3B82F6` | `--info-soft` | `--info-text #1D4ED8` |
+| Neutral / Grey | `--neutral #9CA3AF` | `--neutral-soft #F3F4F6` | `--neutral-text #6B7280` |
+
+**Status pills** (match the badge SVGs in `checkout/assets/`): processing `#E5F3FE/#028BFD`,
+timeout `#FCF5DB/#EC9418`, failed & canceled `#FFEBEB/#FF383C`, awaiting `#EBF6F0/#048E44`,
+expired `#FAFBFA/#83968F`. (Fintech rule: status must always be explicit and legible.)
+
+## Typography
+- **Sans:** `--font-sans` = `'Archivo', -apple-system, system-ui, sans-serif`
+- **Mono:** `--font-mono` = `'DM Mono', ui-monospace, Menlo, monospace`
+- **Default weight:** Medium (500). Line-height ~1.0–1.1 for display, ~1.5 for body.
+
+| Token | Size | Use |
+|---|---|---|
+| `--text-h1` | 38px | income amount, headline |
+| `--text-h2` | 32px | hero title |
+| `--text-h3` | 28px | page title |
+| `--text-h4` | 24px | section / modal title |
+| `--text-h5` | 22px | card title |
+| `--text-h6` | 20px | sub-section / calendar header |
+| `--text-lg` | 18px | large body / button text |
+| `--text-md` | 16px | default body, button label |
+| `--text-sm` | 14px | body small / tab label |
+| `--text-caption` | 12px | caption / weekday header |
+| `--text-micro` | 10px | badge / amount-in-cell |
+
+**Weights:** `--weight-regular 400`, `--weight-medium 500`, `--weight-semibold 600`, `--weight-bold 700`.
+**Tracking:** `--tracking-tight -0.04em` (H1 numbers), `--tracking-snug -0.02em` (most titles + body),
+`--tracking-normal 0`, `--tracking-wide .03em` (mono/small caps), `--tracking-wider .08em` (uppercase labels).
+
+## Spacing scale (base-4, matches Figma `--#N-spacer`)
+`--space-0` 0 · `--space-0-5` 2 · `--space-1` 4 · `--space-1-5` 6 · `--space-2` 8 · `--space-2-5` 10 ·
+`--space-3` 12 · `--space-3-5` 14 · `--space-4` 16 · `--space-5` 20 · `--space-6` 24 · `--space-7` 28 ·
+`--space-8` 32 · `--space-10` 40 · `--space-12` 48 · `--space-14` 56 · `--space-16` 64 (px)
+
+## Border radius
+| Token | px | Use |
+|---|---|---|
+| `--radius-xs` | 8 | tiny chip / inline tag |
+| `--radius-sm` | 10 | small badge |
+| `--radius-md` | 12 | card row, input, calendar cell |
+| `--radius-lg` | 18 | card |
+| `--radius-xl` | 24 | large card |
+| `--radius-2xl` | 28 | modal |
+| `--radius-pill` | 30 | filter-dropdown pill |
+| `--radius-button` | 40 | primary CTA button |
+| `--radius-full` | 999 | fully rounded pill (tabs, FAB) |
+
+## Shadow
+| Token | Value | Use |
+|---|---|---|
+| `--shadow-sm` | `0 2px 8px rgba(0,0,0,.06)` | badge / pin |
+| `--shadow-md` | `0 4px 24px rgba(0,0,0,.08)` | card |
+| `--shadow-lg` | `0 8px 40px rgba(0,0,0,.10)` | modal (default) |
+| `--shadow-xl` | `0 10px 40px rgba(0,0,0,.30)` | floating panel |
+| `--shadow-fab` | `0 6px 20px rgba(12,49,36,.28)` | FAB |
+| `--shadow-popover` | `0 4px 16px rgba(0,0,0,.08)` | dropdown / context menu |
+
+## Component sizes
+`--btn-h 50` · `--btn-compact-h 39` · `--pill-h 44` · `--topbar-h 64` · `--sbar-w 105` / `--sbar-w-exp 256` ·
+`--avatar-md 44` · `--icon-btn 44` · `--modal-w 420` · `--dropdown-min-w 140` (px)
+
+## Motion
+| Token | Value | Use |
+|---|---|---|
+| `--ease-spring` | `cubic-bezier(.34,1.56,.64,1)` | number-flow / bouncy enter |
+| `--ease-out` | `cubic-bezier(.23,1,.32,1)` | slide-in panel |
+| `--ease-standard` | `cubic-bezier(.4,0,.2,1)` | default |
+| `--dur-fast` | 150ms | hover, color, small state |
+| `--dur-base` | 220ms | modal open, overlay |
+| `--dur-slow` | 350ms | opacity / fade |
+| `--dur-spin` | 600ms | number-flow digit roll |
+
+## Z-index
+`--z-modal-overlay 500` · `--z-toast 1000` · `--z-fab 9000` · `--z-devnotes 9001`
+
+---
+
+# PART 3 — Component & Layout Laws
+
+## Buttons
+- **Primary CTA:** accent-green fill, white text, height `--btn-h` (50px), `--radius-full` pill, Medium 16px. Hover → `--accent-hover`.
+- **Secondary:** `--surface-2` fill, `--text` color, same pill shape, no border.
+- **Ghost / tertiary:** transparent, `--border` outline or none, `--text-2`.
+- **Compact:** height `--btn-compact-h` (39px).
+- One **primary** action per screen (see Screen rules). Label = the exact outcome (“Pay Invoice”, not “Continue”).
+
+## Modal header (canonical — follow unless told otherwise)
+- Back button **first child, left-anchored**; close button **last child, right-anchored**; `justify-content:space-between`.
+- Icon buttons **44×44** (`--icon-btn`), round (`--radius-full`), `--accent-light` bg, inner SVG 18×18 stroke 2.2 `--text`.
+- If step 1 has no back action, render the back slot `visibility:hidden` (don't delete it).
+- Modal frame width **420px** (`--modal-w`), radius `--radius-2xl` (28px). Title 20px / Medium, lives in the body, not centered in the bar.
+
+## Dropdown / context menu
+- Min-width `--dropdown-min-w` (140px), `--bg-white` bg, 1.5px `--border`, `--radius-md`, `--shadow-popover`, 4px padding.
+- Items: 10×14 padding, 14px Medium, `--radius-xs`, hover bg `--accent-light` (destructive items keep red text, same hover).
+
+## Status badges / pills
+Use the status token triplets above (fill + soft bg + text). Keep status language explicit (Processing, Failed, Awaiting, Expired…) — never rely on color alone.
+
+## Toast — transient confirmation
+Bottom-center, auto-dismissing message for "it worked" feedback (not for errors that need action).
+
+```css
+.toast{ display:inline-flex; align-items:center; gap:10px;
+        background:var(--surface); border:1px solid var(--border);
+        border-radius:var(--radius-2xl); padding:12px 18px;
+        font:500 15px var(--font-sans); color:var(--text); letter-spacing:var(--tracking-snug);
+        box-shadow:var(--shadow-lg); white-space:nowrap; max-width:92vw; }
+/* positioning + show/hide */
+.toast-live{ position:fixed; left:50%; bottom:28px; z-index:var(--z-toast);
+             transform:translateX(-50%) translateY(12px); opacity:0; pointer-events:none;
+             transition:opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+.toast-live.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+```
+
+| Property | Value |
+|---|---|
+| Background | `--surface` (`#FAFBFA`), 1px `--border` |
+| Radius | `--radius-2xl` (28px) |
+| Padding | 12px 18px |
+| Text | 15px Medium, `--text`, `--tracking-snug`; leading success icon `assets/check.svg` (18×18), 10px gap |
+| Elevation | `--shadow-lg` |
+| Position | `fixed`, bottom-center, 28px from bottom, `--z-toast` (1000) |
+| Motion | slide up 12px + fade over `--dur-base` (220ms) `--ease-out`; auto-dismiss ~2.5s |
+
+Rules: **one toast at a time**; keep copy to a short outcome (“Saved”, “Wallet address saved”);
+use `assets/check.svg` (green check, 18×18) as the success icon. For anything the user must act on, use an inline error or a modal — not a toast.
+
+## Named responsive laws (modals)
+
+### W002A — primary modal → fullscreen, keep Back
+Single breakpoint at **633px**. ≥634px: top-centered 420px modal, radius 24, title-only banner
+(no back/close), sticky CTA footer. ≤633px: **fullscreen** (100%×100%, radius 0); the **Back button is
+shown** (only nav kept), close stays hidden, title centered via an invisible close-spacer; CTA pinned
+to the screen bottom. Floating demo FABs hide ≤633px.
+
+### W003A — secondary modal → bottom floating sheet, no buttons
+Single breakpoint at **633px**. Title-only banner (no back/close) at all sizes. ≥634px: top-centered
+420px modal. ≤633px: **bottom floating sheet** — `max-width 420px`, side margin **≥8px**, **16px from the
+bottom (always)**, **all four corners 24px**, **height ≤ `min(520px,92vh)`** (content scrolls inside).
+Dismiss via overlay tap. Applies to “Pay with…”, “Pay in”, and the “Payment provider” step.
+
+> Both laws use **one** breakpoint (633px) and drop the canonical header for a centered title — a
+> deliberate, documented exception for these specific modals.
+
+---
+
+# How to use this file
+1. **Start from Part 1.** Frame every screen by its user goal, business goal, and single primary action; justify with usability, not aesthetics.
+2. **Build with Part 2 tokens.** Link `tokens.css`; never hard-code a value that has a token.
+3. **Reuse Part 3 components/laws** before inventing new patterns (recognition > recall).
+4. **Check against the philosophy** before shipping: Can anything be removed? Is the primary action obvious? Is money/status explicit? Does every element earn its place?
+</script>
+
+<!-- ─── Reference section: render the markdown + wire one-click download ─── -->
+<script>
+  (function () {
+    var src = document.getElementById('ds-md-source');
+    if (!src) return;
+    // textContent has one leading newline from the tag layout — trim only the edges.
+    var raw = src.textContent.replace(/^\n/, '').replace(/\s+$/, '');
+
+    // ── tiny markdown → HTML (covers what this doc uses) ──
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function inline(s) {
+      s = esc(s);
+      s = s.replace(/`([^`]+)`/g, function (m, c) { return '<code>' + c + '</code>'; });
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      return s;
+    }
+    function cells(row) {
+      return row.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(function (c) { return c.trim(); });
+    }
+    function render(md) {
+      var lines = md.replace(/\r\n/g, '\n').split('\n');
+      var out = '', i = 0;
+      while (i < lines.length) {
+        var line = lines[i];
+        if (/^```/.test(line)) {                               // fenced code
+          var code = '';
+          i++;
+          while (i < lines.length && !/^```/.test(lines[i])) { code += lines[i] + '\n'; i++; }
+          i++;
+          out += '<pre class="md-code"><code>' + esc(code.replace(/\n$/, '')) + '</code></pre>';
+          continue;
+        }
+        if (/^---+\s*$/.test(line)) { out += '<hr>'; i++; continue; }   // rule
+        var h = line.match(/^(#{1,6})\s+(.*)$/);                // heading
+        if (h) { var lv = h[1].length; out += '<h' + lv + '>' + inline(h[2]) + '</h' + lv + '>'; i++; continue; }
+        if (/\|/.test(line) && i + 1 < lines.length && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(lines[i + 1])) { // table
+          var head = cells(line);
+          i += 2;
+          var body = '';
+          while (i < lines.length && /\|/.test(lines[i]) && !/^\s*$/.test(lines[i])) {
+            body += '<tr>' + cells(lines[i]).map(function (c) { return '<td>' + inline(c) + '</td>'; }).join('') + '</tr>';
+            i++;
+          }
+          out += '<div class="md-table-wrap"><table><thead><tr>' +
+                 head.map(function (c) { return '<th>' + inline(c) + '</th>'; }).join('') +
+                 '</tr></thead><tbody>' + body + '</tbody></table></div>';
+          continue;
+        }
+        if (/^>\s?/.test(line)) {                               // blockquote
+          var q = '';
+          while (i < lines.length && /^>\s?/.test(lines[i])) { q += lines[i].replace(/^>\s?/, '') + ' '; i++; }
+          out += '<blockquote><p>' + inline(q.trim()) + '</p></blockquote>';
+          continue;
+        }
+        if (/^\s*[-*]\s+/.test(line)) {                         // unordered list
+          out += '<ul>';
+          while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { out += '<li>' + inline(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>'; i++; }
+          out += '</ul>';
+          continue;
+        }
+        if (/^\s*\d+\.\s+/.test(line)) {                        // ordered list
+          out += '<ol>';
+          while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { out += '<li>' + inline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>'; i++; }
+          out += '</ol>';
+          continue;
+        }
+        if (/^\s*$/.test(line)) { i++; continue; }              // blank
+        var para = line; i++;                                   // paragraph
+        while (i < lines.length && !/^\s*$/.test(lines[i]) &&
+               !/^(#{1,6}\s|```|>|\s*[-*]\s|\s*\d+\.\s|---+\s*$)/.test(lines[i])) {
+          para += ' ' + lines[i]; i++;
+        }
+        out += '<p>' + inline(para) + '</p>';
+      }
+      return out;
+    }
+
+    var doc = document.getElementById('md-doc');
+    if (doc) doc.innerHTML = render(raw);
+    // external links should open in a new tab
+    if (doc) doc.querySelectorAll('a[href^="http"]').forEach(function (a) { a.target = '_blank'; a.rel = 'noopener'; });
+
+    // ── fold/unfold (collapsed by default) ──
+    var toggle = document.getElementById('md-toggle');
+    if (toggle && doc) toggle.addEventListener('click', function () {
+      var open = doc.hidden;            // about to open if currently hidden
+      doc.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.querySelector('.md-toggle-label').textContent = open ? 'Hide full spec' : 'Read full spec';
+    });
+
+    // ── one-click download ──
+    var btn = document.getElementById('md-download');
+    if (btn) btn.addEventListener('click', function () {
+      var blob = new Blob([raw + '\n'], { type: 'text/markdown;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'design-system.md';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+  })();
 </script>
 
 </body>
